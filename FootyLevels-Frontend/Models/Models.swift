@@ -8,6 +8,20 @@ struct SkillInfo: Codable, Identifiable {
     let name: String
     let description: String
     let difficulty: String
+    let playerId: String?
+    let playerName: String?
+    let videoUrl: String?
+    let thumbnailUrl: String?
+    let originStory: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, description, difficulty
+        case playerId = "player_id"
+        case playerName = "player_name"
+        case videoUrl = "video_url"
+        case thumbnailUrl = "thumbnail_url"
+        case originStory = "origin_story"
+    }
 
     var difficultyColor: String {
         switch difficulty.lowercased() {
@@ -17,6 +31,76 @@ struct SkillInfo: Codable, Identifiable {
         default: return "2C3E50"
         }
     }
+
+    var difficultyIcon: String {
+        switch difficulty.lowercased() {
+        case "beginner": return "1.circle.fill"
+        case "intermediate": return "2.circle.fill"
+        case "advanced": return "3.circle.fill"
+        default: return "circle.fill"
+        }
+    }
+}
+
+/// Player information from /api/players
+struct PlayerInfo: Codable, Identifiable {
+    let id: String
+    let name: String
+    let nickname: String
+    let nationality: String
+    let era: String
+    let category: String
+    let imageUrl: String
+    let bio: String
+    let skills: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, nickname, nationality, era, category, bio, skills
+        case imageUrl = "image_url"
+    }
+
+    var isLegend: Bool {
+        category == "legend"
+    }
+
+    var categoryDisplayName: String {
+        isLegend ? "Legend" : "Current Star"
+    }
+
+    var flagEmoji: String {
+        switch nationality.lowercased() {
+        case "netherlands": return "🇳🇱"
+        case "brazil": return "🇧🇷"
+        case "argentina": return "🇦🇷"
+        case "france": return "🇫🇷"
+        case "portugal": return "🇵🇹"
+        default: return "⚽"
+        }
+    }
+}
+
+/// Category information from /api/categories
+struct CategoryInfo: Codable, Identifiable {
+    let id: String
+    let name: String
+    let skills: [String]
+
+    var icon: String {
+        switch id {
+        case "turns": return "arrow.triangle.2.circlepath"
+        case "feints": return "figure.walk.motion"
+        case "flicks": return "arrow.up.right"
+        case "cuts": return "scissors"
+        default: return "sportscourt"
+        }
+    }
+}
+
+/// Progression information from /api/progression
+struct ProgressionInfo: Codable {
+    let beginner: [String]
+    let intermediate: [String]
+    let advanced: [String]
 }
 
 /// Detailed skill information from /api/skills/{skill_id}
@@ -25,8 +109,38 @@ struct SkillDetails: Codable {
     let name: String
     let description: String
     let difficulty: String
+    let playerId: String?
+    let player: PlayerDetailInfo?
+    let videoUrl: String?
+    let thumbnailUrl: String?
+    let originStory: String?
     let phases: [SkillPhase]?
     let checkpoints: [SkillCheckpoint]
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, description, difficulty, player, phases, checkpoints
+        case playerId = "player_id"
+        case videoUrl = "video_url"
+        case thumbnailUrl = "thumbnail_url"
+        case originStory = "origin_story"
+    }
+}
+
+/// Player detail info embedded in skill details
+struct PlayerDetailInfo: Codable {
+    let id: String?
+    let name: String?
+    let nickname: String?
+    let nationality: String?
+    let era: String?
+    let category: String?
+    let imageUrl: String?
+    let bio: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, nickname, nationality, era, category, bio
+        case imageUrl = "image_url"
+    }
 }
 
 struct SkillPhase: Codable {
@@ -246,5 +360,25 @@ extension AnalysisViewModel {
             encouragement: "Great job! You're on the right track. A few tweaks and you'll master this!"
         )
         return vm
+    }
+}
+
+extension SkillInfo {
+    static var samples: [SkillInfo] {
+        [
+            SkillInfo(id: "cruyff_turn", name: "Cruyff Turn", description: "Drag the ball behind your standing leg while turning 180°", difficulty: "intermediate", playerId: "cruyff", playerName: "Johan Cruyff", videoUrl: nil, thumbnailUrl: nil, originStory: "Johan Cruyff first performed this move against Sweden at the 1974 World Cup"),
+            SkillInfo(id: "elastico", name: "Elastico", description: "Quick inside-outside touch to change direction", difficulty: "advanced", playerId: "ronaldinho", playerName: "Ronaldinho", videoUrl: nil, thumbnailUrl: nil, originStory: "Made famous by Ronaldinho"),
+            SkillInfo(id: "step_over", name: "Step Over", description: "Circular foot motion over the ball", difficulty: "beginner", playerId: "ronaldo", playerName: "Cristiano Ronaldo", videoUrl: nil, thumbnailUrl: nil, originStory: "CR7 made the step over his signature move")
+        ]
+    }
+}
+
+extension PlayerInfo {
+    static var samples: [PlayerInfo] {
+        [
+            PlayerInfo(id: "cruyff", name: "Johan Cruyff", nickname: "The Dutch Master", nationality: "Netherlands", era: "1970s", category: "legend", imageUrl: "players/cruyff.jpg", bio: "Revolutionary Dutch player who invented the Cruyff Turn at the 1974 World Cup", skills: ["cruyff_turn"]),
+            PlayerInfo(id: "ronaldinho", name: "Ronaldinho", nickname: "The Magician", nationality: "Brazil", era: "2000s", category: "legend", imageUrl: "players/ronaldinho.jpg", bio: "Brazilian genius known for his incredible flair", skills: ["elastico", "sombrero"]),
+            PlayerInfo(id: "messi", name: "Lionel Messi", nickname: "La Pulga", nationality: "Argentina", era: "2000s-present", category: "current", imageUrl: "players/messi.jpg", bio: "The greatest of all time", skills: ["la_croqueta"])
+        ]
     }
 }
