@@ -36,24 +36,8 @@ struct PlayerDetailView: View {
 
     var heroSection: some View {
         VStack(spacing: 16) {
-            // Player Avatar
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: player.isLegend ?
-                                [Color(hex: "F1C40F"), Color(hex: "F39C12")] :
-                                [AppTheme.primaryColor, AppTheme.primaryColor.opacity(0.7)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 120, height: 120)
-                    .shadow(color: player.isLegend ? Color(hex: "F1C40F").opacity(0.4) : AppTheme.primaryColor.opacity(0.4), radius: 15, x: 0, y: 8)
-
-                Text(player.flagEmoji)
-                    .font(.system(size: 50))
-            }
+            // Player Avatar with Image
+            PlayerAvatarView(player: player, size: 120, showBorder: true)
 
             // Name & Nickname
             VStack(spacing: 4) {

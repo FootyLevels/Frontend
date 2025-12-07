@@ -383,23 +383,8 @@ struct PlayerCard: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            // Player Avatar
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: player.isLegend ?
-                                [Color(hex: "F1C40F"), Color(hex: "F39C12")] :
-                                [AppTheme.primaryColor, AppTheme.primaryColor.opacity(0.7)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 70, height: 70)
-
-                Text(player.flagEmoji)
-                    .font(.system(size: 30))
-            }
+            // Player Avatar with Image
+            PlayerAvatarView(player: player, size: 70)
 
             Text(player.name.components(separatedBy: " ").last ?? player.name)
                 .font(.subheadline)
@@ -415,6 +400,61 @@ struct PlayerCard: View {
         .background(AppTheme.surfaceColor)
         .cornerRadius(AppTheme.Metrics.cornerRadius)
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+}
+
+// MARK: - Player Avatar View
+
+struct PlayerAvatarView: View {
+    let player: PlayerInfo
+    var size: CGFloat = 70
+    var showBorder: Bool = true
+
+    var body: some View {
+        Group {
+            if let imageName = player.assetImageName,
+               let uiImage = UIImage(named: imageName) {
+                // Use actual player image
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                player.isLegend ?
+                                    LinearGradient(colors: [Color(hex: "F1C40F"), Color(hex: "F39C12")], startPoint: .topLeading, endPoint: .bottomTrailing) :
+                                    LinearGradient(colors: [AppTheme.primaryColor, AppTheme.primaryColor.opacity(0.7)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                lineWidth: showBorder ? 3 : 0
+                            )
+                    )
+            } else {
+                // Fallback to flag emoji
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: player.isLegend ?
+                                    [Color(hex: "F1C40F"), Color(hex: "F39C12")] :
+                                    [AppTheme.primaryColor, AppTheme.primaryColor.opacity(0.7)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: size, height: size)
+
+                    Text(player.flagEmoji)
+                        .font(.system(size: size * 0.4))
+                }
+            }
+        }
+        .shadow(
+            color: player.isLegend ? Color(hex: "F1C40F").opacity(0.3) : AppTheme.primaryColor.opacity(0.3),
+            radius: 8,
+            x: 0,
+            y: 4
+        )
     }
 }
 
