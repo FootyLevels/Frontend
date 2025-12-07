@@ -51,6 +51,19 @@ class APIClient {
         return try JSONDecoder().decode([SkillInfo].self, from: data)
     }
 
+    /// Fetch skills filtered by difficulty
+    func fetchSkillsByDifficulty(_ difficulty: String) async throws -> [SkillInfo] {
+        let url = URL(string: "\(baseURL)/api/skills/difficulty/\(difficulty)")!
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw APIError.serverError("Failed to fetch skills by difficulty")
+        }
+
+        return try JSONDecoder().decode([SkillInfo].self, from: data)
+    }
+
     /// Fetch details for a specific skill
     func fetchSkillDetails(skillId: String) async throws -> SkillDetails {
         let url = URL(string: "\(baseURL)/api/skills/\(skillId)")!
@@ -69,6 +82,82 @@ class APIClient {
         }
 
         return try JSONDecoder().decode(SkillDetails.self, from: data)
+    }
+
+    // MARK: - Players
+
+    /// Fetch all players from the backend
+    func fetchPlayers() async throws -> [PlayerInfo] {
+        let url = URL(string: "\(baseURL)/api/players")!
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw APIError.serverError("Failed to fetch players")
+        }
+
+        return try JSONDecoder().decode([PlayerInfo].self, from: data)
+    }
+
+    /// Fetch players by category (legend or current)
+    func fetchPlayersByCategory(_ category: String) async throws -> [PlayerInfo] {
+        let url = URL(string: "\(baseURL)/api/players/category/\(category)")!
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw APIError.serverError("Failed to fetch players by category")
+        }
+
+        return try JSONDecoder().decode([PlayerInfo].self, from: data)
+    }
+
+    /// Fetch details for a specific player
+    func fetchPlayerDetails(playerId: String) async throws -> PlayerInfo {
+        let url = URL(string: "\(baseURL)/api/players/\(playerId)")!
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.networkError("No response")
+        }
+
+        if httpResponse.statusCode == 404 {
+            throw APIError.notFound("Player not found: \(playerId)")
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw APIError.serverError("Failed to fetch player details")
+        }
+
+        return try JSONDecoder().decode(PlayerInfo.self, from: data)
+    }
+
+    // MARK: - Categories & Progression
+
+    /// Fetch skill categories
+    func fetchCategories() async throws -> [CategoryInfo] {
+        let url = URL(string: "\(baseURL)/api/categories")!
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw APIError.serverError("Failed to fetch categories")
+        }
+
+        return try JSONDecoder().decode([CategoryInfo].self, from: data)
+    }
+
+    /// Fetch skill progression by difficulty
+    func fetchProgression() async throws -> ProgressionInfo {
+        let url = URL(string: "\(baseURL)/api/progression")!
+        let (data, response) = try await session.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 else {
+            throw APIError.serverError("Failed to fetch progression")
+        }
+
+        return try JSONDecoder().decode(ProgressionInfo.self, from: data)
     }
 
     // MARK: - Video Analysis
