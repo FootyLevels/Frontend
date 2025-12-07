@@ -1,4 +1,5 @@
 import SwiftUI
+import GoogleSignInSwift
 
 struct ContentView: View {
     @State private var isServerConnected = false
@@ -7,6 +8,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                
                 AppTheme.backgroundColor.ignoresSafeArea()
 
                 VStack(spacing: 30) {
