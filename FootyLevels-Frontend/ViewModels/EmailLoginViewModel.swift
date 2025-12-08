@@ -11,22 +11,33 @@ import SwiftUI
 final class EmailLoginViewModel{
     var email: String = ""
     var password:String = ""
+    var errorMessage: String? = nil
+    var isLoading: Bool = false
     
     func loginWithEmail() async -> UserInfo?{
+        // Reset error at start of attempt
+        self.errorMessage = nil
+        self.isLoading = true
+        defer { self.isLoading = false } // Turn off loading when function finishes
         
-        guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else{
+        // Basic Validation
+        guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !password.isEmpty else {
+            self.errorMessage = "Please fill in all fields."
             return nil
         }
         
-        guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else{
-            return nil
-        }
-        
-        do{
+        do {
             let user = try await AuthManager.shared.loginWithEmail(email: email, password: password)
             return user
-        }catch{
-            print(error)
+        } catch {
+            // 2. Capture the actual error message from Firebase
+            print("Login error: \(error.localizedDescription)")
+            if error.localizedDescription == "The email address is badly formatted." {
+                self.errorMessage = "Email format is incorrect."
+            }else if error.localizedDescription == "The supplied auth credential is malformed or has expired." {
+                self.errorMessage = "Wrong Password"
+            }
         }
         
         return nil

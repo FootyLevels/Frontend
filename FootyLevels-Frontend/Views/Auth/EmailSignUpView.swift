@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct EmailSignUpView: View {
-//    @Binding var appState:AppStateViewModel
+    @Binding var appState:AppStateViewModel
 
     @State var signUpVM = SignUpViewModel()
     // State variables to hold user input
@@ -90,7 +90,8 @@ struct EmailSignUpView: View {
                     Task{
                         if let user = await signUpVM.signUpWithEmail(){
                             print("User Signed Up: \(user)")
-                            print("User Logged In")
+                            appState.currentUser = user
+                            appState.isLoggedIn = .loggedIn
                         }
                     }
                     print("Attempting to sign up with Email: \(email)")
@@ -119,5 +120,5 @@ struct EmailSignUpView: View {
 
 // Preview
 #Preview {
-    EmailSignUpView()
+    EmailSignUpView(appState: .constant(AppStateViewModel()))
 }

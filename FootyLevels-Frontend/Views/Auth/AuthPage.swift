@@ -65,7 +65,7 @@ struct AuthPage: View {
                 .padding(.horizontal)
                 
                 // --- 2. Email Sign Up Button ---
-                NavigationLink(destination: EmailSignUpView()) {
+                NavigationLink(destination: EmailSignUpView(appState: $appState)) {
                     HStack {
                         Image(systemName: "person.badge.plus.fill")
                         Text("Sign Up with Email")
@@ -78,7 +78,7 @@ struct AuthPage: View {
                 }
                 
                 // --- 3. Regular Email Login Button ---
-                NavigationLink(destination: EmailLoginView()) {
+                NavigationLink(destination: EmailLoginView(appState: $appState)) {
                     HStack {
                         Image(systemName: "envelope.fill")
                         Text("Log In with Email")
