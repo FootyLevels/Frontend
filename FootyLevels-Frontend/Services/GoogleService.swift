@@ -8,13 +8,19 @@
 import Foundation
 import FirebaseAuth
 import GoogleSignIn
+import GoogleSignInSwift
 import UIKit // Needed for UIViewController type
 
-class GoogleService: ObservableObject {
+struct GoogleResultTokens{
+    let accessToken: String
+    let idToken: String
+}
+
+final class GoogleService: ObservableObject {
     
     // Update the function signature to accept the required presenting UIViewController
     @MainActor
-    func signInWithGoogle() async throws {
+    func signInWithGoogle() async throws -> GoogleResultTokens {
         
         // 1. The presentingViewController is passed in from the GoogleSignInButton closure.
         guard let presentingViewController = Utils.shared.getTopViewController() else{
@@ -29,16 +35,8 @@ class GoogleService: ObservableObject {
             throw NSError(domain: "AuthError", code: 1, userInfo: [NSLocalizedDescriptionKey: "No ID Token found from Google."])
         }
         
-        // 4. Create Firebase Credential
-        let credential = GoogleAuthProvider.credential(
-            withIDToken: idToken,
-            accessToken: signInResult.user.accessToken.tokenString
-        )
-        
-        // 5. Sign in to Firebase
-        let authResult = try await Auth.auth().signIn(with: credential)
-        
-        print("Firebase Sign-In Success: User \(authResult.user.uid)")
+        let accessToken = signInResult.user.accessToken.tokenString
+        return GoogleResultTokens(accessToken: accessToken, idToken: idToken)
     }
     
 }

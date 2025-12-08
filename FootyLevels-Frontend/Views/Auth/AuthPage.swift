@@ -12,7 +12,9 @@ import FirebaseAuth
 struct AuthPage: View {
     
     // Use the environment object or state object for your service
-    @StateObject private var authService = GoogleService()
+    @State private var googleAuthVM = GoogleViewModel()
+//    @Environment(AppStateViewModel.self) private var appStateViewModel
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         NavigationView {
@@ -35,7 +37,13 @@ struct AuthPage: View {
                 GoogleSignInButton {
                     Task {
                         do {
-                            try await authService.signInWithGoogle()
+                            if let user = try await googleAuthVM.signInWithGoogle(){
+                                print("Signed in with Google \(user.displayName)")
+//                                appStateViewModel.currentUser = user
+                                dismiss()
+                            }
+                            
+
                             // Optional: Add logic to dismiss the view or navigate on success
                         } catch {
                             print("Google Sign-In Failed: \(error.localizedDescription)")

@@ -32,5 +32,16 @@ class AuthManager{
         let authResult = try await Auth.auth().signIn(withEmail: email, password: password)
         return UserInfo(user: authResult.user)
     }
+    
+    func signInWithGoogle(token: GoogleResultTokens) async throws -> UserInfo{
+        let authResult = try await Auth.auth().signIn(with: GoogleAuthProvider.credential(withIDToken: token.idToken, accessToken: token.accessToken))
+        
+        return UserInfo(user: authResult.user)
+    }
+    
+    func signOut() throws{
+        try Auth.auth().signOut()
+    }
+    
 }
 
