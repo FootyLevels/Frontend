@@ -13,7 +13,7 @@ struct AuthPage: View {
     
     // Use the environment object or state object for your service
     @State private var googleAuthVM = GoogleViewModel()
-//    @Environment(AppStateViewModel.self) private var appStateViewModel
+    @Binding var appState:AppStateViewModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -39,7 +39,8 @@ struct AuthPage: View {
                         do {
                             if let user = try await googleAuthVM.signInWithGoogle(){
                                 print("Signed in with Google \(user.displayName)")
-//                                appStateViewModel.currentUser = user
+                                appState.currentUser = user
+                                appState.isLoggedIn = .loggedIn
                                 dismiss()
                             }
                             
@@ -101,5 +102,5 @@ struct AuthPage: View {
 
 // Preview
 #Preview {
-    AuthPage()
+    AuthPage(appState: .constant(AppStateViewModel()))
 }

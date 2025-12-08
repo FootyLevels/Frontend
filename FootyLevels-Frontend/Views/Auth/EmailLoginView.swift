@@ -9,10 +9,8 @@ import SwiftUI
 
 struct EmailLoginView: View {
     @State var emailVM = EmailLoginViewModel()
-    
-    // You would use an @ObservedObject or @StateObject for your AuthService here
-    // @EnvironmentObject var authService: AuthenticationService
-    
+//    @Binding var appState:AppStateViewModel
+
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {

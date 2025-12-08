@@ -8,6 +8,8 @@ struct ContentView: View {
     @State private var skills: [SkillInfo] = []
     @State private var isLoading = true
     @State private var selectedTab = 0
+    
+    @Binding var appState:AppStateViewModel
 
     var body: some View {
         NavigationStack {
@@ -23,6 +25,26 @@ struct ContentView: View {
 
                         // Connection Status
                         connectionStatusView
+                        
+                        // Log-out button
+                        Button {
+                            Task{
+                                try appState.signOut()
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                               Text("Log-Out")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(AppTheme.surfaceColor)
+                                    .shadow(color: .black.opacity(0.05), radius: 2)
+                            )
+                        }
 
                         // Tab Selector
                         browseTabSelector
@@ -79,6 +101,8 @@ struct ContentView: View {
             checkServerConnection()
             loadData()
         }
+        
+        
     }
 
     // MARK: - Header
@@ -93,7 +117,7 @@ struct ContentView: View {
                     .foregroundColor(AppTheme.primaryColor)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("FootyLevels")
+                    Text("Hi, \(appState.currentUser?.displayName ?? "John Doe")")
                         .font(.title)
                         .fontWeight(.heavy)
                         .foregroundColor(AppTheme.secondaryColor)
@@ -155,6 +179,7 @@ struct ContentView: View {
                 .fill(AppTheme.surfaceColor)
                 .shadow(color: .black.opacity(0.05), radius: 2)
         )
+
     }
 
     // MARK: - Tab Selector
@@ -571,5 +596,5 @@ struct MenuCard: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(appState: .constant(AppStateViewModel()))
 }
