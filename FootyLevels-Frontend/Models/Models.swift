@@ -77,6 +77,16 @@ struct PlayerInfo: Codable, Identifiable {
         default: return "⚽"
         }
     }
+
+    /// Extract asset image name from imageUrl
+    /// e.g., "players/cruyff.jpeg" -> "cryuff" (matching asset catalog name)
+    var assetImageName: String? {
+        guard !imageUrl.isEmpty else { return nil }
+        // Extract filename without extension from path like "players/cruyff.jpeg"
+        let filename = URL(string: imageUrl)?.deletingPathExtension().lastPathComponent
+            ?? imageUrl.components(separatedBy: "/").last?.components(separatedBy: ".").first
+        return filename
+    }
 }
 
 /// Category information from /api/categories
