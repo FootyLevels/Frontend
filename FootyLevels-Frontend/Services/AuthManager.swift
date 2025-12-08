@@ -27,4 +27,10 @@ class AuthManager{
         try await changeRequest.commitChanges()
         return UserInfo(user: authResult.user)
     }
+    
+    func loginWithEmail(email:String, password:String) async throws -> UserInfo {
+        let authResult = try await Auth.auth().signIn(withEmail: email, password: password)
+        return UserInfo(user: authResult.user)
+    }
 }
+

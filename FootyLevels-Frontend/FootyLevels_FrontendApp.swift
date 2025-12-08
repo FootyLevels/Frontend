@@ -19,7 +19,7 @@ struct FootyLevels_FrontendApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView() // Content views
+            AuthPage() // Content views
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }
