@@ -8,7 +8,7 @@
 import SwiftUI
 @MainActor
 @Observable
-final class EmailLoginViewModel{
+final class UserLoginViewModel{
     var email: String = ""
     var password:String = ""
     var errorMessage: String? = nil
@@ -42,4 +42,12 @@ final class EmailLoginViewModel{
         
         return nil
     }
+    
+    func signInWithGoogle() async throws -> UserInfo?{
+        let token = try await GoogleService().signInWithGoogle()
+        let userInfo = try await AuthManager.shared.signInWithGoogle(token: token)
+        
+        return userInfo
+    }
+    
 }

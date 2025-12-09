@@ -9,7 +9,7 @@ import SwiftUI
 struct EmailSignUpView: View {
     @Binding var appState:AppStateViewModel
 
-    @State var signUpVM = SignUpViewModel()
+    @State var signUpVM = UserSigninViewModel()
     // State variables to hold user input
     @State private var name = ""
     @State private var email = ""

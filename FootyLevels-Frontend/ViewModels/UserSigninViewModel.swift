@@ -9,7 +9,7 @@ import SwiftUI
 
 @MainActor
 @Observable
-final class SignUpViewModel{
+final class UserSigninViewModel{
     var name: String = ""
     var password: String = ""
     var confirm: String = ""

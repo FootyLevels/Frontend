@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct EmailLoginView: View {
-    @State var emailVM = EmailLoginViewModel()
+    @State var emailVM = UserLoginViewModel()
     @Binding var appState:AppStateViewModel
 
     var body: some View {

@@ -12,7 +12,7 @@ import FirebaseAuth
 struct AuthPage: View {
     
     // Use the environment object or state object for your service
-    @State private var googleAuthVM = GoogleViewModel()
+    @State private var authVM = UserLoginViewModel()
     @Binding var appState:AppStateViewModel
     @Environment(\.dismiss) var dismiss
     
@@ -22,7 +22,7 @@ struct AuthPage: View {
                 
                 Spacer()
                 
-                Text("Welcome to the App")
+                Text("Welcome to FootyLevels")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
@@ -37,7 +37,7 @@ struct AuthPage: View {
                 GoogleSignInButton {
                     Task {
                         do {
-                            if let user = try await googleAuthVM.signInWithGoogle(){
+                            if let user = try await authVM.signInWithGoogle(){
                                 print("Signed in with Google \(user.displayName)")
                                 appState.currentUser = user
                                 appState.isLoggedIn = .loggedIn
@@ -78,7 +78,7 @@ struct AuthPage: View {
                 }
                 
                 // --- 3. Regular Email Login Button ---
-                NavigationLink(destination: EmailLoginView(appState: $appState)) {
+                NavigationLink(destination: EmailLoginView( appState: $appState)) {
                     HStack {
                         Image(systemName: "envelope.fill")
                         Text("Log In with Email")
