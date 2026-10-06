@@ -17,7 +17,7 @@ struct AuthPage: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 
                 Spacer()
@@ -94,9 +94,8 @@ struct AuthPage: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .navigationBarHidden(true) // Hide the default navigation bar for a clean look
+            .toolbar(.hidden, for: .navigationBar) // Hide the default navigation bar for a clean look
         }
-        .navigationViewStyle(.stack) // Recommended for modern SwiftUI apps
     }
 }
 
