@@ -20,9 +20,11 @@ struct ReconstructionResponse: Codable, Identifiable {
     let modelPath: String
     let keypointsPath: String
     let previewPath: String?
+    /// Present only when the request was made with `raw=true`.
+    let raw: RawGeometryInfo?
 
     enum CodingKeys: String, CodingKey {
-        case id, image, model, subject
+        case id, image, model, subject, raw
         case createdAt = "created_at"
         case sourceImage = "source_image"
         case peopleDetected = "people_detected"
@@ -69,6 +71,36 @@ struct ReconstructedSubject: Codable {
         case focalLength = "focal_length"
         case camT = "cam_t"
     }
+}
+
+// MARK: - Raw Geometry
+
+/// Descriptor for the binary vertex buffers served when `raw=true`.
+struct RawGeometryInfo: Codable {
+    let vertexCount: Int
+    let positions: RawBufferInfo
+    let normals: RawBufferInfo?
+    let positionsPath: String
+    let normalsPath: String?
+    /// Shared topology endpoint — not scoped to this reconstruction, because the
+    /// triangle list is identical for every body the model produces. Fetch once
+    /// and cache; re-downloading it per request is pure waste.
+    let indicesPath: String
+
+    enum CodingKeys: String, CodingKey {
+        case positions, normals
+        case vertexCount = "vertex_count"
+        case positionsPath = "positions_url"
+        case normalsPath = "normals_url"
+        case indicesPath = "indices_url"
+    }
+}
+
+struct RawBufferInfo: Codable {
+    let bytes: Int
+    let dtype: String
+    let components: Int
+    let layout: String?
 }
 
 // MARK: - Keypoints

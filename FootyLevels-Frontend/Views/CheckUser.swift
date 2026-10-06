@@ -21,9 +21,12 @@ struct CheckUser: View {
                     .transition(.opacity)
                 
             case .loggedIn:
-                ContentView(appState: $appState)
-                    // 2. Define how this view enters/exits
-                    .transition(.opacity)
+                // Skill Lab projects: upload a clip, reconstruct key frames or
+                // the whole video. It owns its NavigationStack; appState is
+                // handed down so it can offer sign-out.
+                ProjectsListView(appState: appState)
+                // 2. Define how this view enters/exits
+                .transition(.opacity)
                 
             case .notLoggedIn:
                 ZStack {

@@ -8,6 +8,11 @@ struct Pose3DView: View {
     @StateObject private var viewModel = Pose3DViewModel()
     @State private var pickedItem: PhotosPickerItem?
 
+    /// Supplied when the view is shown behind the auth gate, which adds the
+    /// sign-out control. Optional so the view still stands alone in previews
+    /// and when launched directly.
+    var appState: AppStateViewModel?
+
     var body: some View {
         VStack(spacing: 0) {
             sceneArea
@@ -27,6 +32,18 @@ struct Pose3DView: View {
                     Image(systemName: "photo.badge.plus")
                 }
                 .disabled(viewModel.isBusy)
+            }
+
+            // Only present behind the auth gate — Pose3DView is also used
+            // standalone, where there's no session to end.
+            if let appState {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(role: .destructive) {
+                        try? appState.signOut()
+                    } label: {
+                        Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                }
             }
         }
         .onChange(of: pickedItem) { _, newItem in
@@ -49,6 +66,9 @@ struct Pose3DView: View {
                     guard let root = content.entities.first(where: { $0.name == "root" }) else { return }
                     root.children.removeAll()
 
+                    if viewModel.showGround, let ground = viewModel.groundEntity {
+                        root.addChild(ground)
+                    }
                     if viewModel.showBody, let body = viewModel.bodyEntity {
                         root.addChild(body)
                     }
@@ -149,6 +169,9 @@ struct Pose3DView: View {
                     if let joints = viewModel.keypoints?.numJoints {
                         Label("\(joints) joints", systemImage: "point.3.connected.trianglepath.dotted")
                     }
+                    if let source = viewModel.bodySource {
+                        Label(source.rawValue, systemImage: "shippingbox")
+                    }
                 }
                 .font(.caption2)
                 .foregroundColor(.secondary)
@@ -157,15 +180,31 @@ struct Pose3DView: View {
             HStack(spacing: 16) {
                 Toggle("Body", isOn: $viewModel.showBody)
                 Toggle("Joints", isOn: $viewModel.showSkeleton)
+                Toggle("Grid", isOn: $viewModel.showGround)
             }
             .font(.subheadline)
             .toggleStyle(.button)
 
-            // Flip axes here rather than guessing the camera-space convention.
-            // If the pose looks upside down or mirrored, toggle these.
-            HStack(spacing: 16) {
-                Toggle("Flip Y", isOn: $viewModel.orientation.flipY)
-                Toggle("Flip Z", isOn: $viewModel.orientation.flipZ)
+            // The mesh and the joints arrive in different frames — the server
+            // applies `y_up` to the mesh but the keypoints stay camera-space —
+            // so each gets its own flips. If the two layers disagree with each
+            // other, correct them here.
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 12) {
+                    Text("Body")
+                        .foregroundColor(.secondary)
+                        .frame(width: 48, alignment: .leading)
+                    Toggle("Flip Y", isOn: $viewModel.bodyOrientation.flipY)
+                    Toggle("Flip Z", isOn: $viewModel.bodyOrientation.flipZ)
+                }
+
+                HStack(spacing: 12) {
+                    Text("Joints")
+                        .foregroundColor(.secondary)
+                        .frame(width: 48, alignment: .leading)
+                    Toggle("Flip Y", isOn: $viewModel.skeletonOrientation.flipY)
+                    Toggle("Flip Z", isOn: $viewModel.skeletonOrientation.flipZ)
+                }
             }
             .font(.caption)
             .toggleStyle(.button)

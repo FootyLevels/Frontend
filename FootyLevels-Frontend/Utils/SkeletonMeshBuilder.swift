@@ -1,32 +1,48 @@
 import Foundation
 import RealityKit
 
+/// Converts geometry from the API into RealityKit's space.
+///
+/// The mesh and the skeleton need **different** transforms, which is why this
+/// is a value the caller supplies rather than a fixed conversion:
+///
+/// - **Mesh** (`raw` buffers and the USDZ): the server's `y_up` form parameter
+///   defaults to `true`, so it has already converted the camera frame to Y-up
+///   before serving. No further flip — hence `PoseOrientation.identity`.
+/// - **Skeleton** (`keypoints_3d`): the payload still reports `space: "camera"`,
+///   the computer-vision convention of +X right, +Y **down**, +Z into the
+///   scene. RealityKit is +Y up with +Z toward the viewer, so both axes flip.
+///
+/// That asymmetry is inferred from the API rather than confirmed against a real
+/// response, so `Pose3DView` exposes both sets of flips as toggles. If the body
+/// and the joints disagree with each other, this is the knob.
+struct PoseOrientation: Equatable {
+    var flipY: Bool = true
+    var flipZ: Bool = true
+
+    /// No conversion — for geometry the server already oriented.
+    static let identity = PoseOrientation(flipY: false, flipZ: false)
+
+    func apply(to point: SIMD3<Float>) -> SIMD3<Float> {
+        SIMD3(point.x,
+              flipY ? -point.y : point.y,
+              flipZ ? -point.z : point.z)
+    }
+
+    /// `true` when an odd number of axes flip.
+    ///
+    /// Flipping a single axis is a reflection: it reverses triangle winding, so
+    /// faces render inside out unless the index order is reversed to compensate.
+    /// Flipping both is a 180° rotation, which leaves winding intact.
+    var invertsWinding: Bool { flipY != flipZ }
+}
+
 /// Builds RealityKit geometry from SAM 3D Body keypoints.
 ///
 /// Every joint sphere — and every bone, once the API supplies a joint hierarchy —
 /// is merged into a single `MeshResource`, so the whole skeleton draws in one
 /// pass rather than as 70 separate entities.
 struct SkeletonMeshBuilder {
-
-    /// Converts the API's camera-space keypoints into RealityKit's space.
-    ///
-    /// The keypoints endpoint reports `space: "camera"`, which follows the
-    /// computer-vision convention: +X right, +Y **down**, +Z into the scene.
-    /// RealityKit is +Y up with +Z toward the viewer, so both axes flip.
-    ///
-    /// This is the most likely convention, not a verified one — check it against
-    /// a known-good frame. If the body renders upside down or mirrored, flip the
-    /// corresponding axis (`Pose3DView` exposes both as toggles for exactly this).
-    struct Orientation: Equatable {
-        var flipY: Bool = true
-        var flipZ: Bool = true
-
-        func apply(to point: SIMD3<Float>) -> SIMD3<Float> {
-            SIMD3(point.x,
-                  flipY ? -point.y : point.y,
-                  flipZ ? -point.z : point.z)
-        }
-    }
 
     /// Radius of a joint marker, in normalised units (see `targetHeight`).
     var jointRadius: Float = 0.028
@@ -39,7 +55,7 @@ struct SkeletonMeshBuilder {
     /// The skeleton is uniformly scaled so its tallest axis measures this much,
     /// which keeps framing predictable regardless of the subject's real height.
     var targetHeight: Float = 1.0
-    var orientation = Orientation()
+    var orientation = PoseOrientation()
 
     // MARK: - Joint preparation
 

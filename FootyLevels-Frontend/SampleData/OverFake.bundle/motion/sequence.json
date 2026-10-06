@@ -1,0 +1,5499 @@
+{
+  "vertexCount": 18439,
+  "faceCount": 36874,
+  "frameCount": 242,
+  "min": [
+    -0.9968859553337097,
+    0.0,
+    -4.370945930480957
+  ],
+  "span": [
+    2.0570452213287354,
+    1.5417425632476807,
+    4.694446563720703
+  ],
+  "topologyFile": "faces-ground-eb0f60cf90.bin",
+  "encoding": "uint16-le-xyz-gzip",
+  "chunks": [
+    {
+      "start": 0,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000000.bin.gz",
+      "bytes": 3100763
+    },
+    {
+      "start": 30,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000030.bin.gz",
+      "bytes": 3074094
+    },
+    {
+      "start": 60,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000060.bin.gz",
+      "bytes": 3085586
+    },
+    {
+      "start": 90,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000090.bin.gz",
+      "bytes": 3096440
+    },
+    {
+      "start": 120,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000120.bin.gz",
+      "bytes": 3083044
+    },
+    {
+      "start": 150,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000150.bin.gz",
+      "bytes": 3069278
+    },
+    {
+      "start": 180,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000180.bin.gz",
+      "bytes": 3084221
+    },
+    {
+      "start": 210,
+      "count": 30,
+      "file": "body-ground-eb0f60cf90-000210.bin.gz",
+      "bytes": 3078624
+    },
+    {
+      "start": 240,
+      "count": 2,
+      "file": "body-ground-eb0f60cf90-000240.bin.gz",
+      "bytes": 204717
+    }
+  ],
+  "version": 2,
+  "revision": "ground-eb0f60cf90",
+  "ground": {
+    "method": "MoGe turf normals; ball-size camera-height anchors; reviewed contact constraints",
+    "calibration": "estimated, not measured",
+    "ballSupportHeight": 0.08456555753946304,
+    "review": {
+      "version": 1,
+      "frameCount": 242,
+      "fps": 30,
+      "source": "Visual review of supplied over-fake tutorial; inclusive frame ranges. Kicks and subsequent possible bounces are excluded from rolling constraints.",
+      "ballGroundRanges": [
+        [
+          0,
+          59
+        ],
+        [
+          91,
+          217
+        ]
+      ],
+      "bodySupportRanges": [
+        [
+          0,
+          46
+        ],
+        [
+          56,
+          64
+        ],
+        [
+          91,
+          224
+        ]
+      ],
+      "diameterMetres": 0.22,
+      "notes": "Grounded ranges include short foot occlusions bracketed by visible contact. Flight heights outside these ranges remain uncertain single-view estimates, with nonpenetration only. No gravity-based synthetic bounce is added."
+    },
+    "frames": [
+      {
+        "normal": [
+          0.019230792367805356,
+          0.9611146748144173,
+          0.275479143459688
+        ],
+        "cameraHeight": 1.5908833145149388,
+        "bodyDepthCorrection": 0.055993810296058655,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.019776474354239258,
+          0.9608486330035417,
+          0.2763671389969174
+        ],
+        "cameraHeight": 1.6020503196604707,
+        "bodyDepthCorrection": 0.04257692024111748,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.020322137317705224,
+          0.9605814775170551,
+          0.27725482103291144
+        ],
+        "cameraHeight": 1.6076327101836685,
+        "bodyDepthCorrection": 0.03635122999548912,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02086777936366432,
+          0.9603132092625851,
+          0.278142186480627
+        ],
+        "cameraHeight": 1.613215100706866,
+        "bodyDepthCorrection": 0.04377887770533562,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.021413398597768404,
+          0.9600438291593607,
+          0.2790292322562737
+        ],
+        "cameraHeight": 1.6076327101836685,
+        "bodyDepthCorrection": 0.039915453642606735,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02195899312589298,
+          0.9597733381381961,
+          0.27991595527936786
+        ],
+        "cameraHeight": 1.613215100706866,
+        "bodyDepthCorrection": 0.021524595096707344,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.022504561054170105,
+          0.9595017371414752,
+          0.28080235247278545
+        ],
+        "cameraHeight": 1.6182777299286377,
+        "bodyDepthCorrection": 0.02153906784951687,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02305010048902124,
+          0.9592290271231354,
+          0.28168842076281586
+        ],
+        "cameraHeight": 1.6194870088916478,
+        "bodyDepthCorrection": 0.017634566873311996,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.023595609537190122,
+          0.9589552090486497,
+          0.28257415707921535
+        ],
+        "cameraHeight": 1.619950550903812,
+        "bodyDepthCorrection": 0.02926533669233322,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.024141086305775602,
+          0.9586802838950108,
+          0.2834595583552595
+        ],
+        "cameraHeight": 1.640878597994708,
+        "bodyDepthCorrection": 0.023112986236810684,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.024686528902264505,
+          0.9584042526507129,
+          0.28434462152779716
+        ],
+        "cameraHeight": 1.654933012475088,
+        "bodyDepthCorrection": 0.025116775184869766,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.023747349199715276,
+          0.9583672819366292,
+          0.2845491457013783
+        ],
+        "cameraHeight": 1.654933012475088,
+        "bodyDepthCorrection": 0.002836747094988823,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0228081524513483,
+          0.9583294246888645,
+          0.2847534055235617
+        ],
+        "cameraHeight": 1.6483511772323902,
+        "bodyDepthCorrection": 0.02035648189485073,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02186894126446851,
+          0.9582906810289129,
+          0.28495740043226403
+        ],
+        "cameraHeight": 1.640878597994708,
+        "bodyDepthCorrection": 0.04805794358253479,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.020929718246445538,
+          0.958251051085647,
+          0.2851611298676192
+        ],
+        "cameraHeight": 1.640878597994708,
+        "bodyDepthCorrection": 0.0432378426194191,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.01999048600467758,
+          0.9582105349953162,
+          0.28536459327198727
+        ],
+        "cameraHeight": 1.640878597994708,
+        "bodyDepthCorrection": 0.030696744099259377,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.019051247146555168,
+          0.958169132901544,
+          0.28556779008996125
+        ],
+        "cameraHeight": 1.640878597994708,
+        "bodyDepthCorrection": 0.030718427151441574,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.01811200427942501,
+          0.9581268449553259,
+          0.2857707197683752
+        ],
+        "cameraHeight": 1.6483511772323902,
+        "bodyDepthCorrection": 0.002903941785916686,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.017172760010553772,
+          0.9580836713150261,
+          0.2859733817563111
+        ],
+        "cameraHeight": 1.6483511772323902,
+        "bodyDepthCorrection": 0.034133948385715485,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.016233516947091943,
+          0.9580396121463762,
+          0.28617577550510714
+        ],
+        "cameraHeight": 1.6338466648802494,
+        "bodyDepthCorrection": 0.019538529217243195,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.015294277696037632,
+          0.9579946676224707,
+          0.2863779004683645
+        ],
+        "cameraHeight": 1.6338466648802494,
+        "bodyDepthCorrection": 0.020236480981111526,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.016233106417647223,
+          0.9579804864474875,
+          0.28637366122230695
+        ],
+        "cameraHeight": 1.6338466648802494,
+        "bodyDepthCorrection": 0.021053433418273926,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.017171892206366533,
+          0.957965461170202,
+          0.2863691696447352
+        ],
+        "cameraHeight": 1.6338466648802494,
+        "bodyDepthCorrection": 0.017595911398530006,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.018110632582168947,
+          0.9579495919098037,
+          0.286364425771279
+        ],
+        "cameraHeight": 1.6379505904604448,
+        "bodyDepthCorrection": 0.03765520453453064,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0190493250656281,
+          0.9579328787921658,
+          0.28635942963956645
+        ],
+        "cameraHeight": 1.6523824752520944,
+        "bodyDepthCorrection": 0.08088690042495728,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.019987967177950594,
+          0.9579153219498434,
+          0.2863541812892227
+        ],
+        "cameraHeight": 1.6596731273456886,
+        "bodyDepthCorrection": 0.11384080350399017,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.020926556441008676,
+          0.9578969215220698,
+          0.2863486807618694
+        ],
+        "cameraHeight": 1.6596731273456886,
+        "bodyDepthCorrection": 0.09394406527280807,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.021865090377372887,
+          0.9578776776547536,
+          0.28634292810112383
+        ],
+        "cameraHeight": 1.6523824752520944,
+        "bodyDepthCorrection": 0.08053145557641983,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.022803566510344733,
+          0.9578575905004757,
+          0.28633692335259764
+        ],
+        "cameraHeight": 1.6379505904604448,
+        "bodyDepthCorrection": 0.0462166853249073,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02374198236398928,
+          0.9578366602184858,
+          0.28633066656389616
+        ],
+        "cameraHeight": 1.6379505904604448,
+        "bodyDepthCorrection": 0.016990303993225098,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.024680335463167755,
+          0.9578148869746989,
+          0.2863241577846171
+        ],
+        "cameraHeight": 1.6379505904604448,
+        "bodyDepthCorrection": 0.097671739757061,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02537391774375046,
+          0.9597169660726642,
+          0.2798204948366258
+        ],
+        "cameraHeight": 1.636858414235134,
+        "bodyDepthCorrection": 0.08293772488832474,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.026066605909939828,
+          0.9615752687222143,
+          0.2733011793573846
+        ],
+        "cameraHeight": 1.6273155108595738,
+        "bodyDepthCorrection": 0.01644453965127468,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02675830231134812,
+          0.9633894878925751,
+          0.2667671041854608
+        ],
+        "cameraHeight": 1.6100052047240438,
+        "bodyDepthCorrection": 0.04431621730327606,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.027448909619579208,
+          0.9651593346966277,
+          0.2602191691798647
+        ],
+        "cameraHeight": 1.5975755874489275,
+        "bodyDepthCorrection": 0.0039414833299815655,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02813833089657992,
+          0.9668845386169929,
+          0.25365828060159895
+        ],
+        "cameraHeight": 1.5812884482561576,
+        "bodyDepthCorrection": 0.025391673669219017,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028826469662614214,
+          0.9685648477110191,
+          0.24708535048707514
+        ],
+        "cameraHeight": 1.5700230103924098,
+        "bodyDepthCorrection": 0.009936572052538395,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.029513229963749034,
+          0.9702000287943182,
+          0.24050129601441014
+        ],
+        "cameraHeight": 1.5328259159565871,
+        "bodyDepthCorrection": 0.0032796370796859264,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030198516438741788,
+          0.9717898676025332,
+          0.23390703886362677
+        ],
+        "cameraHeight": 1.492997306392458,
+        "bodyDepthCorrection": 0.038495514541864395,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030882234385220628,
+          0.9733341689310786,
+          0.22730350457180137
+        ],
+        "cameraHeight": 1.4805175110318542,
+        "bodyDepthCorrection": 0.06480426341295242,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.031564289825050496,
+          0.9748327567526427,
+          0.22069162188421032
+        ],
+        "cameraHeight": 1.4775665857164972,
+        "bodyDepthCorrection": 0.19001510739326477,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03356868488294845,
+          0.9748640492726853,
+          0.22025718792105894
+        ],
+        "cameraHeight": 1.475229594604537,
+        "bodyDepthCorrection": 0.3504512906074524,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.035573006172591695,
+          0.9748912410821449,
+          0.2198218125963848
+        ],
+        "cameraHeight": 1.470254460128299,
+        "bodyDepthCorrection": 0.23496156930923462,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03757722838377881,
+          0.9749143314753673,
+          0.219385501323426
+        ],
+        "cameraHeight": 1.4636248151869322,
+        "bodyDepthCorrection": 0.1089525818824768,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.039581326208143384,
+          0.9749333199019675,
+          0.21894825955127523
+        ],
+        "cameraHeight": 1.4630521605778715,
+        "bodyDepthCorrection": 0.07643180340528488,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0415852743407517,
+          0.9749482059668795,
+          0.2185100927645397
+        ],
+        "cameraHeight": 1.460961906748221,
+        "bodyDepthCorrection": 0.015127829276025295,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.04358904748170028,
+          0.9749589894303917,
+          0.21807100648299724
+        ],
+        "cameraHeight": 1.4630521605778715,
+        "bodyDepthCorrection": 0.028779707849025726,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0455926203377129,
+          0.9749656702081657,
+          0.21763100626124857
+        ],
+        "cameraHeight": 1.460961906748221,
+        "bodyDepthCorrection": 0.0008440574165433645,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.047595967623736864,
+          0.9749682483712372,
+          0.21719009768836584
+        ],
+        "cameraHeight": 1.4597040991477652,
+        "bodyDepthCorrection": 0.059309180825948715,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.049599064064538484,
+          0.9749667241460027,
+          0.2167482863875379
+        ],
+        "cameraHeight": 1.457455577795072,
+        "bodyDepthCorrection": 0.04852769151329994,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05160188439629726,
+          0.9749610979141887,
+          0.2163055780157117
+        ],
+        "cameraHeight": 1.4544899168612162,
+        "bodyDepthCorrection": 0.0980180874466896,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.051598584253829405,
+          0.9752647963845571,
+          0.21493292683064896
+        ],
+        "cameraHeight": 1.4438458890129902,
+        "bodyDepthCorrection": 0.018366293981671333,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05159518257962302,
+          0.975566528259547,
+          0.2135600292053498
+        ],
+        "cameraHeight": 1.4386479715139138,
+        "bodyDepthCorrection": 0.0903596431016922,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05159167943408145,
+          0.9758662925208378,
+          0.21218689340957322
+        ],
+        "cameraHeight": 1.4375240948838206,
+        "bodyDepthCorrection": 0.0,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05158807487938767,
+          0.9761640881854968,
+          0.21081352771398773
+        ],
+        "cameraHeight": 1.4366174660925328,
+        "bodyDepthCorrection": 0.0,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05158436897950118,
+          0.976459914305985,
+          0.20943994038992467
+        ],
+        "cameraHeight": 1.4370707804881766,
+        "bodyDepthCorrection": 0.0,
+        "bodySupport": false,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.051580561800154884,
+          0.9767537699701603,
+          0.20806613970913163
+        ],
+        "cameraHeight": 1.4366174660925328,
+        "bodyDepthCorrection": 0.041333653032779694,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05157665340885187,
+          0.9770456543012792,
+          0.20669213394352604
+        ],
+        "cameraHeight": 1.4234256480177139,
+        "bodyDepthCorrection": 0.13635389506816864,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05157264387486211,
+          0.9773355664579975,
+          0.2053179313649488
+        ],
+        "cameraHeight": 1.410233829942895,
+        "bodyDepthCorrection": 0.1284361481666565,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05156853326921902,
+          0.9776235056343678,
+          0.2039435402449184
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.14450792968273163,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.05156432166471603,
+          0.9779094710598364,
+          0.2025689688543847
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.20006878674030304,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.04988065360328162,
+          0.9779938070964305,
+          0.20258339931282496
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.17193399369716644,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.04819660863827119,
+          0.9780753748115641,
+          0.20259725591179079
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.10216105729341507,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.04651220102761958,
+          0.978154172370853,
+          0.20261053829714332
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.13631197810173035,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.044827445044280136,
+          0.9782301980100738,
+          0.20262324612929747
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.0848802775144577,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.0431423549756238,
+          0.9783034500352875,
+          0.20263537908324658
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.15892668068408966,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.04145694512283662,
+          0.9783739268229545,
+          0.20264693684858492
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.2285103052854538,
+        "bodySupport": false,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.039771229800316055,
+          0.9784416268200467,
+          0.2026579191295301
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.3595968186855316,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.038085223335065935,
+          0.9785065485441542,
+          0.20266832564494394
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.6223384737968445,
+        "bodySupport": false,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.03639894006609012,
+          0.9785686905835872,
+          0.20267815612835227
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.559292733669281,
+        "bodySupport": false,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.03471239434378512,
+          0.9786280515974725,
+          0.20268741032796417
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.46270751953125,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03393455309074721,
+          0.9786542103892821,
+          0.20269282817569553
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.7269141674041748,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.033156650166835645,
+          0.9786797776963077,
+          0.202698123518744
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.7954573035240173,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03237868697947323,
+          0.9787047533792523,
+          0.20270329632825929
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.9071477651596069,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.031600664936629594,
+          0.9787291373020244,
+          0.2027083465760549
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.0007036924362183,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.030822585446808562,
+          0.9787529293317383,
+          0.20271327423460841
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.085040807723999,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.0300444499190354,
+          0.9787761293387173,
+          0.20271807927706195
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.1788700819015503,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.029266259762844162,
+          0.9787987371964952,
+          0.20272276167722267
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.7985384464263916,
+        "bodySupport": false,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.02848801638826492,
+          0.9788207527818185,
+          0.202727321409563
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.7140519618988037,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.027709721205811076,
+          0.9788421759746476,
+          0.20273175844922112
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 0.7930532097816467,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.026931375626466598,
+          0.9788630066581595,
+          0.20273607277200137
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.0031713247299194,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.026520902766810517,
+          0.9791864387815196,
+          0.20122266229925223
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.0860339403152466,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.026110350288204763,
+          0.9795073698098433,
+          0.19970869309078718
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.1757352352142334,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.0256997213425551,
+          0.9798257970811047,
+          0.19819417674919937
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.6168291568756104,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.025289019083751127,
+          0.9801417179908644,
+          0.19667912489051434
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.7847132682800293,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.024878246667545185,
+          0.9804551299923756,
+          0.19516354914374454
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.5285242795944214,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.024467407251431122,
+          0.9807660305966863,
+          0.19364746115044315
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.4997318983078003,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.024056503994522947,
+          0.9810744173727387,
+          0.19213087256425695
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.515066385269165,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.023645540057433367,
+          0.9813802879474636,
+          0.19061379505047846
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.6404540538787842,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.023234518602152254,
+          0.9816836400058717,
+          0.18909624028559727
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.7502152919769287,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.022823442791924987,
+          0.9819844712911417,
+          0.1875782199568508
+        ],
+        "cameraHeight": 1.4061710486990313,
+        "bodyDepthCorrection": 1.8695505857467651,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.009029567111801367,
+          0.9667689665225832,
+          0.2554921374262429
+        ],
+        "cameraHeight": 1.5941717254402668,
+        "bodyDepthCorrection": 0.01306211855262518,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008908198058507188,
+          0.9671687488671249,
+          0.25397884798177733
+        ],
+        "cameraHeight": 1.5924080249162078,
+        "bodyDepthCorrection": 0.009630587883293629,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008786806551910581,
+          0.9675661491520442,
+          0.25246492636741347
+        ],
+        "cameraHeight": 1.5875235926195144,
+        "bodyDepthCorrection": 0.004074700176715851,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0086653934894529,
+          0.967961164427309,
+          0.250950383773767
+        ],
+        "cameraHeight": 1.582639160322821,
+        "bodyDepthCorrection": 0.017291847616434097,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008543959769051434,
+          0.9683537917957976,
+          0.24943523140520052
+        ],
+        "cameraHeight": 1.579540180596064,
+        "bodyDepthCorrection": 0.037400707602500916,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008422506289066167,
+          0.9687440284134045,
+          0.2479194804794084
+        ],
+        "cameraHeight": 1.5764412008693072,
+        "bodyDepthCorrection": 0.04914986342191696,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008301033948266577,
+          0.9691318714891435,
+          0.24640314222700188
+        ],
+        "cameraHeight": 1.576187587017029,
+        "bodyDepthCorrection": 0.05530405789613724,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008179543645798367,
+          0.9695173182852478,
+          0.244886227891093
+        ],
+        "cameraHeight": 1.576187587017029,
+        "bodyDepthCorrection": 0.06633343547582626,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.008058036281150205,
+          0.9699003661172655,
+          0.24336874872687758
+        ],
+        "cameraHeight": 1.5734749377415784,
+        "bodyDepthCorrection": 0.045968733727931976,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007936512754120429,
+          0.970281012354154,
+          0.2418507160012184
+        ],
+        "cameraHeight": 1.5730320940942726,
+        "bodyDepthCorrection": 0.07087008655071259,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814973964783728,
+          0.9706592544183682,
+          0.24033214099222633
+        ],
+        "cameraHeight": 1.5708836852023251,
+        "bodyDepthCorrection": 0.09130409359931946,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814946311548745,
+          0.9708033041777048,
+          0.2397496010670268
+        ],
+        "cameraHeight": 1.5707188719729512,
+        "bodyDepthCorrection": 0.09506767988204956,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814915844364435,
+          0.970947003280357,
+          0.23916697914059978
+        ],
+        "cameraHeight": 1.5693808899491122,
+        "bodyDepthCorrection": 0.09112314879894257,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814882563329534,
+          0.9710903515792787,
+          0.23858427584431133
+        ],
+        "cameraHeight": 1.5688210662249535,
+        "bodyDepthCorrection": 0.09566862881183624,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814846468551895,
+          0.9712333489285643,
+          0.23800149180977564
+        ],
+        "cameraHeight": 1.5688210662249535,
+        "bodyDepthCorrection": 0.09205909818410873,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814807560148494,
+          0.9713759951834495,
+          0.23741862766885208
+        ],
+        "cameraHeight": 1.5688210662249535,
+        "bodyDepthCorrection": 0.07472832500934601,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814765838245408,
+          0.9715182902003119,
+          0.236835684053641
+        ],
+        "cameraHeight": 1.564151740164444,
+        "bodyDepthCorrection": 0.06840596348047256,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814721302977843,
+          0.9716602338366717,
+          0.236252661596481
+        ],
+        "cameraHeight": 1.5611546570148875,
+        "bodyDepthCorrection": 0.06638508290052414,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814673954490106,
+          0.9718018259511926,
+          0.23566956092994526
+        ],
+        "cameraHeight": 1.5595851301489476,
+        "bodyDepthCorrection": 0.07400421053171158,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007814623792935618,
+          0.9719430664036822,
+          0.23508638268683782
+        ],
+        "cameraHeight": 1.5595851301489476,
+        "bodyDepthCorrection": 0.07353392243385315,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.00781457081847691,
+          0.9720839550550932,
+          0.23450312750019064
+        ],
+        "cameraHeight": 1.5611546570148875,
+        "bodyDepthCorrection": 0.08483299612998962,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007629746940287073,
+          0.9720853425353072,
+          0.2345034622124836
+        ],
+        "cameraHeight": 1.5611546570148875,
+        "bodyDepthCorrection": 0.10081583261489868,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007444922280155018,
+          0.9720866968110089,
+          0.23450378891460216
+        ],
+        "cameraHeight": 1.5595851301489476,
+        "bodyDepthCorrection": 0.09205272048711777,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.00726009685701843,
+          0.9720880178817817,
+          0.23450410760644586
+        ],
+        "cameraHeight": 1.5611546570148875,
+        "bodyDepthCorrection": 0.09063073992729187,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.007075270689815392,
+          0.9720893057472197,
+          0.2345044182879168
+        ],
+        "cameraHeight": 1.5611546570148875,
+        "bodyDepthCorrection": 0.09078861773014069,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.00689044379748436,
+          0.9720905604069269,
+          0.2345047209589194
+        ],
+        "cameraHeight": 1.5611546570148875,
+        "bodyDepthCorrection": 0.06264156103134155,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0067056161989641665,
+          0.9720917818605174,
+          0.23450501561936057
+        ],
+        "cameraHeight": 1.5635235680882902,
+        "bodyDepthCorrection": 0.020768024027347565,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.006520787913194005,
+          0.9720929701076158,
+          0.23450530226914978
+        ],
+        "cameraHeight": 1.5639920856062968,
+        "bodyDepthCorrection": 0.021334601566195488,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.00633595895911342,
+          0.9720941251478566,
+          0.2345055809081989
+        ],
+        "cameraHeight": 1.566138824786958,
+        "bodyDepthCorrection": 0.043149832636117935,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.006151129355662299,
+          0.9720952469808849,
+          0.23450585153642217
+        ],
+        "cameraHeight": 1.5666483063323315,
+        "bodyDepthCorrection": 0.0421934574842453,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966299121780864,
+          0.9720963356063556,
+          0.23450611415373648
+        ],
+        "cameraHeight": 1.5763773569047788,
+        "bodyDepthCorrection": 0.06347861140966415,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966304663448465,
+          0.9723133379424869,
+          0.23360474324765376
+        ],
+        "cameraHeight": 1.5775412307248626,
+        "bodyDepthCorrection": 0.0647505521774292,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966305076719923,
+          0.972529504732766,
+          0.23270317064443385
+        ],
+        "cameraHeight": 1.5763773569047788,
+        "bodyDepthCorrection": 0.05409139022231102,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966300361592038,
+          0.9727448354194204,
+          0.2318013986688609
+        ],
+        "cameraHeight": 1.5763773569047788,
+        "bodyDepthCorrection": 0.043351929634809494,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0059662905181012875,
+          0.9729593294511468,
+          0.23089942964725663
+        ],
+        "cameraHeight": 1.5763773569047788,
+        "bodyDepthCorrection": 0.05831030756235123,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966275546323821,
+          0.9731729862831188,
+          0.2299972659074499
+        ],
+        "cameraHeight": 1.5757292475300975,
+        "bodyDepthCorrection": 0.05358016490936279,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966255446375456,
+          0.9733858053769926,
+          0.22909490977874683
+        ],
+        "cameraHeight": 1.5722666922576536,
+        "bodyDepthCorrection": 0.028201308101415634,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966230218411684,
+          0.973597786200915,
+          0.22819236359190095
+        ],
+        "cameraHeight": 1.571814307520177,
+        "bodyDepthCorrection": 0.000944611500017345,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966199862627658,
+          0.9738089282295294,
+          0.22728962967908267
+        ],
+        "cameraHeight": 1.571814307520177,
+        "bodyDepthCorrection": 0.0017080985708162189,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.00596616437925819,
+          0.9740192309439822,
+          0.22638671037384953
+        ],
+        "cameraHeight": 1.571814307520177,
+        "bodyDepthCorrection": 0.007975265383720398,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.005966123768577753,
+          0.9742286938319296,
+          0.22548360801111575
+        ],
+        "cameraHeight": 1.571814307520177,
+        "bodyDepthCorrection": 0.019067568704485893,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0075280246031761535,
+          0.9746438363489397,
+          0.22363524121344397
+        ],
+        "cameraHeight": 1.5703072898866044,
+        "bodyDepthCorrection": 0.006147574633359909,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.009090003748800155,
+          0.9750531355641622,
+          0.2217853797217986
+        ],
+        "cameraHeight": 1.5687354645210798,
+        "bodyDepthCorrection": 0.023655079305171967,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.010652032954365143,
+          0.9754565827874775,
+          0.21993405668635393
+        ],
+        "cameraHeight": 1.560390674493959,
+        "bodyDepthCorrection": 0.08929995447397232,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.012214083960378297,
+          0.9758541696446138,
+          0.218081305343283
+        ],
+        "cameraHeight": 1.557053492259449,
+        "bodyDepthCorrection": 0.09140156209468842,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.01377612850149325,
+          0.9762458880780017,
+          0.21622715901177683
+        ],
+        "cameraHeight": 1.5468124232443092,
+        "bodyDepthCorrection": 0.13307182490825653,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.015338138309066319,
+          0.9766317303475806,
+          0.21437165109104947
+        ],
+        "cameraHeight": 1.5388281010179197,
+        "bodyDepthCorrection": 0.1382141262292862,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.016900085113713773,
+          0.9770116890315581,
+          0.2125148150573307
+        ],
+        "cameraHeight": 1.538659816295795,
+        "bodyDepthCorrection": 0.20102742314338684,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.018461940647869646,
+          0.9773857570271207,
+          0.21065668446084676
+        ],
+        "cameraHeight": 1.527732115780206,
+        "bodyDepthCorrection": 0.2875739634037018,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.020023676648343463,
+          0.9777539275510979,
+          0.20879729292278937
+        ],
+        "cameraHeight": 1.518860875298299,
+        "bodyDepthCorrection": 0.2640771269798279,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02158526485887745,
+          0.9781161941405762,
+          0.20693667413227426
+        ],
+        "cameraHeight": 1.5171774816446242,
+        "bodyDepthCorrection": 0.23665577173233032,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02215085187898079,
+          0.9781640587316996,
+          0.20665046326239744
+        ],
+        "cameraHeight": 1.5124029019369385,
+        "bodyDepthCorrection": 0.21791209280490875,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02271641991362808,
+          0.9782115272115973,
+          0.2063641739659818
+        ],
+        "cameraHeight": 1.510261728642859,
+        "bodyDepthCorrection": 0.21398523449897766,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.023281968277984948,
+          0.978258599544267,
+          0.20607780659448144
+        ],
+        "cameraHeight": 1.497645291742115,
+        "bodyDepthCorrection": 0.17187854647636414,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.023847496287326672,
+          0.9783052756951487,
+          0.20579136149961477
+        ],
+        "cameraHeight": 1.4975370749695571,
+        "bodyDepthCorrection": 0.1657373607158661,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0244130032570423,
+          0.9783515556311255,
+          0.20550483903336245
+        ],
+        "cameraHeight": 1.4928828898766795,
+        "bodyDepthCorrection": 0.14808961749076843,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02497848850263883,
+          0.9783974393205235,
+          0.20521823954796528
+        ],
+        "cameraHeight": 1.4869842686460772,
+        "bodyDepthCorrection": 0.12719054520130157,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.025543951339745328,
+          0.9784429267331111,
+          0.20493156339592186
+        ],
+        "cameraHeight": 1.48628953180745,
+        "bodyDepthCorrection": 0.11677208542823792,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.026109391084117046,
+          0.9784880178400994,
+          0.2046448109299865
+        ],
+        "cameraHeight": 1.483881327870359,
+        "bodyDepthCorrection": 0.1061592623591423,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02667480705163959,
+          0.9785327126141431,
+          0.20435798250316706
+        ],
+        "cameraHeight": 1.4822322849769343,
+        "bodyDepthCorrection": 0.07931109517812729,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02724019855833303,
+          0.978577011029339,
+          0.20407107846872283
+        ],
+        "cameraHeight": 1.4752588447089348,
+        "bodyDepthCorrection": 0.043988220393657684,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.027359685415325904,
+          0.9785726908607418,
+          0.2040758102165503
+        ],
+        "cameraHeight": 1.4728981700313006,
+        "bodyDepthCorrection": 0.03945276141166687,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02747917243751083,
+          0.9785683566605475,
+          0.20408053906442175
+        ],
+        "cameraHeight": 1.4707443514054959,
+        "bodyDepthCorrection": 0.010310888290405273,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.027598659619753645,
+          0.9785640084287469,
+          0.20408526501209345
+        ],
+        "cameraHeight": 1.4693502306784956,
+        "bodyDepthCorrection": 0.031621821224689484,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02771814695692011,
+          0.9785596461653323,
+          0.20408998805932207
+        ],
+        "cameraHeight": 1.4673324618996533,
+        "bodyDepthCorrection": 0.03883381560444832,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.027837634443875884,
+          0.9785552698702983,
+          0.20409470820586462
+        ],
+        "cameraHeight": 1.4662978371860427,
+        "bodyDepthCorrection": 0.05546094477176666,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.027957122075486538,
+          0.9785508795436407,
+          0.2040994254514785
+        ],
+        "cameraHeight": 1.4658248965991632,
+        "bodyDepthCorrection": 0.06258251518011093,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028076609846617563,
+          0.9785464751853578,
+          0.2041041397959215
+        ],
+        "cameraHeight": 1.4629076136450347,
+        "bodyDepthCorrection": 0.06385577470064163,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028196097752134344,
+          0.9785420567954489,
+          0.20410885123895176
+        ],
+        "cameraHeight": 1.4608409438130796,
+        "bodyDepthCorrection": 0.08594094216823578,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028315585786902207,
+          0.978537624373916,
+          0.20411355978032777
+        ],
+        "cameraHeight": 1.4580912626760487,
+        "bodyDepthCorrection": 0.0830400288105011,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028435073945786364,
+          0.9785331779207623,
+          0.20411826541980851
+        ],
+        "cameraHeight": 1.4491789971759113,
+        "bodyDepthCorrection": 0.12271113693714142,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028625403637322584,
+          0.9785278600230679,
+          0.20411715612675893
+        ],
+        "cameraHeight": 1.4486245211270408,
+        "bodyDepthCorrection": 0.14839576184749603,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.028815730215459197,
+          0.9785225067075154,
+          0.20411603944568005
+        ],
+        "cameraHeight": 1.4416869256292466,
+        "bodyDepthCorrection": 0.14806969463825226,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.029006053659564202,
+          0.9785171179758506,
+          0.2041149153769361
+        ],
+        "cameraHeight": 1.441101059813531,
+        "bodyDepthCorrection": 0.1393340826034546,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.029196373949007294,
+          0.9785116938298308,
+          0.2041137839208936
+        ],
+        "cameraHeight": 1.4371544873528983,
+        "bodyDepthCorrection": 0.14586502313613892,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.02938669106315988,
+          0.9785062342712247,
+          0.20411264507792148
+        ],
+        "cameraHeight": 1.4374318683665492,
+        "bodyDepthCorrection": 0.14480169117450714,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.029577004981395105,
+          0.9785007393018126,
+          0.2041114988483912
+        ],
+        "cameraHeight": 1.4364242785433363,
+        "bodyDepthCorrection": 0.12950053811073303,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.029767315683087832,
+          0.9784952089233862,
+          0.20411034523267635
+        ],
+        "cameraHeight": 1.433006028062221,
+        "bodyDepthCorrection": 0.12748509645462036,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.029957623147614687,
+          0.9784896431377487,
+          0.20410918423115318
+        ],
+        "cameraHeight": 1.4312849295479702,
+        "bodyDepthCorrection": 0.15542462468147278,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030147927354354044,
+          0.9784840419467148,
+          0.20410801584420024
+        ],
+        "cameraHeight": 1.4312849295479702,
+        "bodyDepthCorrection": 0.16525642573833466,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030338228282686047,
+          0.9784784053521108,
+          0.20410684007219843
+        ],
+        "cameraHeight": 1.4312849295479702,
+        "bodyDepthCorrection": 0.11581144481897354,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0304184032251602,
+          0.9784539003055283,
+          0.20421235447967173
+        ],
+        "cameraHeight": 1.4312849295479702,
+        "bodyDepthCorrection": 0.08672831207513809,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03049857762682999,
+          0.9784293774848885,
+          0.20431786519360914
+        ],
+        "cameraHeight": 1.433006028062221,
+        "bodyDepthCorrection": 0.07393189519643784,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030578751483326873,
+          0.978404836891521,
+          0.20442337220826046
+        ],
+        "cameraHeight": 1.4360244235337032,
+        "bodyDepthCorrection": 0.07322370260953903,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030658924790282385,
+          0.9783802785267582,
+          0.20452887551787605
+        ],
+        "cameraHeight": 1.4374318683665492,
+        "bodyDepthCorrection": 0.04489867761731148,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03073909754332815,
+          0.9783557023919351,
+          0.20463437511670693
+        ],
+        "cameraHeight": 1.4426897300040002,
+        "bodyDepthCorrection": 0.023260630667209625,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030819269738095893,
+          0.9783311084883898,
+          0.20473987099900465
+        ],
+        "cameraHeight": 1.4446655836584883,
+        "bodyDepthCorrection": 0.026927320286631584,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.030899441370217436,
+          0.9783064968174632,
+          0.20484536315902152
+        ],
+        "cameraHeight": 1.4452035458395462,
+        "bodyDepthCorrection": 0.018328150734305382,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03097961243532467,
+          0.9782818673804993,
+          0.2049508515910103
+        ],
+        "cameraHeight": 1.445711655951485,
+        "bodyDepthCorrection": 0.029660111293196678,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.031059782929049592,
+          0.9782572201788449,
+          0.20505633628922443
+        ],
+        "cameraHeight": 1.4486013668130744,
+        "bodyDepthCorrection": 0.0026051162276417017,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0311399528470243,
+          0.9782325552138496,
+          0.20516181724791793
+        ],
+        "cameraHeight": 1.452498925711181,
+        "bodyDepthCorrection": 0.008546585217118263,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.031246560505852883,
+          0.9782292989971604,
+          0.2051611343312334
+        ],
+        "cameraHeight": 1.452498925711181,
+        "bodyDepthCorrection": 0.02484099194407463,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.031353167098281384,
+          0.9782260316737043,
+          0.20516044908515954
+        ],
+        "cameraHeight": 1.452498925711181,
+        "bodyDepthCorrection": 0.035307627171278,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03145977262068577,
+          0.9782227532438154,
+          0.2051597615097664
+        ],
+        "cameraHeight": 1.452498925711181,
+        "bodyDepthCorrection": 0.014401319436728954,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.031566377069442195,
+          0.9782194637078294,
+          0.20515907160512442
+        ],
+        "cameraHeight": 1.4525496912234683,
+        "bodyDepthCorrection": 0.008157334290444851,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03167298044092698,
+          0.9782161630660827,
+          0.20515837937130413
+        ],
+        "cameraHeight": 1.4525496912234683,
+        "bodyDepthCorrection": 0.02924349531531334,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03177958273151664,
+          0.9782128513189129,
+          0.20515768480837632
+        ],
+        "cameraHeight": 1.4525496912234683,
+        "bodyDepthCorrection": 0.04934956505894661,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03188618393758789,
+          0.9782095284666591,
+          0.20515698791641213
+        ],
+        "cameraHeight": 1.452498925711181,
+        "bodyDepthCorrection": 0.025817984715104103,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.031992784055517594,
+          0.978206194509661,
+          0.20515628869548277
+        ],
+        "cameraHeight": 1.452498925711181,
+        "bodyDepthCorrection": 0.018874522298574448,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03209938308168284,
+          0.9782028494482599,
+          0.2051555871456599
+        ],
+        "cameraHeight": 1.4510874847549549,
+        "bodyDepthCorrection": 0.0024476454127579927,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.032205981012460874,
+          0.9781994932827979,
+          0.2051548832670152
+        ],
+        "cameraHeight": 1.4510874847549549,
+        "bodyDepthCorrection": 0.014658867381513119,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03232631822481067,
+          0.9782698267613352,
+          0.20480028124584143
+        ],
+        "cameraHeight": 1.4510874847549549,
+        "bodyDepthCorrection": 0.0070038046687841415,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03244665439572758,
+          0.9783400203518046,
+          0.20444563873204727
+        ],
+        "cameraHeight": 1.45167660419591,
+        "bodyDepthCorrection": 0.016401180997490883,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.032566989472539304,
+          0.9784100740108629,
+          0.20409095587691636
+        ],
+        "cameraHeight": 1.452686339585012,
+        "bodyDepthCorrection": 0.023858588188886642,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03268732340257024,
+          0.9784799876953453,
+          0.20373623283179865
+        ],
+        "cameraHeight": 1.452686339585012,
+        "bodyDepthCorrection": 0.026834093034267426,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.032807656133141544,
+          0.9785497613622662,
+          0.20338146974811022
+        ],
+        "cameraHeight": 1.452531553900703,
+        "bodyDepthCorrection": 0.03802581876516342,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.032927987611571306,
+          0.9786193949688194,
+          0.2030266667773328
+        ],
+        "cameraHeight": 1.452531553900703,
+        "bodyDepthCorrection": 0.06028240546584129,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03304831778517463,
+          0.9786888884723778,
+          0.20267182407101358
+        ],
+        "cameraHeight": 1.452686339585012,
+        "bodyDepthCorrection": 0.05859572812914848,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.033168646601263736,
+          0.9787582418304938,
+          0.2023169417807648
+        ],
+        "cameraHeight": 1.454413459021068,
+        "bodyDepthCorrection": 0.05945375934243202,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03328897400714812,
+          0.9788274550008991,
+          0.20196202005826341
+        ],
+        "cameraHeight": 1.454413459021068,
+        "bodyDepthCorrection": 0.056434668600559235,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03340929995013461,
+          0.9788965279415054,
+          0.201607059055251
+        ],
+        "cameraHeight": 1.4569253792425776,
+        "bodyDepthCorrection": 0.028887491673231125,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03372922926346617,
+          0.9788860029923565,
+          0.20160489140628704
+        ],
+        "cameraHeight": 1.4582438124858725,
+        "bodyDepthCorrection": 0.030598437413573265,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03404914820829576,
+          0.9788753779671773,
+          0.2016027031463253
+        ],
+        "cameraHeight": 1.459146703470996,
+        "bodyDepthCorrection": 0.03650373965501785,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.034369056686733415,
+          0.9788646528757586,
+          0.20160049427738228
+        ],
+        "cameraHeight": 1.4674847797191999,
+        "bodyDepthCorrection": 0.002255517290905118,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03468895460090525,
+          0.9788538277279828,
+          0.2015982648014932
+        ],
+        "cameraHeight": 1.4677851422942645,
+        "bodyDepthCorrection": 0.016095934435725212,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03500884185295359,
+          0.978842902533824,
+          0.20159601472071237
+        ],
+        "cameraHeight": 1.4681156445151362,
+        "bodyDepthCorrection": 0.0010957608465105295,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03532871834503711,
+          0.9788318773033478,
+          0.20159374403711275
+        ],
+        "cameraHeight": 1.4703882345760066,
+        "bodyDepthCorrection": 0.0015177453169599175,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.035648583979331,
+          0.9788207520467114,
+          0.20159145275278628
+        ],
+        "cameraHeight": 1.4703882345760066,
+        "bodyDepthCorrection": 0.005219920072704554,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.035968438658027096,
+          0.9788095267741636,
+          0.20158914086984375
+        ],
+        "cameraHeight": 1.4713603694804214,
+        "bodyDepthCorrection": 0.048035670071840286,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03628828228333407,
+          0.9787982014960445,
+          0.20158680839041473
+        ],
+        "cameraHeight": 1.4722715858616482,
+        "bodyDepthCorrection": 0.10887445509433746,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0366081147574775,
+          0.9787867762227859,
+          0.20158445531664765
+        ],
+        "cameraHeight": 1.472423496636426,
+        "bodyDepthCorrection": 0.1339663565158844,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.036629104806563256,
+          0.9787410545049722,
+          0.20180251957684991
+        ],
+        "cameraHeight": 1.473144396121355,
+        "bodyDepthCorrection": 0.12564802169799805,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03665009330271606,
+          0.9786952831544041,
+          0.20202057665550557
+        ],
+        "cameraHeight": 1.4739822339971753,
+        "bodyDepthCorrection": 0.2558974623680115,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03667108024271437,
+          0.9786494621759811,
+          0.20223862651950383
+        ],
+        "cameraHeight": 1.4748200718729954,
+        "bodyDepthCorrection": 0.2183678150177002,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.03669206562333723,
+          0.9786035915746253,
+          0.2024566691357358
+        ],
+        "cameraHeight": 1.4795825978345398,
+        "bodyDepthCorrection": 0.22775641083717346,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.036713049441364214,
+          0.9785576713552813,
+          0.20267470447109445
+        ],
+        "cameraHeight": 1.4843451237960845,
+        "bodyDepthCorrection": 0.28047364950180054,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.036734031693575524,
+          0.9785117015229161,
+          0.20289273249247486
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.28222551941871643,
+        "bodySupport": true,
+        "ballConstraint": "reviewed-ground"
+      },
+      {
+        "normal": [
+          0.0367550123767519,
+          0.9784656820825198,
+          0.203110753166774
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.26311492919921875,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.03677599148767468,
+          0.9784196130391045,
+          0.2033287664608909
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.26860520243644714,
+        "bodySupport": true,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03679696902312581,
+          0.9783734943977052,
+          0.20354677234172672
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.28140732645988464,
+        "bodySupport": true,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03681794497988779,
+          0.9783273261633791,
+          0.20376477077618466
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.246982142329216,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.036817780938912074,
+          0.9781893972021105,
+          0.2044259137391982
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.24054394662380219,
+        "bodySupport": true,
+        "ballConstraint": "unconstrained"
+      },
+      {
+        "normal": [
+          0.03681760010585091,
+          0.9780510233532171,
+          0.20508695726488926
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.2268131971359253,
+        "bodySupport": true,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03681740248144659,
+          0.9779122048191743,
+          0.2057479004515492
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.3150860667228699,
+        "bodySupport": true,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.036817188066510353,
+          0.9777729418042764,
+          0.20640874239790916
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.4063461720943451,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03681695686192232,
+          0.9776332345146356,
+          0.20706948220314603
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.5488684177398682,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03681670886863149,
+          0.9774930831581801,
+          0.2077301189668887
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.6282110214233398,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03681644408765575,
+          0.9773524879446529,
+          0.2083906517892242
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.6014040112495422,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.036816162520081845,
+          0.9772114490856101,
+          0.2090510797707038
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.5682290196418762,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.036815864167065365,
+          0.977069966794419,
+          0.20971140201234906
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.4951895773410797,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.036815549029830766,
+          0.9769280412862574,
+          0.2103716176156582
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.6487250924110413,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03633405515756195,
+          0.9768371149243533,
+          0.2108769483420915
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.781682550907135,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03585253250829996,
+          0.9767457025248387,
+          0.21138218589086608
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.8565173149108887,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03537098179628663,
+          0.9766538041917582,
+          0.21188732950446484
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.9201808571815491,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03488940373593483,
+          0.97656142003133,
+          0.2123923784257414
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.8572571277618408,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.034407799041823055,
+          0.9764685501519454,
+          0.21289733189792504
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.9148335456848145,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.033926168428690236,
+          0.9763751946641687,
+          0.21340218916462675
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.9749054908752441,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.033444512611430346,
+          0.9762813536807354,
+          0.2139069494698449
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 1.077742099761963,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03296283230508719,
+          0.9761870273165533,
+          0.21441161205797066
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.9832837581634521,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.03248112822484903,
+          0.9760922156887001,
+          0.21491617617379405
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.811303436756134,
+        "bodySupport": false,
+        "ballConstraint": "nonpenetration"
+      },
+      {
+        "normal": [
+          0.0319994010860433,
+          0.9759969189164237,
+          0.21542064106250908
+        ],
+        "cameraHeight": 1.4871096794637444,
+        "bodyDepthCorrection": 0.7021594047546387,
+        "bodySupport": false,
+        "ballConstraint": "unconstrained"
+      }
+    ],
+    "limits": "Camera yaw and world translation are not recovered. Flight depth remains uncertain; nonpenetration only outside reviewed rolling ranges.",
+    "validation": {
+      "groundedBallFrames": 187,
+      "supportedBodyFrames": 190,
+      "maxGroundedBallClearance": 0.0,
+      "maxSupportedBodyClearance": 0.0,
+      "minimumBodyClearance": 0.0,
+      "minimumBallClearance": 0.0
+    }
+  },
+  "fps": 30.0,
+  "duration": 8.066666666666666,
+  "bodyModel": "Meta SAM 3D Body",
+  "segmentationModel": "Meta SAM 3",
+  "coordinates": "ground-aligned pitch/roll, per-shot horizontal origin, estimated metric scale",
+  "smoothing": "symmetric 3-frame [0.2, 0.6, 0.2], never across cuts or missing frames",
+  "shots": [
+    {
+      "id": 0,
+      "start": 0,
+      "origin": [
+        -0.11201137487865222,
+        0.0,
+        -2.6424058550772638
+      ],
+      "bodyScale": 0.9137311683282062,
+      "cameraHeightRange": [
+        1.4061710486990313,
+        1.6596731273456886
+      ],
+      "reviewedBallFrames": 60,
+      "reviewedBodyFrames": 56
+    },
+    {
+      "id": 1,
+      "start": 91,
+      "origin": [
+        -0.16325929816171983,
+        0.0,
+        -2.8572278446144135
+      ],
+      "bodyScale": 0.9032071078854419,
+      "cameraHeightRange": [
+        1.4312849295479702,
+        1.5941717254402668
+      ],
+      "reviewedBallFrames": 127,
+      "reviewedBodyFrames": 134
+    }
+  ],
+  "validBodyFrames": 242,
+  "validBallFrames": 242,
+  "ball": {
+    "model": "Meta SAM 3D Objects",
+    "file": "ball.glb",
+    "diameter": 0.22,
+    "depth": "shared ground/camera estimate; reviewed rolling contact; size-based flight estimate",
+    "rotation": "not estimated; fixed orientation"
+  },
+  "frames": [
+    {
+      "index": 0,
+      "time": 0.0,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.21564069390296936,
+        0.08456555753946304,
+        -0.3402824103832245
+      ]
+    },
+    {
+      "index": 1,
+      "time": 0.03333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.210017129778862,
+        0.08456555753946304,
+        -0.35662809014320374
+      ]
+    },
+    {
+      "index": 2,
+      "time": 0.06666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.20619186758995056,
+        0.08456555753946304,
+        -0.3689042925834656
+      ]
+    },
+    {
+      "index": 3,
+      "time": 0.1,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.20414765179157257,
+        0.08456555753946304,
+        -0.3704988360404968
+      ]
+    },
+    {
+      "index": 4,
+      "time": 0.13333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.20028981566429138,
+        0.08456555753946304,
+        -0.3667454719543457
+      ]
+    },
+    {
+      "index": 5,
+      "time": 0.16666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.20231615006923676,
+        0.08456555753946304,
+        -0.390038400888443
+      ]
+    },
+    {
+      "index": 6,
+      "time": 0.2,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.20992469787597656,
+        0.08456555753946304,
+        -0.44523119926452637
+      ]
+    },
+    {
+      "index": 7,
+      "time": 0.23333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.18633003532886505,
+        0.08456555753946304,
+        -0.46911680698394775
+      ]
+    },
+    {
+      "index": 8,
+      "time": 0.26666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.15230195224285126,
+        0.08456555753946304,
+        -0.48128587007522583
+      ]
+    },
+    {
+      "index": 9,
+      "time": 0.3,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.12392381578683853,
+        0.08456555753946304,
+        -0.5300419926643372
+      ]
+    },
+    {
+      "index": 10,
+      "time": 0.3333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.10336092114448547,
+        0.08456555753946304,
+        -0.5841756463050842
+      ]
+    },
+    {
+      "index": 11,
+      "time": 0.36666666666666664,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.0881635770201683,
+        0.08456555753946304,
+        -0.6113058924674988
+      ]
+    },
+    {
+      "index": 12,
+      "time": 0.4,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.07829318940639496,
+        0.08456555753946304,
+        -0.6226361989974976
+      ]
+    },
+    {
+      "index": 13,
+      "time": 0.43333333333333335,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.06828370690345764,
+        0.08456555753946304,
+        -0.6369522213935852
+      ]
+    },
+    {
+      "index": 14,
+      "time": 0.4666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.05404585599899292,
+        0.08456555753946304,
+        -0.6672259569168091
+      ]
+    },
+    {
+      "index": 15,
+      "time": 0.5,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.04434540122747421,
+        0.08456555753946304,
+        -0.6945302486419678
+      ]
+    },
+    {
+      "index": 16,
+      "time": 0.5333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.029907889664173126,
+        0.08456555753946304,
+        -0.7109464406967163
+      ]
+    },
+    {
+      "index": 17,
+      "time": 0.5666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.017100710421800613,
+        0.08456555753946304,
+        -0.7393676042556763
+      ]
+    },
+    {
+      "index": 18,
+      "time": 0.6,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.004240209702402353,
+        0.08456555753946304,
+        -0.7525968551635742
+      ]
+    },
+    {
+      "index": 19,
+      "time": 0.6333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.008149703033268452,
+        0.08456555753946304,
+        -0.7552199959754944
+      ]
+    },
+    {
+      "index": 20,
+      "time": 0.6666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.023667434230446815,
+        0.08456555753946304,
+        -0.7698051929473877
+      ]
+    },
+    {
+      "index": 21,
+      "time": 0.7,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.03714523836970329,
+        0.08456555753946304,
+        -0.7901744842529297
+      ]
+    },
+    {
+      "index": 22,
+      "time": 0.7333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.04226761683821678,
+        0.08456555753946304,
+        -0.8133299946784973
+      ]
+    },
+    {
+      "index": 23,
+      "time": 0.7666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.02322876825928688,
+        0.08456555753946304,
+        -0.849159300327301
+      ]
+    },
+    {
+      "index": 24,
+      "time": 0.8,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.020996054634451866,
+        0.08456555753946304,
+        -0.8790702223777771
+      ]
+    },
+    {
+      "index": 25,
+      "time": 0.8333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.0727529376745224,
+        0.08456555753946304,
+        -0.8891470432281494
+      ]
+    },
+    {
+      "index": 26,
+      "time": 0.8666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.11741425096988678,
+        0.08456555753946304,
+        -0.8892358541488647
+      ]
+    },
+    {
+      "index": 27,
+      "time": 0.9,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.15033777058124542,
+        0.08456555753946304,
+        -0.8762695789337158
+      ]
+    },
+    {
+      "index": 28,
+      "time": 0.9333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.1758134365081787,
+        0.08456555753946304,
+        -0.849812388420105
+      ]
+    },
+    {
+      "index": 29,
+      "time": 0.9666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.1922275722026825,
+        0.08456555753946304,
+        -0.8431444764137268
+      ]
+    },
+    {
+      "index": 30,
+      "time": 1.0,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.19590550661087036,
+        0.08456555753946304,
+        -0.8555569052696228
+      ]
+    },
+    {
+      "index": 31,
+      "time": 1.0333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.19198134541511536,
+        0.08456555753946304,
+        -0.9006255865097046
+      ]
+    },
+    {
+      "index": 32,
+      "time": 1.0666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.18245390057563782,
+        0.08456555753946304,
+        -0.9495642185211182
+      ]
+    },
+    {
+      "index": 33,
+      "time": 1.1,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.16957063972949982,
+        0.08456555753946304,
+        -0.9910864233970642
+      ]
+    },
+    {
+      "index": 34,
+      "time": 1.1333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.15279901027679443,
+        0.08456555753946304,
+        -1.0298166275024414
+      ]
+    },
+    {
+      "index": 35,
+      "time": 1.1666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.13250622153282166,
+        0.08456555753946304,
+        -1.0641365051269531
+      ]
+    },
+    {
+      "index": 36,
+      "time": 1.2,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.10987473279237747,
+        0.08456555753946304,
+        -1.089098334312439
+      ]
+    },
+    {
+      "index": 37,
+      "time": 1.2333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.08787838369607925,
+        0.08456555753946304,
+        -1.070031762123108
+      ]
+    },
+    {
+      "index": 38,
+      "time": 1.2666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.059656210243701935,
+        0.08456555753946304,
+        -1.0310324430465698
+      ]
+    },
+    {
+      "index": 39,
+      "time": 1.3,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.03942039608955383,
+        0.08456555753946304,
+        -1.065714716911316
+      ]
+    },
+    {
+      "index": 40,
+      "time": 1.3333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.01675952970981598,
+        0.08456555753946304,
+        -1.11719810962677
+      ]
+    },
+    {
+      "index": 41,
+      "time": 1.3666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.003585111116990447,
+        0.08456555753946304,
+        -1.1223223209381104
+      ]
+    },
+    {
+      "index": 42,
+      "time": 1.4,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.023146305233240128,
+        0.08456555753946304,
+        -1.109602928161621
+      ]
+    },
+    {
+      "index": 43,
+      "time": 1.4333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.045409031212329865,
+        0.08456555753946304,
+        -1.0894956588745117
+      ]
+    },
+    {
+      "index": 44,
+      "time": 1.4666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.06872959434986115,
+        0.08456555753946304,
+        -1.0744638442993164
+      ]
+    },
+    {
+      "index": 45,
+      "time": 1.5,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.09304799139499664,
+        0.08456555753946304,
+        -1.0696637630462646
+      ]
+    },
+    {
+      "index": 46,
+      "time": 1.5333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.11201360821723938,
+        0.08456555753946304,
+        -1.0636264085769653
+      ]
+    },
+    {
+      "index": 47,
+      "time": 1.5666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.12647762894630432,
+        0.08456555753946304,
+        -1.0510799884796143
+      ]
+    },
+    {
+      "index": 48,
+      "time": 1.6,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.13804495334625244,
+        0.08456555753946304,
+        -1.0299358367919922
+      ]
+    },
+    {
+      "index": 49,
+      "time": 1.6333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.14679637551307678,
+        0.08456555753946304,
+        -1.0140999555587769
+      ]
+    },
+    {
+      "index": 50,
+      "time": 1.6666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.15145936608314514,
+        0.08456555753946304,
+        -1.0134057998657227
+      ]
+    },
+    {
+      "index": 51,
+      "time": 1.7,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.1493404656648636,
+        0.08456555753946304,
+        -1.010241985321045
+      ]
+    },
+    {
+      "index": 52,
+      "time": 1.7333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.14193929731845856,
+        0.08456555753946304,
+        -1.0140926837921143
+      ]
+    },
+    {
+      "index": 53,
+      "time": 1.7666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.13190937042236328,
+        0.08456555753946304,
+        -1.0246127843856812
+      ]
+    },
+    {
+      "index": 54,
+      "time": 1.8,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.1130928248167038,
+        0.08456555753946304,
+        -1.043409824371338
+      ]
+    },
+    {
+      "index": 55,
+      "time": 1.8333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.08911898732185364,
+        0.08456555753946304,
+        -1.0708739757537842
+      ]
+    },
+    {
+      "index": 56,
+      "time": 1.8666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.05535874515771866,
+        0.08456555753946304,
+        -1.0918691158294678
+      ]
+    },
+    {
+      "index": 57,
+      "time": 1.9,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.0152542470023036,
+        0.08456555753946304,
+        -1.0821202993392944
+      ]
+    },
+    {
+      "index": 58,
+      "time": 1.9333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        0.009950718842446804,
+        0.08456555753946304,
+        -1.0934598445892334
+      ]
+    },
+    {
+      "index": 59,
+      "time": 1.9666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.025493690744042397,
+        0.08456555753946304,
+        -1.1801482439041138
+      ]
+    },
+    {
+      "index": 60,
+      "time": 2.0,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.10800229012966156,
+        0.1229228526353836,
+        -1.3032516241073608
+      ]
+    },
+    {
+      "index": 61,
+      "time": 2.033333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.1965104639530182,
+        0.12755011022090912,
+        -1.5152788162231445
+      ]
+    },
+    {
+      "index": 62,
+      "time": 2.066666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.26870277523994446,
+        0.15520328283309937,
+        -1.6210850477218628
+      ]
+    },
+    {
+      "index": 63,
+      "time": 2.1,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.34694331884384155,
+        0.1449270248413086,
+        -1.8099581003189087
+      ]
+    },
+    {
+      "index": 64,
+      "time": 2.1333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.4213952124118805,
+        0.12039369344711304,
+        -2.022569179534912
+      ]
+    },
+    {
+      "index": 65,
+      "time": 2.1666666666666665,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.4821092486381531,
+        0.09807797521352768,
+        -2.188072919845581
+      ]
+    },
+    {
+      "index": 66,
+      "time": 2.2,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.521311342716217,
+        0.1005723625421524,
+        -2.238490104675293
+      ]
+    },
+    {
+      "index": 67,
+      "time": 2.2333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.5562156438827515,
+        0.10189942270517349,
+        -2.352729320526123
+      ]
+    },
+    {
+      "index": 68,
+      "time": 2.2666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.5688522458076477,
+        0.1315004527568817,
+        -2.394090414047241
+      ]
+    },
+    {
+      "index": 69,
+      "time": 2.3,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.5922256708145142,
+        0.1293841004371643,
+        -2.5590100288391113
+      ]
+    },
+    {
+      "index": 70,
+      "time": 2.3333333333333335,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6346936821937561,
+        0.09550565481185913,
+        -2.8390092849731445
+      ]
+    },
+    {
+      "index": 71,
+      "time": 2.3666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6603706479072571,
+        0.08456556499004364,
+        -2.9708638191223145
+      ]
+    },
+    {
+      "index": 72,
+      "time": 2.4,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6681596636772156,
+        0.08456556499004364,
+        -3.011066436767578
+      ]
+    },
+    {
+      "index": 73,
+      "time": 2.433333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.670100212097168,
+        0.08456556499004364,
+        -2.9966259002685547
+      ]
+    },
+    {
+      "index": 74,
+      "time": 2.466666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6659519672393799,
+        0.08456556499004364,
+        -3.0063862800598145
+      ]
+    },
+    {
+      "index": 75,
+      "time": 2.5,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6442246437072754,
+        0.08456556499004364,
+        -3.1145896911621094
+      ]
+    },
+    {
+      "index": 76,
+      "time": 2.533333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.646361231803894,
+        0.0959702655673027,
+        -3.1934115886688232
+      ]
+    },
+    {
+      "index": 77,
+      "time": 2.566666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6439821124076843,
+        0.11877967417240143,
+        -3.180643081665039
+      ]
+    },
+    {
+      "index": 78,
+      "time": 2.6,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6601608991622925,
+        0.0959702581167221,
+        -3.370838165283203
+      ]
+    },
+    {
+      "index": 79,
+      "time": 2.6333333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6793872117996216,
+        0.08456556499004364,
+        -3.448024034500122
+      ]
+    },
+    {
+      "index": 80,
+      "time": 2.6666666666666665,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6719630360603333,
+        0.08456556499004364,
+        -3.4046225547790527
+      ]
+    },
+    {
+      "index": 81,
+      "time": 2.7,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6132442951202393,
+        0.08456556499004364,
+        -3.2887790203094482
+      ]
+    },
+    {
+      "index": 82,
+      "time": 2.7333333333333334,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6062275171279907,
+        0.08456556499004364,
+        -3.385077476501465
+      ]
+    },
+    {
+      "index": 83,
+      "time": 2.7666666666666666,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6137596368789673,
+        0.08456556499004364,
+        -3.5185537338256836
+      ]
+    },
+    {
+      "index": 84,
+      "time": 2.8,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6230222582817078,
+        0.08456556499004364,
+        -3.63383412361145
+      ]
+    },
+    {
+      "index": 85,
+      "time": 2.8333333333333335,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.6259036660194397,
+        0.08456556499004364,
+        -3.713966131210327
+      ]
+    },
+    {
+      "index": 86,
+      "time": 2.8666666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.594839334487915,
+        0.08456556499004364,
+        -3.785166025161743
+      ]
+    },
+    {
+      "index": 87,
+      "time": 2.9,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.5355210304260254,
+        0.08456556499004364,
+        -3.8697457313537598
+      ]
+    },
+    {
+      "index": 88,
+      "time": 2.933333333333333,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.49375057220458984,
+        0.08456556499004364,
+        -4.027788162231445
+      ]
+    },
+    {
+      "index": 89,
+      "time": 2.966666666666667,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.46362781524658203,
+        0.08456556499004364,
+        -4.209784030914307
+      ]
+    },
+    {
+      "index": 90,
+      "time": 3.0,
+      "shot": 0,
+      "valid": true,
+      "ball": [
+        -0.4300709664821625,
+        0.08456555753946304,
+        -4.369686603546143
+      ]
+    },
+    {
+      "index": 91,
+      "time": 3.033333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7928272485733032,
+        0.08456555753946304,
+        -0.4705406427383423
+      ]
+    },
+    {
+      "index": 92,
+      "time": 3.066666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7924107313156128,
+        0.08456555753946304,
+        -0.4806041717529297
+      ]
+    },
+    {
+      "index": 93,
+      "time": 3.1,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7898731231689453,
+        0.08456555753946304,
+        -0.4823318123817444
+      ]
+    },
+    {
+      "index": 94,
+      "time": 3.1333333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7868296504020691,
+        0.08456555753946304,
+        -0.48408395051956177
+      ]
+    },
+    {
+      "index": 95,
+      "time": 3.1666666666666665,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7838265895843506,
+        0.08456555753946304,
+        -0.4881591796875
+      ]
+    },
+    {
+      "index": 96,
+      "time": 3.2,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7833330035209656,
+        0.08456555753946304,
+        -0.49927735328674316
+      ]
+    },
+    {
+      "index": 97,
+      "time": 3.2333333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7820225358009338,
+        0.08456555753946304,
+        -0.5137815475463867
+      ]
+    },
+    {
+      "index": 98,
+      "time": 3.2666666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7797294855117798,
+        0.08456555753946304,
+        -0.5271818041801453
+      ]
+    },
+    {
+      "index": 99,
+      "time": 3.3,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7777919769287109,
+        0.08456555753946304,
+        -0.5401856303215027
+      ]
+    },
+    {
+      "index": 100,
+      "time": 3.3333333333333335,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7752817273139954,
+        0.08456555753946304,
+        -0.5530978441238403
+      ]
+    },
+    {
+      "index": 101,
+      "time": 3.3666666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7709619402885437,
+        0.08456555753946304,
+        -0.5599679946899414
+      ]
+    },
+    {
+      "index": 102,
+      "time": 3.4,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7657926082611084,
+        0.08456555753946304,
+        -0.5624076128005981
+      ]
+    },
+    {
+      "index": 103,
+      "time": 3.433333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7632110118865967,
+        0.08456555753946304,
+        -0.5697933435440063
+      ]
+    },
+    {
+      "index": 104,
+      "time": 3.466666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7598565220832825,
+        0.08456555753946304,
+        -0.5782231092453003
+      ]
+    },
+    {
+      "index": 105,
+      "time": 3.5,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7533211708068848,
+        0.08456555753946304,
+        -0.5808870196342468
+      ]
+    },
+    {
+      "index": 106,
+      "time": 3.533333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7471444606781006,
+        0.08456555753946304,
+        -0.5838553309440613
+      ]
+    },
+    {
+      "index": 107,
+      "time": 3.566666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7404248714447021,
+        0.08456555753946304,
+        -0.5821983218193054
+      ]
+    },
+    {
+      "index": 108,
+      "time": 3.6,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7345272302627563,
+        0.08456555753946304,
+        -0.5838877558708191
+      ]
+    },
+    {
+      "index": 109,
+      "time": 3.6333333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7268568873405457,
+        0.08456555753946304,
+        -0.5843127369880676
+      ]
+    },
+    {
+      "index": 110,
+      "time": 3.6666666666666665,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7217286825180054,
+        0.08456555753946304,
+        -0.5914090275764465
+      ]
+    },
+    {
+      "index": 111,
+      "time": 3.7,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7151554822921753,
+        0.08456555753946304,
+        -0.5995067358016968
+      ]
+    },
+    {
+      "index": 112,
+      "time": 3.7333333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.7058029770851135,
+        0.08456555753946304,
+        -0.5991154909133911
+      ]
+    },
+    {
+      "index": 113,
+      "time": 3.7666666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.697534441947937,
+        0.08456555753946304,
+        -0.5947365164756775
+      ]
+    },
+    {
+      "index": 114,
+      "time": 3.8,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6924800276756287,
+        0.08456555753946304,
+        -0.596067488193512
+      ]
+    },
+    {
+      "index": 115,
+      "time": 3.8333333333333335,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6838577389717102,
+        0.08456555753946304,
+        -0.5968049168586731
+      ]
+    },
+    {
+      "index": 116,
+      "time": 3.8666666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6741830706596375,
+        0.08456555753946304,
+        -0.5993793606758118
+      ]
+    },
+    {
+      "index": 117,
+      "time": 3.9,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6656079292297363,
+        0.08456555753946304,
+        -0.6053837537765503
+      ]
+    },
+    {
+      "index": 118,
+      "time": 3.933333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6542257070541382,
+        0.08456555753946304,
+        -0.6055030822753906
+      ]
+    },
+    {
+      "index": 119,
+      "time": 3.966666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6441547870635986,
+        0.08456555753946304,
+        -0.6074290871620178
+      ]
+    },
+    {
+      "index": 120,
+      "time": 4.0,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6354748606681824,
+        0.08456555753946304,
+        -0.613943874835968
+      ]
+    },
+    {
+      "index": 121,
+      "time": 4.033333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6264365911483765,
+        0.08456555753946304,
+        -0.629113495349884
+      ]
+    },
+    {
+      "index": 122,
+      "time": 4.066666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6173192858695984,
+        0.08456555753946304,
+        -0.6413273215293884
+      ]
+    },
+    {
+      "index": 123,
+      "time": 4.1,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.6073126792907715,
+        0.08456555753946304,
+        -0.6511485576629639
+      ]
+    },
+    {
+      "index": 124,
+      "time": 4.133333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5971297025680542,
+        0.08456555753946304,
+        -0.660466194152832
+      ]
+    },
+    {
+      "index": 125,
+      "time": 4.166666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5860663652420044,
+        0.08456555753946304,
+        -0.6677132844924927
+      ]
+    },
+    {
+      "index": 126,
+      "time": 4.2,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5744908452033997,
+        0.08456555753946304,
+        -0.6734568476676941
+      ]
+    },
+    {
+      "index": 127,
+      "time": 4.233333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.562490701675415,
+        0.08456555753946304,
+        -0.6796146631240845
+      ]
+    },
+    {
+      "index": 128,
+      "time": 4.266666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5506411790847778,
+        0.08456555753946304,
+        -0.6885704398155212
+      ]
+    },
+    {
+      "index": 129,
+      "time": 4.3,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5397898554801941,
+        0.08456555753946304,
+        -0.7009879350662231
+      ]
+    },
+    {
+      "index": 130,
+      "time": 4.333333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5262553691864014,
+        0.08456555753946304,
+        -0.7104499936103821
+      ]
+    },
+    {
+      "index": 131,
+      "time": 4.366666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.5114943385124207,
+        0.08456555753946304,
+        -0.7205080986022949
+      ]
+    },
+    {
+      "index": 132,
+      "time": 4.4,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.4966062009334564,
+        0.08456555753946304,
+        -0.7361829280853271
+      ]
+    },
+    {
+      "index": 133,
+      "time": 4.433333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.48149120807647705,
+        0.08456555753946304,
+        -0.7493547797203064
+      ]
+    },
+    {
+      "index": 134,
+      "time": 4.466666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.465254545211792,
+        0.08456555753946304,
+        -0.7566400766372681
+      ]
+    },
+    {
+      "index": 135,
+      "time": 4.5,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.44807547330856323,
+        0.08456555753946304,
+        -0.7646287679672241
+      ]
+    },
+    {
+      "index": 136,
+      "time": 4.533333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.42690011858940125,
+        0.08456555753946304,
+        -0.7673008441925049
+      ]
+    },
+    {
+      "index": 137,
+      "time": 4.566666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.404913067817688,
+        0.08456555753946304,
+        -0.7736484408378601
+      ]
+    },
+    {
+      "index": 138,
+      "time": 4.6,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.38163697719573975,
+        0.08456555753946304,
+        -0.7859570384025574
+      ]
+    },
+    {
+      "index": 139,
+      "time": 4.633333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.35549670457839966,
+        0.08456555753946304,
+        -0.7863236665725708
+      ]
+    },
+    {
+      "index": 140,
+      "time": 4.666666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.3292352259159088,
+        0.08456555753946304,
+        -0.788357675075531
+      ]
+    },
+    {
+      "index": 141,
+      "time": 4.7,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.30244573950767517,
+        0.08456555753946304,
+        -0.7951424717903137
+      ]
+    },
+    {
+      "index": 142,
+      "time": 4.733333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.27334773540496826,
+        0.08456555753946304,
+        -0.7891165018081665
+      ]
+    },
+    {
+      "index": 143,
+      "time": 4.766666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.24372342228889465,
+        0.08456555753946304,
+        -0.7764822244644165
+      ]
+    },
+    {
+      "index": 144,
+      "time": 4.8,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.21432453393936157,
+        0.08456555753946304,
+        -0.7568985819816589
+      ]
+    },
+    {
+      "index": 145,
+      "time": 4.833333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.18533135950565338,
+        0.08456555753946304,
+        -0.74825119972229
+      ]
+    },
+    {
+      "index": 146,
+      "time": 4.866666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.15715599060058594,
+        0.08456555753946304,
+        -0.736992597579956
+      ]
+    },
+    {
+      "index": 147,
+      "time": 4.9,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.13108354806900024,
+        0.08456555753946304,
+        -0.7234996557235718
+      ]
+    },
+    {
+      "index": 148,
+      "time": 4.933333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.10542669892311096,
+        0.08456555753946304,
+        -0.7171431183815002
+      ]
+    },
+    {
+      "index": 149,
+      "time": 4.966666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.08147885650396347,
+        0.08456555753946304,
+        -0.7103656530380249
+      ]
+    },
+    {
+      "index": 150,
+      "time": 5.0,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.05705607682466507,
+        0.08456555753946304,
+        -0.7053871154785156
+      ]
+    },
+    {
+      "index": 151,
+      "time": 5.033333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.03468673303723335,
+        0.08456555753946304,
+        -0.6909406781196594
+      ]
+    },
+    {
+      "index": 152,
+      "time": 5.066666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.014185362495481968,
+        0.08456555753946304,
+        -0.6761183738708496
+      ]
+    },
+    {
+      "index": 153,
+      "time": 5.1,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.007328434847295284,
+        0.08456555753946304,
+        -0.6661450862884521
+      ]
+    },
+    {
+      "index": 154,
+      "time": 5.133333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.024846861138939857,
+        0.08456555753946304,
+        -0.6516631841659546
+      ]
+    },
+    {
+      "index": 155,
+      "time": 5.166666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.042775657027959824,
+        0.08456555753946304,
+        -0.6415822505950928
+      ]
+    },
+    {
+      "index": 156,
+      "time": 5.2,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.05966239795088768,
+        0.08456555753946304,
+        -0.6335496306419373
+      ]
+    },
+    {
+      "index": 157,
+      "time": 5.233333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.07754959166049957,
+        0.08456555753946304,
+        -0.6297283172607422
+      ]
+    },
+    {
+      "index": 158,
+      "time": 5.266666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.0948132872581482,
+        0.08456555753946304,
+        -0.6238393187522888
+      ]
+    },
+    {
+      "index": 159,
+      "time": 5.3,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1084180548787117,
+        0.08456555753946304,
+        -0.6131055951118469
+      ]
+    },
+    {
+      "index": 160,
+      "time": 5.333333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.12081536650657654,
+        0.08456555753946304,
+        -0.5965483784675598
+      ]
+    },
+    {
+      "index": 161,
+      "time": 5.366666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1352444738149643,
+        0.08456555753946304,
+        -0.5812265872955322
+      ]
+    },
+    {
+      "index": 162,
+      "time": 5.4,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.14829178154468536,
+        0.08456555753946304,
+        -0.5727214217185974
+      ]
+    },
+    {
+      "index": 163,
+      "time": 5.433333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.15744397044181824,
+        0.08456555753946304,
+        -0.5552968978881836
+      ]
+    },
+    {
+      "index": 164,
+      "time": 5.466666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.16642969846725464,
+        0.08456555753946304,
+        -0.5433814525604248
+      ]
+    },
+    {
+      "index": 165,
+      "time": 5.5,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.17612728476524353,
+        0.08456555753946304,
+        -0.5339962840080261
+      ]
+    },
+    {
+      "index": 166,
+      "time": 5.533333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1851932555437088,
+        0.08456555753946304,
+        -0.528326690196991
+      ]
+    },
+    {
+      "index": 167,
+      "time": 5.566666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.19326584041118622,
+        0.08456555753946304,
+        -0.5221443176269531
+      ]
+    },
+    {
+      "index": 168,
+      "time": 5.6,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.20161950588226318,
+        0.08456555753946304,
+        -0.5135115385055542
+      ]
+    },
+    {
+      "index": 169,
+      "time": 5.633333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2082410454750061,
+        0.08456555753946304,
+        -0.5061607956886292
+      ]
+    },
+    {
+      "index": 170,
+      "time": 5.666666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2147739827632904,
+        0.08456555753946304,
+        -0.5035288333892822
+      ]
+    },
+    {
+      "index": 171,
+      "time": 5.7,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.22400027513504028,
+        0.08456555753946304,
+        -0.505169153213501
+      ]
+    },
+    {
+      "index": 172,
+      "time": 5.733333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.22902128100395203,
+        0.08456555753946304,
+        -0.5006499886512756
+      ]
+    },
+    {
+      "index": 173,
+      "time": 5.766666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2331462949514389,
+        0.08456555753946304,
+        -0.49969229102134705
+      ]
+    },
+    {
+      "index": 174,
+      "time": 5.8,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2373730093240738,
+        0.08456555753946304,
+        -0.5014997720718384
+      ]
+    },
+    {
+      "index": 175,
+      "time": 5.833333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.24404236674308777,
+        0.08456555753946304,
+        -0.5080745816230774
+      ]
+    },
+    {
+      "index": 176,
+      "time": 5.866666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.24903489649295807,
+        0.08456555753946304,
+        -0.5171017050743103
+      ]
+    },
+    {
+      "index": 177,
+      "time": 5.9,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2503986656665802,
+        0.08456555753946304,
+        -0.518291175365448
+      ]
+    },
+    {
+      "index": 178,
+      "time": 5.933333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.25169637799263,
+        0.08456555753946304,
+        -0.5170034170150757
+      ]
+    },
+    {
+      "index": 179,
+      "time": 5.966666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.25235339999198914,
+        0.08456555753946304,
+        -0.5161776542663574
+      ]
+    },
+    {
+      "index": 180,
+      "time": 6.0,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.25304076075553894,
+        0.08456555753946304,
+        -0.5209277272224426
+      ]
+    },
+    {
+      "index": 181,
+      "time": 6.033333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.25275057554244995,
+        0.08456555753946304,
+        -0.5255024433135986
+      ]
+    },
+    {
+      "index": 182,
+      "time": 6.066666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2518270015716553,
+        0.08456555753946304,
+        -0.5260239243507385
+      ]
+    },
+    {
+      "index": 183,
+      "time": 6.1,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.25022420287132263,
+        0.08456555753946304,
+        -0.5256993174552917
+      ]
+    },
+    {
+      "index": 184,
+      "time": 6.133333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.24700871109962463,
+        0.08456555753946304,
+        -0.5238948464393616
+      ]
+    },
+    {
+      "index": 185,
+      "time": 6.166666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.24296918511390686,
+        0.08456555753946304,
+        -0.5217484831809998
+      ]
+    },
+    {
+      "index": 186,
+      "time": 6.2,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.23990954458713531,
+        0.08456555753946304,
+        -0.521923303604126
+      ]
+    },
+    {
+      "index": 187,
+      "time": 6.233333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2342788279056549,
+        0.08456555753946304,
+        -0.5198414921760559
+      ]
+    },
+    {
+      "index": 188,
+      "time": 6.266666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.22942069172859192,
+        0.08456555753946304,
+        -0.5200068950653076
+      ]
+    },
+    {
+      "index": 189,
+      "time": 6.3,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.22545841336250305,
+        0.08456555753946304,
+        -0.5213743448257446
+      ]
+    },
+    {
+      "index": 190,
+      "time": 6.333333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.22073478996753693,
+        0.08456555753946304,
+        -0.5211241245269775
+      ]
+    },
+    {
+      "index": 191,
+      "time": 6.366666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.21351252496242523,
+        0.08456555753946304,
+        -0.5193865895271301
+      ]
+    },
+    {
+      "index": 192,
+      "time": 6.4,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.20755769312381744,
+        0.08456555753946304,
+        -0.524049699306488
+      ]
+    },
+    {
+      "index": 193,
+      "time": 6.433333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.20058725774288177,
+        0.08456555753946304,
+        -0.528626561164856
+      ]
+    },
+    {
+      "index": 194,
+      "time": 6.466666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1941487193107605,
+        0.08456555753946304,
+        -0.5345417857170105
+      ]
+    },
+    {
+      "index": 195,
+      "time": 6.5,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1888645738363266,
+        0.08456555753946304,
+        -0.5411813855171204
+      ]
+    },
+    {
+      "index": 196,
+      "time": 6.533333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.18179303407669067,
+        0.08456555753946304,
+        -0.5459535717964172
+      ]
+    },
+    {
+      "index": 197,
+      "time": 6.566666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.17402014136314392,
+        0.08456555753946304,
+        -0.5508826375007629
+      ]
+    },
+    {
+      "index": 198,
+      "time": 6.6,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.16520729660987854,
+        0.08456555753946304,
+        -0.5553426146507263
+      ]
+    },
+    {
+      "index": 199,
+      "time": 6.633333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.15573753416538239,
+        0.08456555753946304,
+        -0.5627719163894653
+      ]
+    },
+    {
+      "index": 200,
+      "time": 6.666666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.14642153680324554,
+        0.08456555753946304,
+        -0.5700774192810059
+      ]
+    },
+    {
+      "index": 201,
+      "time": 6.7,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1369737684726715,
+        0.08456555753946304,
+        -0.5787602066993713
+      ]
+    },
+    {
+      "index": 202,
+      "time": 6.733333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.125898540019989,
+        0.08456555753946304,
+        -0.5835484266281128
+      ]
+    },
+    {
+      "index": 203,
+      "time": 6.766666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.11491582542657852,
+        0.08456555753946304,
+        -0.5895090103149414
+      ]
+    },
+    {
+      "index": 204,
+      "time": 6.8,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.10462182760238647,
+        0.08456555753946304,
+        -0.604634165763855
+      ]
+    },
+    {
+      "index": 205,
+      "time": 6.833333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.09381101280450821,
+        0.08456555753946304,
+        -0.6109596490859985
+      ]
+    },
+    {
+      "index": 206,
+      "time": 6.866666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.0800398513674736,
+        0.08456555753946304,
+        -0.6123719811439514
+      ]
+    },
+    {
+      "index": 207,
+      "time": 6.9,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.06633707880973816,
+        0.08456555753946304,
+        -0.6136633157730103
+      ]
+    },
+    {
+      "index": 208,
+      "time": 6.933333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.052654340863227844,
+        0.08456555753946304,
+        -0.6136025786399841
+      ]
+    },
+    {
+      "index": 209,
+      "time": 6.966666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.039433784782886505,
+        0.08456555753946304,
+        -0.6145976781845093
+      ]
+    },
+    {
+      "index": 210,
+      "time": 7.0,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.024960113689303398,
+        0.08456555753946304,
+        -0.6162961721420288
+      ]
+    },
+    {
+      "index": 211,
+      "time": 7.033333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.010758522897958755,
+        0.08456555753946304,
+        -0.6162540316581726
+      ]
+    },
+    {
+      "index": 212,
+      "time": 7.066666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.003313447581604123,
+        0.08456555753946304,
+        -0.6181515455245972
+      ]
+    },
+    {
+      "index": 213,
+      "time": 7.1,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.016075437888503075,
+        0.08456555753946304,
+        -0.6191329956054688
+      ]
+    },
+    {
+      "index": 214,
+      "time": 7.133333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.03154805302619934,
+        0.08456555753946304,
+        -0.6197261810302734
+      ]
+    },
+    {
+      "index": 215,
+      "time": 7.166666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.04223300516605377,
+        0.08456555753946304,
+        -0.6307277083396912
+      ]
+    },
+    {
+      "index": 216,
+      "time": 7.2,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        0.029381386935710907,
+        0.08456555753946304,
+        -0.6867481470108032
+      ]
+    },
+    {
+      "index": 217,
+      "time": 7.233333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.010314993560314178,
+        0.08456555753946304,
+        -0.806338906288147
+      ]
+    },
+    {
+      "index": 218,
+      "time": 7.266666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.05195754021406174,
+        0.10711531341075897,
+        -0.9110344648361206
+      ]
+    },
+    {
+      "index": 219,
+      "time": 7.3,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.09487518668174744,
+        0.09208214282989502,
+        -1.0860964059829712
+      ]
+    },
+    {
+      "index": 220,
+      "time": 7.333333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1290103644132614,
+        0.08879107981920242,
+        -1.2387713193893433
+      ]
+    },
+    {
+      "index": 221,
+      "time": 7.366666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.15238502621650696,
+        0.10167405754327774,
+        -1.3337864875793457
+      ]
+    },
+    {
+      "index": 222,
+      "time": 7.4,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.17505934834480286,
+        0.10208691656589508,
+        -1.4399927854537964
+      ]
+    },
+    {
+      "index": 223,
+      "time": 7.433333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.1996842324733734,
+        0.08899751305580139,
+        -1.5753469467163086
+      ]
+    },
+    {
+      "index": 224,
+      "time": 7.466666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2191193848848343,
+        0.08456556499004364,
+        -1.6968990564346313
+      ]
+    },
+    {
+      "index": 225,
+      "time": 7.5,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.23991522192955017,
+        0.08456556499004364,
+        -1.8222112655639648
+      ]
+    },
+    {
+      "index": 226,
+      "time": 7.533333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2545149326324463,
+        0.08456556499004364,
+        -1.9121085405349731
+      ]
+    },
+    {
+      "index": 227,
+      "time": 7.566666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.26335588097572327,
+        0.08456556499004364,
+        -1.9636036157608032
+      ]
+    },
+    {
+      "index": 228,
+      "time": 7.6,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2761351466178894,
+        0.08456556499004364,
+        -1.9942258596420288
+      ]
+    },
+    {
+      "index": 229,
+      "time": 7.633333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2835844159126282,
+        0.08456556499004364,
+        -2.0387914180755615
+      ]
+    },
+    {
+      "index": 230,
+      "time": 7.666666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2886016070842743,
+        0.08456556499004364,
+        -2.1111900806427
+      ]
+    },
+    {
+      "index": 231,
+      "time": 7.7,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.29615098237991333,
+        0.08456556499004364,
+        -2.1774961948394775
+      ]
+    },
+    {
+      "index": 232,
+      "time": 7.733333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.30228978395462036,
+        0.08456556499004364,
+        -2.2264297008514404
+      ]
+    },
+    {
+      "index": 233,
+      "time": 7.766666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.3015286922454834,
+        0.08456556499004364,
+        -2.2390143871307373
+      ]
+    },
+    {
+      "index": 234,
+      "time": 7.8,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.3121752440929413,
+        0.08456556499004364,
+        -2.2548422813415527
+      ]
+    },
+    {
+      "index": 235,
+      "time": 7.833333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.32757678627967834,
+        0.08456556499004364,
+        -2.309046745300293
+      ]
+    },
+    {
+      "index": 236,
+      "time": 7.866666666666666,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.3094733953475952,
+        0.08456556499004364,
+        -2.3768153190612793
+      ]
+    },
+    {
+      "index": 237,
+      "time": 7.9,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.31703895330429077,
+        0.08456556499004364,
+        -2.4449939727783203
+      ]
+    },
+    {
+      "index": 238,
+      "time": 7.933333333333334,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.3346239924430847,
+        0.08456556499004364,
+        -2.509528160095215
+      ]
+    },
+    {
+      "index": 239,
+      "time": 7.966666666666667,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.334117591381073,
+        0.08456556499004364,
+        -2.561704397201538
+      ]
+    },
+    {
+      "index": 240,
+      "time": 8.0,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.2960392236709595,
+        0.10719385743141174,
+        -2.5209710597991943
+      ]
+    },
+    {
+      "index": 241,
+      "time": 8.033333333333333,
+      "shot": 1,
+      "valid": true,
+      "ball": [
+        -0.23120656609535217,
+        0.19770704209804535,
+        -2.229841470718384
+      ]
+    }
+  ],
+  "failures": []
+}

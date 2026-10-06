@@ -18,8 +18,11 @@ class APIClient {
 
     private init() {
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 120 // 2 minutes for video uploads
-        config.timeoutIntervalForResource = 300 // 5 minutes total
+        // Reconstruction runs inline on the server — one forward pass through
+        // an 840M-parameter model, plus a cold start that loads ~2.8GB of
+        // weights on the first request. Hence the generous timeouts.
+        config.timeoutIntervalForRequest = 120
+        config.timeoutIntervalForResource = 300
         self.session = URLSession(configuration: config)
     }
 
@@ -36,245 +39,198 @@ class APIClient {
         return httpResponse.statusCode == 200
     }
 
-    // MARK: - Skills
+    // MARK: - 3D Reconstruction (SAM 3D Body)
 
-    /// Fetch all available skills from the backend
-    func fetchSkills() async throws -> [SkillInfo] {
-        let url = URL(string: "\(baseURL)/api/skills")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch skills")
-        }
-
-        return try JSONDecoder().decode([SkillInfo].self, from: data)
-    }
-
-    /// Fetch skills filtered by difficulty
-    func fetchSkillsByDifficulty(_ difficulty: String) async throws -> [SkillInfo] {
-        let url = URL(string: "\(baseURL)/api/skills/difficulty/\(difficulty)")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch skills by difficulty")
-        }
-
-        return try JSONDecoder().decode([SkillInfo].self, from: data)
-    }
-
-    /// Fetch details for a specific skill
-    func fetchSkillDetails(skillId: String) async throws -> SkillDetails {
-        let url = URL(string: "\(baseURL)/api/skills/\(skillId)")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.networkError("No response")
-        }
-
-        if httpResponse.statusCode == 404 {
-            throw APIError.notFound("Skill not found: \(skillId)")
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch skill details")
-        }
-
-        return try JSONDecoder().decode(SkillDetails.self, from: data)
-    }
-
-    // MARK: - Players
-
-    /// Fetch all players from the backend
-    func fetchPlayers() async throws -> [PlayerInfo] {
-        let url = URL(string: "\(baseURL)/api/players")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch players")
-        }
-
-        return try JSONDecoder().decode([PlayerInfo].self, from: data)
-    }
-
-    /// Fetch players by category (legend or current)
-    func fetchPlayersByCategory(_ category: String) async throws -> [PlayerInfo] {
-        let url = URL(string: "\(baseURL)/api/players/category/\(category)")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch players by category")
-        }
-
-        return try JSONDecoder().decode([PlayerInfo].self, from: data)
-    }
-
-    /// Fetch details for a specific player
-    func fetchPlayerDetails(playerId: String) async throws -> PlayerInfo {
-        let url = URL(string: "\(baseURL)/api/players/\(playerId)")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.networkError("No response")
-        }
-
-        if httpResponse.statusCode == 404 {
-            throw APIError.notFound("Player not found: \(playerId)")
-        }
-
-        guard httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch player details")
-        }
-
-        return try JSONDecoder().decode(PlayerInfo.self, from: data)
-    }
-
-    // MARK: - Categories & Progression
-
-    /// Fetch skill categories
-    func fetchCategories() async throws -> [CategoryInfo] {
-        let url = URL(string: "\(baseURL)/api/categories")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch categories")
-        }
-
-        return try JSONDecoder().decode([CategoryInfo].self, from: data)
-    }
-
-    /// Fetch skill progression by difficulty
-    func fetchProgression() async throws -> ProgressionInfo {
-        let url = URL(string: "\(baseURL)/api/progression")!
-        let (data, response) = try await session.data(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Failed to fetch progression")
-        }
-
-        return try JSONDecoder().decode(ProgressionInfo.self, from: data)
-    }
-
-    // MARK: - Video Analysis
-
-    /// Analyze a user's video using the quick analysis endpoint (pre-stored reference)
+    /// Upload a still frame for 3D body reconstruction.
     /// - Parameters:
-    ///   - skill: The skill ID to analyze (e.g., "cruyff_turn")
-    ///   - videoURL: Local URL to the user's video file
-    ///   - progressHandler: Optional callback for upload progress (0.0 to 1.0)
-    /// - Returns: Analysis response from the server
-    func analyzeVideo(
-        skill: String,
-        videoURL: URL,
-        progressHandler: ((Double) -> Void)? = nil
-    ) async throws -> AnalysisAPIResponse {
-        let url = URL(string: "\(baseURL)/api/analyze/quick")!
+    ///   - imageData: JPEG data. Downscale first — the model doesn't need full
+    ///     camera resolution, and smaller uploads cut round-trip time.
+    ///   - filename: Reported to the server as the source image name.
+    ///   - raw: Requests the `raw` block with binary vertex buffers, which is
+    ///     what the renderer prefers. Sent as a multipart field; if the FastAPI
+    ///     route declares it as a query parameter instead, append it to `url`.
+    ///   - preview: Whether the server should render a preview JPEG. Off by
+    ///     default — the app renders the mesh itself and never fetches it, so
+    ///     generating one is wasted server work.
+    ///   - yUp: Whether the server converts the mesh from its camera frame to
+    ///     the Y-up convention. Left on (the server's own default) so the
+    ///     vertices arrive in RealityKit's orientation already. Note this
+    ///     appears to apply to the mesh only — the keypoints payload still
+    ///     reports `space: "camera"`, so the skeleton is converted separately.
+    ///   - fieldName: Multipart field name the endpoint expects. Change this if
+    ///     the FastAPI route declares something other than `image`.
+    func reconstruct(
+        imageData: Data,
+        filename: String = "frame.jpg",
+        raw: Bool = true,
+        preview: Bool = false,
+        yUp: Bool = true,
+        fieldName: String = "image"
+    ) async throws -> ReconstructionResponse {
+        let url = URL(string: "\(baseURL)/api/reconstruct")!
 
-        // Create multipart form data
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        // Build body
         var body = Data()
-
-        // Add skill field
+        for (name, value) in [("raw", raw), ("preview", preview), ("y_up", yUp)] {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"skill\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(skill)\r\n".data(using: .utf8)!)
-
-        // Add video file
-        let videoData = try Data(contentsOf: videoURL)
-        let filename = videoURL.lastPathComponent
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"user_video\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: video/mp4\r\n\r\n".data(using: .utf8)!)
-        body.append(videoData)
+        body.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
-
         request.httpBody = body
 
-        // Perform request
         let (data, response) = try await session.data(for: request)
+        try validate(response: response, data: data)
 
+        return try JSONDecoder().decode(ReconstructionResponse.self, from: data)
+    }
+
+    /// Re-fetch an existing reconstruction by ID, without re-uploading the image.
+    func fetchReconstruction(id: String) async throws -> ReconstructionResponse {
+        let url = URL(string: "\(baseURL)/api/reconstruct/\(id)")!
+        let (data, response) = try await session.data(from: url)
+        try validate(response: response, data: data)
+
+        return try JSONDecoder().decode(ReconstructionResponse.self, from: data)
+    }
+
+    /// Fetch the 3D/2D joint positions for a reconstruction.
+    /// - Parameter path: The `keypointsPath` from a `ReconstructionResponse`.
+    func fetchKeypoints(path: String) async throws -> KeypointsResponse {
+        let url = try resolve(path: path)
+        let (data, response) = try await session.data(from: url)
+        try validate(response: response, data: data)
+
+        return try JSONDecoder().decode(KeypointsResponse.self, from: data)
+    }
+
+    /// Download the reconstructed body mesh to a local file.
+    /// - Parameter path: The `modelPath` from a `ReconstructionResponse`.
+    /// - Returns: A temporary file URL ending in `.usdz`.
+    func downloadModel(path: String) async throws -> URL {
+        let url = try resolve(path: path)
+        let (temporaryURL, response) = try await session.download(from: url)
+        try validate(response: response, data: nil)
+
+        // RealityKit infers the format from the file extension, and URLSession
+        // names downloads with a random extensionless path — so rename before
+        // handing the file to `Entity(contentsOf:)` or it fails to load.
+        let destination = FileManager.default.temporaryDirectory
+            .appendingPathComponent("reconstruction_\(UUID().uuidString).usdz")
+        try? FileManager.default.removeItem(at: destination)
+        try FileManager.default.moveItem(at: temporaryURL, to: destination)
+
+        return destination
+    }
+
+    /// Download one of the raw binary geometry buffers.
+    /// - Parameter path: A `positionsPath` or `normalsPath` from `RawGeometryInfo`.
+    func fetchBinary(path: String) async throws -> Data {
+        let url = try resolve(path: path)
+        let (data, response) = try await session.data(from: url)
+        try validate(response: response, data: data)
+        return data
+    }
+
+    /// Download the shared triangle index buffer, caching it for the process
+    /// lifetime.
+    ///
+    /// `indicesPath` points at `/api/topology` rather than a per-reconstruction
+    /// path because the triangle list is the same for every body, so this is
+    /// fetched once no matter how many frames are reconstructed. The server
+    /// marks it `immutable`, so URLSession's own cache backs this up too.
+    func fetchTopology(path: String) async throws -> TopologyBuffer {
+        if let cached = await Self.topologyCache.value {
+            return cached
+        }
+
+        let url = try resolve(path: path)
+        let (data, response) = try await session.data(from: url)
+        try validate(response: response, data: data)
+
+        // The endpoint self-describes via `X-Triangle-Count` / `X-Index-Dtype`.
+        // Trusting that header beats inferring the count from `model.faces`,
+        // which belongs to a different part of the response.
+        let http = response as? HTTPURLResponse
+        let triangleCount = http?
+            .value(forHTTPHeaderField: "X-Triangle-Count")
+            .flatMap(Int.init)
+
+        let buffer = TopologyBuffer(data: data, triangleCount: triangleCount)
+        await Self.topologyCache.store(buffer)
+        return buffer
+    }
+
+    private static let topologyCache = TopologyCache()
+
+    /// Resolves a server-relative path (`/api/...`) against the base URL.
+    /// Absolute URLs are passed through unchanged.
+    private func resolve(path: String) throws -> URL {
+        if let absolute = URL(string: path), absolute.scheme != nil {
+            return absolute
+        }
+        guard let url = URL(string: baseURL + path) else {
+            throw APIError.networkError("Malformed URL for path: \(path)")
+        }
+        return url
+    }
+
+    private func validate(response: URLResponse, data: Data?) throws {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.networkError("No response")
         }
 
-        // Handle error responses
-        if httpResponse.statusCode == 400 {
-            let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data)
-            throw APIError.badRequest(errorResponse?.detail ?? "Invalid request")
-        }
+        if (200...299).contains(httpResponse.statusCode) { return }
 
-        if httpResponse.statusCode == 404 {
-            throw APIError.notFound("No reference video available for this skill")
-        }
+        // FastAPI puts the useful message in `detail` for every error it raises:
+        // 415 for a non-image upload, 422 for undecodable bytes or no person
+        // found, 503 for an incomplete model checkpoint. Decode it for any
+        // status, so those reach the user as the server worded them rather
+        // than as a bare status code.
+        let detail = data
+            .flatMap { try? JSONDecoder().decode(ErrorResponse.self, from: $0) }?
+            .detail
 
-        if httpResponse.statusCode >= 500 {
-            let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data)
-            throw APIError.serverError(errorResponse?.detail ?? "Server error")
+        switch httpResponse.statusCode {
+        case 404:
+            throw APIError.notFound(detail ?? "Not found")
+        case 400...499:
+            throw APIError.badRequest(detail ?? "Request rejected (\(httpResponse.statusCode))")
+        default:
+            throw APIError.serverError(detail ?? "Server error (\(httpResponse.statusCode))")
         }
-
-        guard httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Unexpected status code: \(httpResponse.statusCode)")
-        }
-
-        return try JSONDecoder().decode(AnalysisAPIResponse.self, from: data)
     }
+}
 
-    /// Analyze with custom reference video
-    func analyzeWithReference(
-        skill: String,
-        referenceVideoURL: URL,
-        userVideoURL: URL
-    ) async throws -> AnalysisAPIResponse {
-        let url = URL(string: "\(baseURL)/api/analyze")!
+// MARK: - Topology Cache
 
-        let boundary = UUID().uuidString
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+/// The shared triangle index buffer, plus what the server said about it.
+struct TopologyBuffer: Sendable {
+    let data: Data
+    /// From the `X-Triangle-Count` response header, when present.
+    let triangleCount: Int?
+}
 
-        var body = Data()
+/// In-memory cache for the shared triangle index buffer.
+///
+/// An actor because `APIClient` is a singleton reachable from any task. Two
+/// concurrent first-calls can both fetch, which wastes one request but is
+/// otherwise harmless — not worth serialising the download to avoid.
+private actor TopologyCache {
+    private var cached: TopologyBuffer?
 
-        // Add skill field
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"skill\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(skill)\r\n".data(using: .utf8)!)
+    var value: TopologyBuffer? { cached }
 
-        // Add reference video
-        let refData = try Data(contentsOf: referenceVideoURL)
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"reference_video\"; filename=\"reference.mp4\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: video/mp4\r\n\r\n".data(using: .utf8)!)
-        body.append(refData)
-        body.append("\r\n".data(using: .utf8)!)
-
-        // Add user video
-        let userData = try Data(contentsOf: userVideoURL)
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"user_video\"; filename=\"user.mp4\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: video/mp4\r\n\r\n".data(using: .utf8)!)
-        body.append(userData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
-
-        request.httpBody = body
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
-            throw APIError.serverError("Analysis failed")
-        }
-
-        return try JSONDecoder().decode(AnalysisAPIResponse.self, from: data)
+    func store(_ buffer: TopologyBuffer) {
+        cached = buffer
     }
 }
 
