@@ -63,6 +63,9 @@ struct ProjectsListView: View {
                             }
                             .buttonStyle(.plain)
                         }
+                        if !serverProjects.isEmpty {
+                            addAnother
+                        }
                     }
 
                     footer
@@ -149,14 +152,13 @@ struct ProjectsListView: View {
                 .font(.system(size: 13))
                 .foregroundStyle(Color(hex: "89967B"))
                 .multilineTextAlignment(.center)
-            PhotosPicker(selection: $pickedVideo, matching: .videos) {
+            importPicker {
                 HStack(spacing: 8) {
                     Text("Import a video")
                     Image(systemName: "arrow.right")
                 }
             }
             .buttonStyle(.slPrimary)
-            .disabled(viewModel.uploadPhase != nil || viewModel.health == nil)
         }
         .foregroundStyle(Color(hex: "738B5C"))
         .padding(.vertical, 40)
@@ -164,6 +166,38 @@ struct ProjectsListView: View {
         .frame(maxWidth: .infinity)
         .overlay(RoundedRectangle(cornerRadius: 12)
             .stroke(Color(hex: "CAD6BB"), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+    }
+
+    /// Shown under existing projects. `welcome` disappears after the first
+    /// upload, and without this the only way to import another clip is the
+    /// toolbar icon, which is easy to miss.
+    private var addAnother: some View {
+        importPicker {
+            HStack(spacing: 8) {
+                Image(systemName: "plus")
+                Text("Import another video")
+            }
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(Color(hex: "738B5C"))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 18)
+            .overlay(RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(hex: "CAD6BB"), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .opacity(canImport ? 1 : 0.5)
+    }
+
+    /// False while an upload is running or the server is unreachable.
+    private var canImport: Bool {
+        viewModel.uploadPhase == nil && viewModel.health != nil
+    }
+
+    /// The video picker behind every import entry point.
+    private func importPicker<Content: View>(@ViewBuilder label: () -> Content) -> some View {
+        PhotosPicker(selection: $pickedVideo, matching: .videos, label: label)
+            .disabled(!canImport)
     }
 
     private var footer: some View {
@@ -190,10 +224,10 @@ struct ProjectsListView: View {
             BrandMark(size: 20)
         }
         ToolbarItem(placement: .topBarTrailing) {
-            PhotosPicker(selection: $pickedVideo, matching: .videos) {
-                Label("Import video", systemImage: "square.and.arrow.up")
+            // "plus", not "square.and.arrow.up": the latter reads as Share on iOS.
+            importPicker {
+                Label("Import video", systemImage: "plus")
             }
-            .disabled(viewModel.uploadPhase != nil || viewModel.health == nil)
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button {
