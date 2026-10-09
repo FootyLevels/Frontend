@@ -22,6 +22,9 @@ final class ProjectsListViewModel {
     var isLoading = false
     var errorMessage: String?
     var uploadPhase: UploadPhase?
+    /// The project being deleted, so its card can show progress and a second
+    /// delete can't start until the server answers.
+    var deletingId: String?
 
     /// Health and the project list are independent, so fetch them together. A
     /// health failure alone just means the status row reads "offline".
@@ -80,6 +83,31 @@ final class ProjectsListViewModel {
             errorMessage = error.localizedDescription
             return nil
         }
+    }
+
+    /// The bundled example can't be deleted, and neither can a clip the server
+    /// is still reconstructing (it would answer 409 anyway).
+    func canDelete(_ project: SkillLabProject) -> Bool {
+        deletingId == nil && !BundledSample.isSample(project.id) && !project.isBusy
+    }
+
+    /// Deletes a project on the server, then drops it from the list. On failure
+    /// the card stays and the error is shown, so the person can retry.
+    func delete(_ project: SkillLabProject) async {
+        guard canDelete(project) else { return }
+        deletingId = project.id
+        errorMessage = nil
+        defer { deletingId = nil }
+
+        do {
+            try await SkillLabClient.shared.deleteProject(id: project.id)
+        } catch SkillLabError.server(status: 404, _) {
+            // Already gone, e.g. deleted from another device; the list catches up.
+        } catch {
+            errorMessage = error.localizedDescription
+            return
+        }
+        projects.removeAll { $0.id == project.id }
     }
 }
 

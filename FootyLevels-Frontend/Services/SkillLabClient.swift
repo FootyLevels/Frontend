@@ -151,6 +151,13 @@ final class SkillLabClient {
         return try JSONDecoder().decode(SkillLabProject.self, from: data)
     }
 
+    /// Permanently removes a project — its video, key frames and 3D results —
+    /// from the server. Fails with `.server(status: 409, …)` while a
+    /// reconstruction is running, and 404 once it is already gone.
+    func deleteProject(id: String) async throws {
+        try await perform("DELETE", "/api/projects/\(id)", body: nil)
+    }
+
     func addFrame(projectId: String, timestamp: Double, label: String = "") async throws -> SkillLabProject {
         try await send("POST", "/api/projects/\(projectId)/frames",
                        body: ["timestamp": timestamp, "label": label])
@@ -199,6 +206,13 @@ final class SkillLabClient {
     }
 
     private func send<T: Decodable>(_ method: String, _ path: String, body: [String: Any]?) async throws -> T {
+        let data = try await perform(method, path, body: body)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    /// Sends a request and returns its validated body, which is empty for 204.
+    @discardableResult
+    private func perform(_ method: String, _ path: String, body: [String: Any]?) async throws -> Data {
         var request = URLRequest(url: try url(for: path))
         request.httpMethod = method
         if let body {
@@ -207,7 +221,7 @@ final class SkillLabClient {
         }
         let (data, response) = try await transport(request.url) { try await self.session.data(for: request) }
         try Self.validate(response, data: data)
-        return try JSONDecoder().decode(T.self, from: data)
+        return data
     }
 
     private static func validate(_ response: URLResponse, data: Data) throws {

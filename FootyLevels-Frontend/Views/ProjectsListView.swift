@@ -11,6 +11,8 @@ struct ProjectsListView: View {
     @State private var path: [String] = []
     @State private var pickedVideo: PhotosPickerItem?
     @State private var showServerSettings = false
+    /// Set by "Delete Video…"; non-nil while the confirmation dialog is up.
+    @State private var pendingDelete: SkillLabProject?
 
     /// Server projects, minus the example — that one always opens from the
     /// bundle, so it isn't listed twice when the server has it too.
@@ -58,10 +60,15 @@ struct ProjectsListView: View {
                             welcome
                         }
                         ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
+                            let isDeleting = viewModel.deletingId == project.id
                             NavigationLink(value: project.id) {
                                 ProjectCard(project: project, number: index + 2, isSample: false)
                             }
                             .buttonStyle(.plain)
+                            .opacity(isDeleting ? 0.5 : 1)
+                            .disabled(isDeleting)
+                            .overlay(alignment: .topTrailing) { projectMenu(for: project, isDeleting: isDeleting) }
+                            .contextMenu { deleteButton(for: project) }
                         }
                         if !serverProjects.isEmpty {
                             addAnother
@@ -86,6 +93,14 @@ struct ProjectsListView: View {
                 ServerSettingsView(suggestions: viewModel.health?.network?.urls ?? []) {
                     Task { await viewModel.refresh() }
                 }
+            }
+            .confirmationDialog("Delete this video?", isPresented: isConfirmingDelete,
+                                titleVisibility: .visible, presenting: pendingDelete) { project in
+                Button("Delete Video", role: .destructive) {
+                    Task { await viewModel.delete(project) }
+                }
+            } message: { project in
+                Text("“\(project.title)” and its key frames and 3D results will be removed from the server. This can't be undone.")
             }
             .task {
                 // With no address yet (a fresh device install) there's nothing to
@@ -198,6 +213,44 @@ struct ProjectsListView: View {
     private func importPicker<Content: View>(@ViewBuilder label: () -> Content) -> some View {
         PhotosPicker(selection: $pickedVideo, matching: .videos, label: label)
             .disabled(!canImport)
+    }
+
+    // MARK: - Deleting
+
+    /// A visible "…" button on each of the person's cards, so deleting doesn't
+    /// depend on discovering the long-press menu.
+    private func projectMenu(for project: SkillLabProject, isDeleting: Bool) -> some View {
+        Menu {
+            deleteButton(for: project)
+        } label: {
+            Group {
+                if isDeleting {
+                    ProgressView()
+                } else {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(SL.muted)
+                }
+            }
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
+        }
+        .accessibilityLabel("More actions for \(project.title)")
+    }
+
+    private func deleteButton(for project: SkillLabProject) -> some View {
+        Button(role: .destructive) {
+            pendingDelete = project
+        } label: {
+            Label("Delete Video…", systemImage: "trash")
+        }
+        // The server also refuses a busy or bundled project; offline, the error
+        // couldn't be shown (the status card replaces it), so don't offer it.
+        .disabled(!viewModel.canDelete(project) || viewModel.health == nil)
+    }
+
+    private var isConfirmingDelete: Binding<Bool> {
+        Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } })
     }
 
     private var footer: some View {
