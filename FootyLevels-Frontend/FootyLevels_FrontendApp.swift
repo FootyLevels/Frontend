@@ -13,17 +13,19 @@ import GoogleSignIn
 @main
 struct FootyLevels_FrontendApp: App {
     init() {
-            FirebaseApp.configure()
-            print("Firebase configured successfully.")
+            ApplicationEnvironment.configureFirebase()
         }
     
     var body: some Scene {
         WindowGroup {
             Group {
                 #if DEBUG
-                // Temporary local testing: open the bundled example without login.
-                // CheckUser()
-                ProjectsListView()
+                // Local sample entry remains available; it grants no API identity.
+                if ProcessInfo.processInfo.arguments.contains("--require-login") {
+                    CheckUser()
+                } else {
+                    ProjectsListView()
+                }
                 #else
                 CheckUser()
                 #endif

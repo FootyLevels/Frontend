@@ -24,6 +24,16 @@ struct ProjectsListView: View {
                 VStack(alignment: .leading, spacing: 26) {
                     intro
 
+                    if let error = appState?.accountError {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(error).font(.callout)
+                            Button("Retry account connection") {
+                                Task { await appState?.connectAccount() }
+                            }
+                        }
+                        .foregroundStyle(SL.errorText)
+                    }
+
                     Button {
                         showServerSettings = true
                     } label: {

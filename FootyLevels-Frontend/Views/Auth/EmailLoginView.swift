@@ -53,10 +53,8 @@ struct EmailLoginView: View {
                     
                     // --- Login Button ---
                     Button {
-                        print("🔵 BUTTON WAS CLICKED") // <--- Add this
                         Task {
                             if let user = await emailVM.loginWithEmail() {
-                                 print("🟢 LOGIN SUCCESS") // <--- Add this
                                  appState.currentUser = user
                                  appState.isLoggedIn = .loggedIn
                             }
@@ -70,10 +68,10 @@ struct EmailLoginView: View {
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
-                            .disabled(emailVM.isLoading) // Prevent double clicking
                             .padding(.top, 20)
                                 
                     }
+                    .disabled(emailVM.isLoading)
                     
                     Spacer()
                 }

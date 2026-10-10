@@ -9,12 +9,11 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.1099202703884-ipbl58cetbmc85b6eavpq4r2nq9b913g</string>
+				<string>com.googleusercontent.apps.894198668525-n0lmad4r3emoj9psptn9ug77ev7n8eam</string>
+				<string>com.googleusercontent.apps.554230919588-ugq5tba1geftajfhbg8sii9pgn9h4mia</string>
 			</array>
 		</dict>
 	</array>
-	<key>GIDClientID</key>
-	<string>1099202703884-ipbl58cetbmc85b6eavpq4r2nq9b913g.apps.googleusercontent.com</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
@@ -22,5 +21,7 @@
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>FootyLevels connects to your Skill Lab server on the local network to upload videos and load 3D reconstructions.</string>
+	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+	<false/>
 </dict>
 </plist>

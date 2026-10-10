@@ -33,7 +33,6 @@ final class UserLoginViewModel{
             let user = try await AuthManager.shared.loginWithEmail(email: email, password: password)
             return user
         } catch {
-            print("Login error: \(error.localizedDescription)")
             self.errorMessage = Self.message(for: error)
         }
 
@@ -56,10 +55,8 @@ final class UserLoginViewModel{
         switch code {
         case .invalidEmail:
             return "Email format is incorrect."
-        case .wrongPassword, .invalidCredential:
+        case .wrongPassword, .invalidCredential, .userNotFound:
             return "Wrong email or password."
-        case .userNotFound:
-            return "No account found for that email."
         case .userDisabled:
             return "That account has been disabled."
         case .tooManyRequests:

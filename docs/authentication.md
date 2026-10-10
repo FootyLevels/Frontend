@@ -1,0 +1,76 @@
+# Application identity — FP-14
+
+Debug uses the Development Firebase project; Release uses Demo. Each configuration
+has its own Google client and callback scheme. Public Firebase client settings are
+bundled; server credentials are never part of the app. The old semester project's
+configuration is preserved outside the app resources under `Configuration/Legacy`.
+Analytics collection is disabled during this migration.
+
+The existing email and Google login screens use Firebase's persisted session.
+DEBUG still opens the included example without login, as requested for local
+work. Launch with `--require-login` to test the ordinary login route. Release
+always uses that route. The bypass provides no identity to the account API.
+
+## Account API configuration
+
+The authenticated transport is separate from the older Skill Lab connection.
+Set `FootyLevelsAPIBaseURL` in the app's Info configuration when the new modular
+API is deployed. No default is shipped yet: do not point it at the current
+unauthenticated model service just because that service is reachable.
+
+For a Debug simulator using the API on this Mac, set the launch environment:
+
+```
+FOOTYLEVELS_API_URL=http://127.0.0.1:8011
+```
+
+Use HTTPS for a device or Release. Only the configured application origin gets
+Firebase bearer tokens. Redirects are refused, asset URLs use a separate
+transport, cookies and response caching are disabled, and a 401 gets one token
+refresh. A second 401 signs out the matching session. Late responses from a
+previous login cannot update the current account, including a new session for
+the same UID. Network/503 errors preserve login and offer retry.
+
+Profile bootstrap runs after login when this API address is configured. Logout
+clears account state and cached responses; switching accounts recreates the
+project navigation and playback views. The legacy Skill Lab remains a shared
+team testing service in Debug: its uploaded-project listing and model operations have
+**not** moved to Firebase ownership yet. FP-17/16/39 attach private asset handling,
+owned uploads and model processing before the new application is deployed.
+Release blocks legacy network reads, mutations and remote asset resolution while
+keeping bundled file resolution. This prevents a signed-in Release app from
+silently exposing the old shared project list.
+
+## Verification on 10 October 2026
+
+A signed iPhone 17 Pro simulator build used the real Development Firebase SDK
+against the local authenticated API and real Firestore. Two temporary email
+accounts passed repeated profile bootstrap, own-project reads, foreign-project
+read/delete rejection, sign-out and account switching. The bundled example loaded
+after logout. Both test accounts and exact project/profile records were removed
+and their absence verified. Passwords/tokens stayed in memory.
+
+The first unsigned simulator attempt failed while saving the Firebase session to
+the keychain. Simulator builds must leave `CODE_SIGNING_ALLOWED=YES`; no paid Apple
+account is needed for simulator signing. Its one exact orphan signup was removed.
+
+`AuthenticatedAPIClientTests` cover refresh, logout, account switching during token
+fetch/response, same-UID session changes, unsafe destinations and service failure.
+`LiveFirebaseSessionTests` is skipped by default. Its explicit Development-only
+opt-in requires these XCTest target environment variables:
+
+```
+FOOTYLEVELS_LIVE_AUTH_TESTS=1
+FOOTYLEVELS_AUTH_TEST_API=http://127.0.0.1:8011
+```
+
+Set them in a copy of the generated `.xctestrun` **inside Build/Products**, then use
+`test-without-building -only-testing:FootyLevels-FrontendTests/LiveFirebaseSessionTests`.
+The probe creates and deletes temporary Auth users, and records non-secret exact
+metadata IDs in the simulator app's Documents/fp14-ios-evidence.json. Remove only
+those Firestore project/profile IDs after verifying their owner and test run title.
+On a keychain failure, a signup may exist before its UID reaches the SDK; its exact
+email is `fp14-ios-<runID>-a@example.invalid` (or `-b`). Never delete other accounts.
+
+Interactive Google consent and a physical iPhone smoke test remain release checks.
+They were not substituted with automated password entry or claimed as verified.

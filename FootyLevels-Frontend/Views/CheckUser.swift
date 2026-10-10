@@ -25,6 +25,7 @@ struct CheckUser: View {
                 // the whole video. It owns its NavigationStack; appState is
                 // handed down so it can offer sign-out.
                 ProjectsListView(appState: appState)
+                .id(appState.currentUser?.uid)
                 // 2. Define how this view enters/exits
                 .transition(.opacity)
                 

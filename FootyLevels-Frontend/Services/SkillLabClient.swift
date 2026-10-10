@@ -22,7 +22,17 @@ enum ServerSettings {
         set { UserDefaults.standard.set(newValue, forKey: storageKey) }
     }
 
-    static var baseURL: URL? { normalize(address) }
+    // The semester service has shared, unauthenticated records. Keep it available
+    // for team Debug testing until owned uploads/model routes are integrated.
+    static var legacyServiceEnabled: Bool {
+        #if DEBUG
+        true
+        #else
+        false
+        #endif
+    }
+
+    static var baseURL: URL? { legacyServiceEnabled ? normalize(address) : nil }
 
     /// Accepts what people actually paste: a bare `192.168.1.42:8000`, or the
     /// full `…/api/health` URL the server prints at startup.
@@ -111,6 +121,7 @@ final class SkillLabClient {
         if let bundled = BundledSample.fileURL(forAssetPath: path) {
             return bundled
         }
+        guard ServerSettings.legacyServiceEnabled else { throw SkillLabError.notConfigured }
         if let absolute = URL(string: path), absolute.scheme != nil {
             return absolute
         }
@@ -191,6 +202,7 @@ final class SkillLabClient {
     /// Runs a request, turning connection-level failures into an error that
     /// names the address and says what usually fixes it.
     private func transport<T>(_ url: URL?, _ operation: () async throws -> T) async throws -> T {
+        guard ServerSettings.legacyServiceEnabled else { throw SkillLabError.notConfigured }
         do {
             return try await operation()
         } catch let error as URLError where SkillLabError.isUnreachable(error) {
