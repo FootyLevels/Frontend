@@ -19,9 +19,15 @@ struct FootyLevels_FrontendApp: App {
     
     var body: some Scene {
         WindowGroup {
-            // CheckUser gates on auth state and shows either the sign-in flow
-            // or the 3D reconstruction view.
-            CheckUser()
+            Group {
+                #if DEBUG
+                // Temporary local testing: open the bundled example without login.
+                // CheckUser()
+                ProjectsListView()
+                #else
+                CheckUser()
+                #endif
+            }
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }
