@@ -26,5 +26,9 @@ final class FootyLevels_FrontendUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Welcome Back"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.textFields["you@example.com"].exists)
         XCTAssertTrue(app.secureTextFields["Enter your password"].exists)
+        app.navigationBars.buttons.firstMatch.tap()
+        app.buttons["Sign Up with Email"].tap()
+        XCTAssertTrue(app.staticTexts["Create Your Account"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Sign Up"].isEnabled)
     }
 }

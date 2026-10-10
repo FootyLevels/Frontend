@@ -74,3 +74,13 @@ email is `fp14-ios-<runID>-a@example.invalid` (or `-b`). Never delete other acco
 
 Interactive Google consent and a physical iPhone smoke test remain release checks.
 They were not substituted with automated password entry or claimed as verified.
+
+The final Debug regression passed 11 account/configuration unit checks, two UI
+flows and the existing Swift Testing check. The separately opted-in live SDK probe
+passed; it is skipped during ordinary regression runs. The Release simulator build
+and two configuration checks passed: Firebase initializes against Demo, loopback
+HTTP is refused by the account transport, and legacy remote service/asset access
+is blocked while the bundled sample's video still resolves locally.
+
+Email signup now shows recoverable errors, blocks incomplete/mismatched input and
+prevents repeated requests. Signup/login screens no longer print account details.
