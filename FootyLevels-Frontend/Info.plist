@@ -19,7 +19,11 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocalNetworkUsageDescription</key>
+	<key>NSCameraUsageDescription</key>
+    <string>Record a football practice clip to explore your body movement in 3D.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>The camera records video with audio. Audio is removed before uploading your practice clip.</string>
+    <key>NSLocalNetworkUsageDescription</key>
 	<string>FootyLevels connects to your Skill Lab server on the local network to upload videos and load 3D reconstructions.</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
 	<false/>

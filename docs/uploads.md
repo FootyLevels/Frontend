@@ -1,0 +1,81 @@
+# FP-16: private capture/import and resumable uploads
+
+The account flow uses the DGX application API, Firebase login/Firestore records,
+and Supabase Free private storage. It is separate from the DEBUG-only legacy
+Skill Lab service. The bundled example still opens offline without signing in.
+
+## Player flow
+
+A signed-in player can import from Photos or record up to 60 seconds. Camera or
+microphone denial explains how to use Settings or Photos; cancellation creates
+no project. PhotosPicker needs access only to the selected item. The editor asks
+for a title, optional practice label, start and end. It validates a readable video
+track and a 1–60 second selection before networking. Export keeps rotation,
+removes audio, prepares a 720p MP4 and checks the 50 MB limit. Invalid/corrupt input,
+export failure or an oversized prepared clip never creates a cloud project.
+
+The prepared clip and metadata are saved privately under Application Support,
+excluded from backups and protected until first device unlock. Each draft is
+scoped by Firebase UID, environment and application API origin. Its opaque UUID
+is reused for both project creation and upload-session idempotency. Title/source/
+label/checksum/size are pinned; resumed transfers recheck the file's SHA-256.
+
+Only the authenticated API receives a Firebase token. The storage transport pins
+the selected environment's HTTPS storage host, private bucket and exact owner/
+project/upload object path, rejects redirects and uses only the scoped upload
+signature. TUS sends at most 6 MiB per chunk; HEAD reads the server-confirmed offset,
+and a 409 causes bounded offset resynchronization. Signatures stay in memory;
+the provider's resumable Location is a bearer capability stored only in device
+Keychain. Neither is logged or saved in draft JSON.
+
+Pause/background/network loss preserves the draft. Resume after relaunch uses
+fresh authenticated capability refresh and server offsets. A lost create response
+uses the same project key; a lost finalization response returns the same committed
+project. An account generation change cancels/discards late work even if the UID
+is subsequently reused. Another account/environment/origin cannot see or resume
+these local drafts. The library lists owned cloud projects, supports pagination
+and allows another clip to be imported.
+
+Discard persists its intent, recovers an unknown project creation ID if necessary,
+and requests a server tombstone before deleting the local draft. A failed removal
+remains visible for retry. Server blob/quota release follows its capability
+quarantine and the FP-18/54 maintenance rules; deletion acknowledgement does not
+claim immediate blob removal.
+
+## Local configuration
+
+Keep the API URL separate from editable legacy server settings. DEBUG launch with
+`--require-login`, `FOOTYLEVELS_ENVIRONMENT=dev`, and
+`FOOTYLEVELS_API_URL=http://127.0.0.1:8012` in the simulator. Forward that loopback
+port to DGX's private authenticated Development API on 8011 over SSH. A physical
+phone or Release requires a configured HTTPS account origin; Release targets Demo
+and does not honor DEBUG overrides or enable legacy unauthenticated uploads.
+
+No authenticated public origin is configured yet. The existing public model API
+on 8010 is still the compatibility service; do not point Firebase requests at it.
+FP-39 connects the authenticated and model workflows before changing that routing.
+
+## Verification and remaining gates
+
+`PrivateUploadTests` covers confirmed-offset resume, stale offsets, capability
+origin/path validation, corrupt and oversized input, private draft isolation,
+lost project response/relaunch, same-UID session replacement, video-only export,
+trim and portrait orientation. Existing auth and offline-sample tests remain.
+
+`LivePrivateUploadTests` is disabled by default. Enable only Development with
+`FOOTYLEVELS_LIVE_UPLOAD_TESTS=1` and `FOOTYLEVELS_AUTH_TEST_API` set to the loopback
+forward above in the test target environment. It creates two temporary real
+Firebase accounts, uploads to real private Supabase through the actual DGX API,
+interrupts after a 6 MiB chunk, recreates the coordinator, resumes/finalizes, checks
+a second recording and foreign-account denial, then verifies signed source bytes.
+Accounts are deleted in cleanup. `Documents/fp16-ios-evidence.json` records exact
+fixture IDs/phases only; remove and audit their Firestore/blob/quota fixtures using
+the trusted scoped cleanup procedure afterward. Never commit credentials or
+capabilities. A padded MP4 fixture exercises chunking; it is not a production model
+input and does not establish a new media-preparation or GPU result.
+
+Finalization returns `preparing` honestly. FP-54 must connect server decoding,
+limits/previews and readiness; FP-39/19 connect authenticated reconstruction and
+playback. Physical camera/permission/device testing and interactive Google sign-in
+remain separate verification gates. This client checkpoint does not claim the
+whole application is verified end to end.

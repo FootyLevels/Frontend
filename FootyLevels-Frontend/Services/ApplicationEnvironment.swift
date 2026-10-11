@@ -14,6 +14,9 @@ enum ApplicationEnvironment: String {
     }
 
     var projectID: String { "footylevels-\(rawValue)-20261009" }
+    var storageHost: String {
+        self == .dev ? "bwzxrvkxfubnmuieljoj.storage.supabase.co" : "skzgjwbkadiazfvuhtts.storage.supabase.co"
+    }
     var configurationName: String { "GoogleService-Info-\(self == .dev ? "Dev" : "Demo")" }
 
     /// This is separate from the legacy Skill Lab address. Only a release's

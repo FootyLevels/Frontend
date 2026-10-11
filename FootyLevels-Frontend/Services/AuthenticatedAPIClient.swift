@@ -25,6 +25,8 @@ enum AccountAPIError: LocalizedError, Equatable {
         case .unavailable: return "The account service is unavailable. Please try again."
         case .forbidden: return "This account isn't available for this action."
         case .notFound: return "This item is no longer available."
+        case .server(409): return "The upload or project changed. Refresh, or discard the unfinished draft and import it again."
+        case .server(429): return "Private storage is currently full. Your draft is saved; try again after space is available."
         case .server: return "The request couldn't be completed. Please try again."
         }
     }
@@ -88,7 +90,12 @@ final class AuthenticatedAPIClient {
     }
 
     /// Relative API paths only. A server-provided asset URL cannot receive tokens.
-    func request(_ method: String, path: String, body: Data? = nil) async throws -> Data {
+    func request(_ method: String, path: String, body: Data? = nil, idempotencyKey: String? = nil) async throws -> Data {
+        if let key = idempotencyKey {
+            guard key.range(of: "^[a-zA-Z0-9_-]{16,80}$", options: .regularExpression) != nil else {
+                throw AccountAPIError.unsafeAddress
+            }
+        }
         guard path.hasPrefix("/api/"), !path.contains("\\"),
               let url = URL(string: path, relativeTo: baseURL)?.absoluteURL,
               url.standardized.path.hasPrefix("/api/"),
@@ -103,6 +110,7 @@ final class AuthenticatedAPIClient {
             var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
             request.httpMethod = method
             request.httpBody = body
+            if let key = idempotencyKey { request.setValue(key, forHTTPHeaderField: "Idempotency-Key") }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             if body != nil { request.setValue("application/json", forHTTPHeaderField: "Content-Type") }
