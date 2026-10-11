@@ -79,3 +79,20 @@ limits/previews and readiness; FP-39/19 connect authenticated reconstruction and
 playback. Physical camera/permission/device testing and interactive Google sign-in
 remain separate verification gates. This client checkpoint does not claim the
 whole application is verified end to end.
+
+## Verified cloud checkpoint — 11 October 2026
+
+The opt-in simulator probe passed against real Development Firebase, the DGX
+application API and Supabase private storage. It interrupted after a confirmed
+6 MiB chunk, recreated the coordinator and resumed the same project to revision 2.
+A second upload, foreign-account denial, signed download size/SHA-256 and
+tombstone checks passed. The trusted cleanup verified removal of two temporary
+accounts, two projects, two upload records, two source objects and two profiles;
+global reserved bytes returned to zero. No credentials or capabilities are in
+the committed aggregate evidence (`uploads-evidence.json`).
+
+The default upload/auth/configuration suite and both UI checks passed, including
+opening the included 3D example without login. Progress now distinguishes byte
+transfer from server verification, and foreground/list refreshes avoid racing
+an active upload or camera permission request. These checks do not exercise a
+physical camera, interactive Google login or new authenticated 3D generation.

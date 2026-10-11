@@ -35,8 +35,8 @@ final class CloudUploadsViewModel {
         } catch { errorMessage = error.localizedDescription }
     }
 
-    func refresh(more: Bool = false) async {
-        guard let coordinator else { return }
+    func refresh(more: Bool = false, afterMutation: Bool = false) async {
+        guard !isLoading, afterMutation || !isBusy, let coordinator else { return }
         isLoading = true
         defer { isLoading = false }
         do {
@@ -110,7 +110,7 @@ final class CloudUploadsViewModel {
         guard let coordinator else { return }
         start("Resuming upload…") { [weak self] in
             guard let self else { return }
-            if draft.discarding { try await coordinator.discard(draft); await self.refresh() }
+            if draft.discarding { try await coordinator.discard(draft); await self.refresh(afterMutation: true) }
             else { try await self.runUpload(draft, coordinator: coordinator) }
         }
     }
@@ -119,14 +119,17 @@ final class CloudUploadsViewModel {
         guard let coordinator else { return }
         start("Removing unfinished upload…") { [weak self] in
             try await coordinator.discard(draft)
-            await self?.refresh()
+            await self?.refresh(afterMutation: true)
         }
     }
 
     private func runUpload(_ draft: UploadDraft, coordinator: CloudUploadCoordinator) async throws {
         phase = "Uploading private video…"
         progress = 0
-        let project = try await coordinator.upload(draft) { [weak self] value in self?.progress = value }
+        let project = try await coordinator.upload(draft) { [weak self] value in
+            self?.progress = value
+            if value == 1 { self?.phase = "Verifying private upload…" }
+        }
         projects.removeAll { $0.id == project.id }
         projects.insert(project, at: 0)
         drafts = try coordinator.store.load()

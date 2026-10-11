@@ -12,6 +12,7 @@ struct ProjectsListView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showCamera = false
     @State private var recordedFile: URL?
+    @State private var requestingCamera = false
     @State private var cameraError: String?
     private var hasAccount: Bool { appState?.isLoggedIn == .loggedIn }
     @State private var path = NavigationPath()
@@ -41,8 +42,8 @@ struct ProjectsListView: View {
                     }
 
                     if !hasAccount {
-                    Button {
-                        showServerSettings = true
+                        Button {
+                            showServerSettings = true
                     } label: {
                         ServerStatusCard(health: viewModel.health,
                                          isLoading: viewModel.isLoading && viewModel.health == nil,
@@ -75,21 +76,20 @@ struct ProjectsListView: View {
                     if hasAccount {
                         privateProjects
                     } else {
-                    section("YOUR PROJECTS") {
-                        if serverProjects.isEmpty, !viewModel.isLoading {
-                            welcome
-                        }
-                        ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
-                            NavigationLink(value: project.id) {
-                                ProjectCard(project: project, number: index + 2, isSample: false)
+                        section("YOUR PROJECTS") {
+                            if serverProjects.isEmpty, !viewModel.isLoading {
+                                welcome
                             }
-                            .buttonStyle(.plain)
+                            ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
+                                NavigationLink(value: project.id) {
+                                    ProjectCard(project: project, number: index + 2, isSample: false)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            if !serverProjects.isEmpty {
+                                addAnother
+                            }
                         }
-                        if !serverProjects.isEmpty {
-                            addAnother
-                        }
-                    }
-
                     }
 
                     footer
@@ -131,11 +131,11 @@ struct ProjectsListView: View {
             } message: { Text(cameraError ?? "") }
             .onChange(of: scenePhase) { _, phase in
                 if phase != .active { cloud.pause() }
-                else if hasAccount { Task { await cloud.refresh() } }
+                else if hasAccount, !showCamera, !requestingCamera { Task { await cloud.refresh() } }
             }
             .onDisappear { cloud.pause(); cloud.cancelEditor() }
             .task {
-                if hasAccount { cloud.configure(); await cloud.refresh(); return }
+                if hasAccount { await appState?.connectAccount(); cloud.configure(); await cloud.refresh(); return }
                 // With no address yet (a fresh device install) there's nothing to
                 // fetch — the example still works, and the status card offers setup.
                 if viewModel.isConfigured {
@@ -176,7 +176,7 @@ struct ProjectsListView: View {
                         if !draft.discarding {
                             Button("Discard", role: .destructive) { cloud.discard(draft) }
                         }
-                    }.disabled(cloud.isBusy)
+                    }.disabled(cloud.isBusy || cloud.isLoading)
                 }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
                     .background(SL.page, in: RoundedRectangle(cornerRadius: 12))
             }
@@ -194,11 +194,13 @@ struct ProjectsListView: View {
                     }.padding(16).background(SL.page, in: RoundedRectangle(cornerRadius: 12))
                 }.buttonStyle(.plain)
             }
-            if cloud.hasMore { Button("Load more projects") { Task { await cloud.refresh(more: true) } } }
+            if cloud.hasMore { Button("Load more projects") { Task { await cloud.refresh(more: true) } }.disabled(cloud.isBusy || cloud.isLoading) }
             importPicker { Label(cloud.projects.isEmpty ? "Import a video" : "Import another video", systemImage: "photo.on.rectangle") }
                 .buttonStyle(.slPrimary)
             Button {
+                requestingCamera = true
                 Task {
+                    defer { requestingCamera = false }
                     cameraError = await VideoRecordingPicker.permissionError()
                     if cameraError == nil { showCamera = true }
                 }
@@ -291,7 +293,7 @@ struct ProjectsListView: View {
 
     /// False while an upload is running or the server is unreachable.
     private var canImport: Bool {
-        hasAccount ? (!cloud.isBusy && cloud.pending == nil && cloud.isConfigured) : (viewModel.uploadPhase == nil && viewModel.health != nil)
+        hasAccount ? (!cloud.isBusy && !cloud.isLoading && !requestingCamera && cloud.pending == nil && cloud.isConfigured) : (viewModel.uploadPhase == nil && viewModel.health != nil)
     }
 
     /// The video picker behind every import entry point.

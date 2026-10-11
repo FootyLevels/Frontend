@@ -13,9 +13,13 @@ final class LivePrivateUploadTests: XCTestCase {
         guard ProcessInfo.processInfo.environment["FOOTYLEVELS_LIVE_UPLOAD_TESTS"] == "1" else {
             throw XCTSkip("Real private uploads require explicit opt-in")
         }
-        guard FirebaseApp.app()?.options.projectID == "footylevels-dev-20261009",
-              let text = ProcessInfo.processInfo.environment["FOOTYLEVELS_AUTH_TEST_API"],
-              let apiURL = URL(string: text), apiURL.host == "127.0.0.1" else { throw AccountAPIError.unsafeAddress }
+        let configuredProject = FirebaseApp.app()?.options.projectID
+        XCTAssertEqual(configuredProject, "footylevels-dev-20261009", "The live test must use Development Firebase")
+        guard configuredProject == "footylevels-dev-20261009" else { throw AccountAPIError.unsafeAddress }
+        let text = try XCTUnwrap(ProcessInfo.processInfo.environment["FOOTYLEVELS_AUTH_TEST_API"], "Missing loopback test API environment")
+        let apiURL = try XCTUnwrap(URL(string: text), "Invalid loopback test API URL")
+        XCTAssertEqual(apiURL.host, "127.0.0.1", "The live test must use the SSH loopback forward")
+        guard apiURL.host == "127.0.0.1" else { throw AccountAPIError.unsafeAddress }
         let api = try AuthenticatedAPIClient(baseURL: apiURL, credentials: FirebaseAPICredentials.shared)
         let runID = UUID().uuidString.lowercased()
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("fp16-live-" + runID)

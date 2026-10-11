@@ -1,0 +1,42 @@
+{
+  "ticket": "FP-16",
+  "recordedOn": "2026-10-11",
+  "environment": "Development",
+  "backendApplicationRevision": "d774d54",
+  "frontendImplementationRevision": "346a5cc",
+  "defaultVerification": {
+    "privateUploadRegressionTestsPassed": 10,
+    "hostedXCTestExecuted": 23,
+    "hostedXCTestSkippedOptInCloudTests": 2,
+    "hostedXCTestFailures": 0,
+    "uiTestsPassed": ["included-example-without-login", "signed-out-email-login-route"]
+  },
+  "livePrivateUpload": {
+    "passed": true,
+    "services": ["Firebase Auth", "DGX authenticated Development API", "Supabase private storage"],
+    "checks": [
+      "video-only trimmed export",
+      "same-key project creation retry",
+      "interruption after confirmed 6 MiB chunk",
+      "fresh coordinator resumes the same project",
+      "finalization returns preparing at input revision 2",
+      "second recording has a separate owned project",
+      "foreign-account access denied",
+      "old account generation fenced",
+      "signed source download size and SHA-256 match",
+      "project tombstone"
+    ],
+    "fixtureOnlyPadding": true,
+    "cleanupAbsenceVerified": true,
+    "removedFixtureCounts": {"accounts": 2, "projects": 2, "uploads": 2, "sourceObjects": 2, "profiles": 2},
+    "globalReservedBytesAfterCleanup": 0
+  },
+  "remainingGates": [
+    "physical camera and permission flows",
+    "interactive Google sign-in",
+    "FP-54 server media preparation and readiness",
+    "FP-39/19 authenticated reconstruction and playback",
+    "authenticated public HTTPS origin"
+  ],
+  "wholeApplicationEndToEndVerified": false
+}
