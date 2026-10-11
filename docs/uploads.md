@@ -96,3 +96,7 @@ opening the included 3D example without login. Progress now distinguishes byte
 transfer from server verification, and foreground/list refreshes avoid racing
 an active upload or camera permission request. These checks do not exercise a
 physical camera, interactive Google login or new authenticated 3D generation.
+Both Release configuration tests also passed with a test-only
+`ENABLE_TESTABILITY=YES` build override: Demo Firebase is selected, loopback
+authenticated origins and legacy service access are disabled, and the bundled
+example remains available. The app's Release build settings are unchanged.

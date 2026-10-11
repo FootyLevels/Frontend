@@ -9,6 +9,8 @@
     "hostedXCTestExecuted": 23,
     "hostedXCTestSkippedOptInCloudTests": 2,
     "hostedXCTestFailures": 0,
+    "releaseConfigurationTestsPassed": 2,
+    "releaseTestsUseTestabilityOverrideOnly": true,
     "uiTestsPassed": ["included-example-without-login", "signed-out-email-login-route"]
   },
   "livePrivateUpload": {
