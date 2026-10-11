@@ -74,9 +74,12 @@ the trusted scoped cleanup procedure afterward. Never commit credentials or
 capabilities. A padded MP4 fixture exercises chunking; it is not a production model
 input and does not establish a new media-preparation or GPU result.
 
-Finalization returns `preparing` honestly. FP-54 must connect server decoding,
-limits/previews and readiness; FP-39/19 connect authenticated reconstruction and
-playback. Physical camera/permission/device testing and interactive Google sign-in
+Finalization returns `preparing` honestly. FP-54 server decoding, private
+canonical playback/previews and readiness were verified and deployed on the
+private Development API on 11 October, including automatic durable dispatch.
+FP-39/19/40 still connect the iOS frame-selection/reconstruction/playback
+interface and authenticated public routing. Physical camera/permission/device
+testing and interactive Google sign-in
 remain separate verification gates. This client checkpoint does not claim the
 whole application is verified end to end.
 

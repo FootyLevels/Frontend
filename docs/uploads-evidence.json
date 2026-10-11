@@ -36,7 +36,6 @@
   "remainingGates": [
     "physical camera and permission flows",
     "interactive Google sign-in",
-    "FP-54 server media preparation and readiness",
     "FP-39/19 authenticated reconstruction and playback",
     "authenticated public HTTPS origin"
   ],
