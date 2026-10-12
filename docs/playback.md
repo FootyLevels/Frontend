@@ -46,10 +46,25 @@ or error messages. Camera presets, follow and wireframe controls are retained.
 The displayed floor grid is bounded to 50 m for predictable preview resources;
 this is a visual reference, not ground calibration.
 
-This first owned flow displays body motion. Private selected-keyframe GLB UI remains
-additional integration work; an unsupported result does not silently load through
-the shared legacy client. No scoring, AQA or execution-correctness classifier is added.
+The owned flow displays body motion and selected static poses. Choose "Selected
+pose", select an exact prepared-video frame, draw the full player box or choose
+the full frame, then generate. The current UI submits one pose per request; the
+client supports 1–24 distinct selections and displays all successful/missing
+selections in a returned result. Result buttons pause/seek the verified source
+video to their exact frame time. The private source reuses PoseInspectorModel,
+camera presets, wireframe and rotation. A missing pose clears the previous mesh.
+Invalid files show a recoverable message rather than loading through the shared
+legacy client. No scoring, AQA or execution-correctness classifier is added.
 Ball tracking and measured scale/ground calibration are not claimed by this profile.
+
+Selected-pose manifests pin job, winning attempt, input revision/hash, prepared
+source hash, engine/contract, boxes, ordered frame times and missing indices. Each
+GLB must match its private size/hash, manifest geometry counts and the declared
+MHR topology digest. Decoding is bounded to 4 MiB, 25,000 vertices and 50,000 faces;
+unsafe buffer layouts, sparse/normalized geometry, external buffers and unsupported
+transforms fail before creating a RealityKit mesh. Standard normalized vertex
+colors are accepted and ignored by the existing viewer. At most two decoded
+private meshes are cached; teardown/account changes close assets and clear scenes.
 
 ## Verified checkpoint
 
@@ -83,14 +98,37 @@ a complete interactive app or physical-device acceptance test. Actual output had
 tests. Workers poll conservatively to protect free-tier Firestore usage, so queue
 pickup can take several minutes. The API still runs on DGX loopback 8011, while
 public ngrok port 8010 remains legacy compatibility. Named physical-iPhone
-playback, interactive Google sign-in, authenticated public routing and private
-selected-keyframe UI remain open. FP-40 stays In Progress.
+playback, interactive Google sign-in and authenticated public routing remain
+open. FP-40 stays In Progress.
+
+On 12 October, the separately opted-in selected-pose probe passed with another
+real temporary Development Firebase SDK account and actual DGX GPU output. Its
+two-second upload prepared 60 frames; frames 0 and 15 both succeeded on attempt 1,
+producing two GLBs and keyframes.json. Both 18,439-vertex / 36,874-face bodies
+passed private provenance/hash/topology checks and opened in the actual pose
+inspector. AVPlayer seeks and exact AVFoundation frame extraction matched source
+times 0.00 and 0.50 seconds. Logout rejected the stale private source; teardown
+cleared the scene and local video. Exact cleanup removed the account, eleven
+cloud files (one source, seven prepared, three result), metadata, reserved quota
+and two private model-cache entries, with absence and quiescence verified.
+See [selected-pose verification evidence](private-keyframe-playback-evidence.json).
+
+All 17 private playback component tests passed after the saved-model compatibility
+fix. The initial broader Debug run passed 41 checks and skipped three opt-in tests,
+but failed one new saved-body test because normalized colors were rejected. After
+the correction, the targeted 17-check suite, including that saved-body check,
+passed. The broader run's bundled 3D UI, signed-out UI, account/upload regressions
+and launch checks passed. The selected-pose live probe passed separately; no full
+interactive application or physical-device verification is claimed. Synthetic
+partial/missing-frame checks remain separate from the two successful live poses.
 
 `LivePrivatePlaybackTests` is skipped by default. After starting the private SSH
 forward from Mac port 8012 to DGX port 8011, set `FOOTYLEVELS_LIVE_PLAYBACK_TESTS=1`
 and `FOOTYLEVELS_AUTH_TEST_API=http://127.0.0.1:8012` in a copy of the Development
 `.xctestrun` inside `Build/Products`. Run only this class, with serial testing and
-a 1,500-second test allowance. No secrets belong in the run configuration. Once
+a 1,500-second test allowance. No secrets belong in the run configuration.
+For the selected-pose probe, also set `FOOTYLEVELS_LIVE_PLAYBACK_KIND=keyframes`;
+the default probe still generates a 30-frame motion segment. Once
 the SDK test finishes, its Documents/fp40-ios-evidence.json holds non-secret exact
 cleanup IDs. Run Backend's `scripts/cleanup_ios_playback_fixtures.py` with that file
 using the configured Mac ADC; it checks the temporary account's exact invocation
