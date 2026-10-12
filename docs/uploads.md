@@ -42,18 +42,19 @@ remains visible for retry. Server blob/quota release follows its capability
 quarantine and the FP-18/54 maintenance rules; deletion acknowledgement does not
 claim immediate blob removal.
 
-## Local configuration
+## Development connection
 
-Keep the API URL separate from editable legacy server settings. DEBUG launch with
-`--require-login`, `FOOTYLEVELS_ENVIRONMENT=dev`, and
-`FOOTYLEVELS_API_URL=http://127.0.0.1:8012` in the simulator. Forward that loopback
-port to DGX's private authenticated Development API on 8011 over SSH. A physical
-phone or Release requires a configured HTTPS account origin; Release targets Demo
-and does not honor DEBUG overrides or enable legacy unauthenticated uploads.
+Debug Development builds use the approved public HTTPS account API by default.
+Launch with `--require-login` for the ordinary account route; the included example
+still works offline without login in Debug. Firebase bearer tokens go only to the
+configured application API, while Supabase signed capabilities use separate
+private transports. See [identity configuration](authentication.md).
 
-No authenticated public origin is configured yet. The existing public model API
-on 8010 is still the compatibility service; do not point Firebase requests at it.
-FP-39 connects the authenticated and model workflows before changing that routing.
+For a simulator-only private connection, forward Mac loopback 8012 to DGX loopback
+**8010** and set `FOOTYLEVELS_API_URL=http://127.0.0.1:8012`. Historical proofs used
+8011 before the 12 October cutover. A phone uses the default HTTPS address without
+this SSH forward. Demo/Release still needs its own separately configured HTTPS
+runtime and does not honor Debug overrides or enable legacy uploads.
 
 ## Verification and remaining gates
 

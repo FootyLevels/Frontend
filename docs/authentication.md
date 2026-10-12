@@ -14,15 +14,15 @@ always uses that route. The bypass provides no identity to the account API.
 ## Account API configuration
 
 The authenticated transport is separate from the older Skill Lab connection.
-Set `FootyLevelsAPIBaseURL` in the app's Info configuration when the new modular
-API is deployed. No default is shipped yet: do not point it at the current
-unauthenticated model service just because that service is reachable.
+Development Debug builds configure `FootyLevelsAPIBaseURL` to
+`https://ranting-pesticide-thespian.ngrok-free.dev`. Since 12 October this endpoint
+serves the authenticated application API on DGX loopback 8010. It accepts Firebase
+Development identities; the private GPU runtime on 8013 is not an app API.
 
-For a Debug simulator using the API on this Mac, set the launch environment:
-
-```
-FOOTYLEVELS_API_URL=http://127.0.0.1:8011
-```
+Debug Demo selection suppresses the Development default. Release selects Demo and
+has no API default until a separate Demo HTTPS runtime is configured. For local
+simulator tests, an explicit `FOOTYLEVELS_API_URL` still overrides the Debug origin.
+Never put credentials in these settings or in the editable legacy server address.
 
 Use HTTPS for a device or Release. Only the configured application origin gets
 Firebase bearer tokens. Redirects are refused, asset URLs use a separate
@@ -33,10 +33,10 @@ the same UID. Network/503 errors preserve login and offer retry.
 
 Profile bootstrap runs after login when this API address is configured. Logout
 clears account state and cached responses; switching accounts recreates the
-project navigation and playback views. The legacy Skill Lab remains a shared
-team testing service in Debug: its uploaded-project listing and model operations have
-**not** moved to Firebase ownership yet. FP-17/16/39 attach private asset handling,
-owned uploads and model processing before the new application is deployed.
+project navigation and playback views. The included example still opens without login in Debug as requested. Uploaded
+private projects, media preparation and 3D generation now use Firebase ownership
+and the authenticated API. The legacy server settings only support private team
+compatibility testing; the public endpoint no longer serves its shared listing.
 Release blocks legacy network reads, mutations and remote asset resolution while
 keeping bundled file resolution. This prevents a signed-in Release app from
 silently exposing the old shared project list.

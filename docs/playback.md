@@ -1,4 +1,4 @@
-# FP-40: private motion playback
+# FP-40: private motion and selected-pose playback
 
 The owned-project screen reuses the existing RealityKit motion player, camera,
 mesh codec and AVPlayer clock. The bundled example still opens locally without
@@ -135,3 +135,28 @@ using the configured Mac ADC; it checks the temporary account's exact invocation
 email, project title/owner/environment, waits for writers, deletes only that
 fixture's assets/records/cache and releases only its reserved quota. Preserve
 evidence and retry cleanup if writers remain active; never broadly clear storage.
+
+## Public Development proof — 12 October 2026
+
+The Debug Development app now bundles the approved HTTPS application origin.
+The same real selected-pose probe passed through that public address **without an
+SSH forward**: fresh Firebase SDK identity/bootstrap, private upload/preparation,
+actual DGX generation, private manifest/two GLBs and existing RealityKit pose
+inspector. Both requested poses succeeded on attempt 1, with 18,439 vertices and
+36,874 faces each; exact video seeks/images matched 0.00 and 0.50 seconds.
+
+One live public XCTest and all 26 authentication/playback component checks passed.
+Exact cleanup verified the temporary account absent and removed eleven files
+(one source, seven prepared, three result), owned metadata/quota and two model
+cache entries. Global reserved bytes returned to zero, staging/cache were empty,
+and the owned body model remained warm. See
+[public proof evidence](public-private-playback-evidence.json).
+
+DGX loopback 8010 now serves the authenticated API; model HTTP is private on 8013,
+with the same private inference socket. Earlier 8011 evidence describes historical
+private runs. Demo/Release still needs a separate HTTPS application runtime.
+The public proof exercises actual SDK/service/player integration on a simulator;
+it does not verify the complete interactive UI, a physical iPhone, Google consent,
+or whole-motion generation through the public route. Earlier real motion evidence
+remains a separately verified private simulator run. Launch `--require-login` for
+the Debug account screens; the local example bypass is preserved.

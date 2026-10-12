@@ -1,0 +1,94 @@
+{
+  "ticket": "FP-40",
+  "verifiedDate": "2026-10-12",
+  "environment": "dev",
+  "branch": "codex/fp-40-public-api",
+  "frontendImplementationCheckpoint": "8d10899",
+  "backendConfigurationCheckpoint": "e5ec392",
+  "device": "iPhone 17 Pro simulator, iOS 26.4",
+  "identity": "Real temporary Development Firebase SDK email account",
+  "transport": "Public HTTPS, no Mac SSH forward",
+  "publicOrigin": "https://ranting-pesticide-thespian.ngrok-free.dev",
+  "deployment": {
+    "cloudRelease": "e43109d",
+    "modelRelease": "4017f11",
+    "authenticatedAPIUpstreamPort": 8010,
+    "privateModelHTTPPort": 8013,
+    "privateInferenceBridge": "unchanged",
+    "ngrokConfiguration": "unchanged",
+    "bodyModelWarmAfterCleanup": true
+  },
+  "result": {
+    "mode": "keyframes",
+    "status": "succeeded",
+    "attempt": 1,
+    "preparedFrames": 60,
+    "selectedFrames": [
+      0,
+      15
+    ],
+    "sourceTimes": [
+      0,
+      0.5
+    ],
+    "validPoses": 2,
+    "verticesPerPose": 18439,
+    "facesPerPose": 36874,
+    "privateArtifacts": 3
+  },
+  "verified": [
+    "Real Firebase SDK login/bootstrap through public API",
+    "Owned upload/private Supabase finalization",
+    "Actual DGX media preparation and GPU generation",
+    "Private manifest and GLB size/hash/provenance/topology/geometry checks",
+    "Both bodies load in existing RealityKit pose inspector",
+    "Exact AVPlayer seek and AVFoundation frame timestamps",
+    "Logout rejects stale private source; scene/video teardown",
+    "Exact fixture/account absence and quota cleanup"
+  ],
+  "publicSmoke": {
+    "health": 200,
+    "unauthenticatedProjects": 401,
+    "invalidBearerProfile": 401,
+    "legacyMediaRoute": 404
+  },
+  "checks": {
+    "livePublicXCTest": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "authenticatedAndPlaybackComponents": {
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0
+    },
+    "backendAPI": {
+      "passed": 61,
+      "failed": 0
+    }
+  },
+  "cleanup": {
+    "accountAbsentVerified": true,
+    "sourceObjects": 1,
+    "preparedObjects": 7,
+    "absenceVerified": true,
+    "resultObjects": 3,
+    "privateModelCacheEntries": 2,
+    "globalReservedBytes": 0,
+    "totalObjects": 11,
+    "writersQuiescent": true,
+    "workerStagingDirectoriesAfterCleanup": 0,
+    "privateModelCacheEntriesAfterCleanup": 0
+  },
+  "limitations": {
+    "physicalIPhoneVerified": false,
+    "interactiveGoogleSignInVerified": false,
+    "fullInteractiveApplicationEndToEndVerified": false,
+    "motionThroughPublicRouteVerified": false,
+    "realMissingPoseVerified": false,
+    "demoApplicationRuntimeDeployed": false,
+    "automaticRestartAfterServerRebootVerified": false
+  },
+  "commitsPushed": false
+}
