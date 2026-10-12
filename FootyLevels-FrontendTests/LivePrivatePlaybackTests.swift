@@ -27,6 +27,7 @@ final class LivePrivatePlaybackTests: XCTestCase {
         var phases: [String] = [], details: [String: Any] = [:]
         var accountsDeleted = false
         var motion: MotionPlayerViewModel?, playback: PlaybackController?
+        var pose: PoseInspectorModel?, poseSource: PrivateKeyframeAssetSource?
         var preparedAssets: PrivatePlaybackAssets?, source: PrivateMotionAssetSource?
         var coordinator: CloudUploadCoordinator?
         func save(_ phase: String) throws {
@@ -41,6 +42,7 @@ final class LivePrivatePlaybackTests: XCTestCase {
         }
         func teardownLocal() {
             motion?.teardown(); playback?.teardown(); source?.close(); preparedAssets?.close()
+            pose?.clear(); poseSource?.close()
             if let store = coordinator?.store, let drafts = try? store.load() {
                 for draft in drafts { try? store.remove(draft) }
             }
@@ -94,6 +96,53 @@ final class LivePrivatePlaybackTests: XCTestCase {
             let preparedURL = try await prepared.localFile(file: "video")
             XCTAssertTrue(FileManager.default.fileExists(atPath: preparedURL.path))
             details["preparedFrames"] = media.frameCount; try save("prepared-private-video-verified")
+            if ProcessInfo.processInfo.environment["FOOTYLEVELS_LIVE_PLAYBACK_KIND"] == "keyframes" {
+                var job = try await client.generateKeyframes(project: project,selections: [
+                    CloudKeyframeSelection(frameIndex: 0,bbox: [0,0,1,1]),
+                    CloudKeyframeSelection(frameIndex: 15,bbox: [0,0,1,1])])
+                jobID = job.id; details["mode"] = "keyframes"; try save("durable-keyframe-job-created")
+                let deadline = Date().addingTimeInterval(600)
+                while job.isActive, Date() < deadline {
+                    try await Task.sleep(for: .seconds(4)); job = try await client.job(job.id,project: project)
+                }
+                details["jobStatus"] = job.status
+                guard job.status == "succeeded", let rid = job.reconstructionId else { throw CloudPlaybackError.invalidResult }
+                try save("real-dgx-keyframes-generated")
+                project = try await client.project(project.id)
+                let (result,winningJob,assets) = try await client.keyframeResult(rid,project: project)
+                let source = PrivateKeyframeAssetSource(result: result,job: winningJob,assets: assets); poseSource = source
+                let manifest = try await source.manifest()
+                XCTAssertEqual(manifest.frames.map(\.frameIndex),[0,15]); XCTAssertEqual(manifest.frames.map(\.timestamp),[0,0.5])
+                let model = PoseInspectorModel(); pose = model
+                let controller = PlaybackController(url: preparedURL,duration: media.duration); playback = controller
+                for frame in manifest.frames {
+                    let decoded = try await source.mesh(frameIndex: frame.frameIndex)
+                    let mesh = try XCTUnwrap(decoded)
+                    XCTAssertEqual(mesh.positions.count,18_439); XCTAssertEqual(mesh.indices.count,36_874*3)
+                    await model.showPrivate(frameIndex: frame.frameIndex,source: source)
+                    XCTAssertNotNil(model.stageRoot?.findEntity(named: "body")); XCTAssertNil(model.errorMessage)
+                    _ = await controller.player.seek(to: CMTime(value: Int64(frame.frameIndex),timescale: 30),
+                        toleranceBefore: .zero,toleranceAfter: .zero)
+                    XCTAssertEqual(controller.player.currentTime().seconds,frame.timestamp,accuracy: 1.0/60)
+                    let generator = AVAssetImageGenerator(asset: controller.player.currentItem!.asset)
+                    generator.requestedTimeToleranceBefore = .zero; generator.requestedTimeToleranceAfter = .zero
+                    let image = try await generator.image(at: CMTime(value: Int64(frame.frameIndex),timescale: 30))
+                    XCTAssertEqual(image.actualTime.seconds,frame.timestamp,accuracy: 1.0/60)
+                    generator.cancelAllCGImageGeneration()
+                }
+                model.show(.left); model.wireframe = true; model.autoRotate = true
+                details["frames"] = manifest.frames.count; details["validFrames"] = manifest.frames.count
+                details["vertices"] = 18_439; details["faces"] = 36_874; details["artifactCount"] = result.artifacts.count
+                details["winningAttempt"] = winningJob.attemptCount; details["sourceTimes"] = manifest.frames.map(\.timestamp)
+                try save("verified-private-glbs-pose-inspector-and-exact-source-images-ready")
+                try AuthManager.shared.signOut()
+                do { try source.checkSession(); XCTFail("Signed-out pose source remained usable") }
+                catch { XCTAssertEqual(error as? AccountAPIError,.sessionChanged) }
+                teardownLocal(); XCTAssertNil(model.stageRoot)
+                XCTAssertFalse(FileManager.default.fileExists(atPath: preparedURL.path))
+                try await retireAccount(); try save("passed-account-deleted-awaiting-exact-cloud-cleanup")
+                return
+            }
             var job = try await client.generateMotion(project: project, startFrame: 15, endFrame: 45)
             jobID = job.id; try save("durable-motion-job-created")
             let generationDeadline = Date().addingTimeInterval(900)

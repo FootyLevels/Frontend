@@ -6,6 +6,7 @@ struct CloudProjectStatusView: View {
     @State private var model: CloudProjectViewModel
     @State private var startFrame = 0.0
     @State private var length = 30.0
+    @State private var selectedMode = "motion"
     @Environment(\.scenePhase) private var scenePhase
 
     init(project: CloudProject) { _model = State(initialValue: CloudProjectViewModel(project: project)) }
@@ -27,7 +28,18 @@ struct CloudProjectStatusView: View {
                         VideoPlayer(player: prepared.player).frame(height: 220).clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                 }
-                if let media = model.project.preparedMedia, model.project.state == "ready" { segmentPicker(media) }
+                if let media = model.project.preparedMedia, model.project.state == "ready" {
+                    Picker("Generation type",selection: $selectedMode) {
+                        Text("Motion clip").tag("motion"); Text("Selected pose").tag("pose")
+                    }.pickerStyle(.segmented).disabled(model.isMutating || model.job?.isActive == true)
+                    if selectedMode == "motion" { segmentPicker(media) }
+                    else if let prepared = model.preparedPlayback {
+                        PrivateKeyframePicker(media: media, playback: prepared, canGenerate: model.canGenerate,
+                            checkSession: model.checkPlaybackSession, onGenerate: model.generatePose)
+                            .id(ObjectIdentifier(prepared))
+                            .disabled(model.isMutating || model.job?.isActive == true)
+                    }
+                }
                 if let job = model.job {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(job.statusText).font(.headline)
@@ -41,6 +53,7 @@ struct CloudProjectStatusView: View {
                     }
                 }
                 if let motion = model.motion, let playback = model.playback { motionPlayer(motion, playback) }
+                if let pose = model.pose { posePlayer(pose) }
                 HStack {
                     Button("Refresh status") { Task { await model.refresh() } }.disabled(model.isLoading || model.isMutating)
                     Spacer()
@@ -55,6 +68,39 @@ struct CloudProjectStatusView: View {
         .onChange(of: scenePhase) { _, phase in
             model.isForeground = phase == .active
             if phase != .active { model.playback?.pause(); model.preparedPlayback?.pause() }
+        }
+    }
+
+    private func posePlayer(_ pose: PoseInspectorModel) -> some View {
+        VStack(alignment: .leading,spacing: 12) {
+            Text("YOUR SELECTED 3D POSE").font(.caption).foregroundStyle(SL.muted)
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(model.keyframeIndices,id: \.self) { index in
+                        Button("\((Double(index)/30).formatted(.number.precision(.fractionLength(2)))) s") { model.selectPose(index) }
+                            .buttonStyle(.slSecondary)
+                            .accessibilityAddTraits(model.selectedKeyframe == index ? .isSelected : [])
+                    }
+                }
+            }
+            ZStack {
+                ModelStageView(root: pose.stageRoot,camera: pose.camera).id(ObjectIdentifier(pose))
+                    .accessibilityIdentifier("private-pose-stage")
+                    .accessibilityValue(pose.isLoading ? "Loading" : pose.missingPose ? "Missing pose" : pose.stageRoot == nil ? "Unavailable" : "Ready")
+                if pose.isLoading { ProgressView("Loading selected pose…") }
+                if pose.missingPose { Text("Player not reconstructed at this moment").font(.callout) }
+                if let error = pose.errorMessage { Text(error).foregroundStyle(SL.errorText).font(.callout).padding() }
+            }.frame(height: 340).clipped().background(SL.stage)
+            if let index = model.selectedKeyframe {
+                Text("Source time: \((Double(index)/30).formatted(.number.precision(.fractionLength(2)))) s")
+                    .font(.caption.monospacedDigit()).foregroundStyle(SL.muted)
+            }
+            ScrollView(.horizontal) { HStack { ForEach(CameraAngle.allCases) { angle in Button(angle.rawValue) { pose.show(angle) } } } }
+            HStack {
+                Toggle("Wireframe",isOn: Binding(get: { pose.wireframe },set: { pose.wireframe = $0 }))
+                Toggle("Rotate",isOn: Binding(get: { pose.autoRotate },set: { pose.autoRotate = $0 }))
+            }.font(.callout)
+            Text("Selecting a pose pauses the source video at that moment. Drag the model to orbit.").font(.footnote).foregroundStyle(SL.muted)
         }
     }
 

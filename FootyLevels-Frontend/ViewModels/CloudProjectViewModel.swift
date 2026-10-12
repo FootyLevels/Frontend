@@ -9,6 +9,9 @@ final class CloudProjectViewModel {
     var playback: PlaybackController?
     var preparedPlayback: PlaybackController?
     var motion: MotionPlayerViewModel?
+    var pose: PoseInspectorModel?
+    var keyframeIndices: [Int] = []
+    var selectedKeyframe: Int?
     var errorMessage: String?
     var playbackError: String?
     var loadingMessage: String?
@@ -17,6 +20,8 @@ final class CloudProjectViewModel {
     private var refreshing = false
     private var loadedResult: String?
     private var source: PrivateMotionAssetSource?
+    private var poseSource: PrivateKeyframeAssetSource?
+    private var poseSelection: Task<Void, Never>?
     private var preparedAssets: PrivatePlaybackAssets?
     private var preparedRevision: Int?
     private var attemptedResult: String?
@@ -27,6 +32,10 @@ final class CloudProjectViewModel {
 
     init(project: CloudProject) { self.project = project }
     var canGenerate: Bool { !stopped && client != nil && project.state == "ready" && project.preparedMedia != nil && job?.isActive != true && !isMutating }
+    func checkPlaybackSession() throws {
+        guard !stopped, let client else { throw AccountAPIError.sessionChanged }
+        try client.checkSession()
+    }
 
     func watch() async {
         stopped = false
@@ -94,6 +103,24 @@ final class CloudProjectViewModel {
     private func loadResult(_ id: String, client: CloudReconstructionClient) async throws {
         loadingMessage = "Verifying private 3D files…"
         defer { loadingMessage = nil }
+        let resultJob = try await client.job(id, project: project)
+        if resultJob.kind == "reconstructKeyframes" {
+            let (result, job, assets) = try await client.keyframeResult(id, project: project)
+            let source = PrivateKeyframeAssetSource(result: result, job: job, assets: assets)
+            do {
+                _ = try await source.manifest()
+                try client.checkSession(); guard !stopped else { throw CancellationError() }
+                clearPlayback(); poseSource = source
+                let pose = PoseInspectorModel(); self.pose = pose
+                keyframeIndices = job.keyframes!.map(\.frameIndex)
+                let first = keyframeIndices[0]; selectedKeyframe = first
+                preparedPlayback?.pause(); preparedPlayback?.seek(to: Double(first)/30)
+                await pose.showPrivate(frameIndex: first, source: source)
+                try client.checkSession(); guard !stopped else { throw CancellationError() }
+                loadedResult = id; playbackError = nil
+            } catch { source.close(); throw error }
+            return
+        }
         let (result, job, assets) = try await client.motionResult(id, project: project)
         let source = PrivateMotionAssetSource(result: result, job: job, assets: assets)
         do {
@@ -112,6 +139,22 @@ final class CloudProjectViewModel {
             loadedResult = id
             playbackError = nil
         } catch { source.close(); throw error }
+    }
+
+    func generatePose(frameIndex: Int, box: [Double]) {
+        guard canGenerate, let client else { return }
+        perform {
+            let current = try await client.project(self.project.id); self.project = current
+            self.job = try await client.generateKeyframes(project: current,
+                selections: [CloudKeyframeSelection(frameIndex: frameIndex, bbox: box)])
+        }
+    }
+
+    func selectPose(_ frameIndex: Int) {
+        guard !stopped, let pose, let source = poseSource, keyframeIndices.contains(frameIndex) else { return }
+        poseSelection?.cancel(); selectedKeyframe = frameIndex
+        preparedPlayback?.pause(); preparedPlayback?.seek(to: Double(frameIndex)/30)
+        poseSelection = Task { await pose.showPrivate(frameIndex: frameIndex, source: source) }
     }
 
     func generate(startFrame: Int, endFrame: Int) {
@@ -145,6 +188,8 @@ final class CloudProjectViewModel {
     }
 
     private func clearPlayback() {
+        poseSelection?.cancel(); poseSelection = nil; pose?.clear(); poseSource?.close()
+        pose = nil; poseSource = nil; keyframeIndices = []; selectedKeyframe = nil
         playback?.teardown(); motion?.teardown(); source?.close()
         playback = nil; motion = nil; source = nil; loadedResult = nil
     }

@@ -42,6 +42,7 @@ struct CloudJob: Decodable {
     let profileVersion: String
     let sourceAsset: CloudAssetReference
     let motionSegment: Segment?
+    let keyframes: [CloudKeyframeSelection]?
     let reconstructionId: String?
     let errorCode: String?
     struct Segment: Decodable { let startFrame: Int; let endFrame: Int }
@@ -58,7 +59,16 @@ struct CloudJob: Decodable {
             default: return "Unavailable preparation status"
             }
         }
-        if kind == "reconstructKeyframes" { return isActive ? "Generating selected 3D poses" : "Selected-pose job: \(status)" }
+        if kind == "reconstructKeyframes" {
+            switch status {
+            case "queued", "retrying": return "Waiting for the 3D worker"
+            case "running": return "Generating selected 3D poses"
+            case "succeeded": return "Selected 3D poses ready"
+            case "partial": return "Selected poses ready · some could not be reconstructed"
+            case "cancelled": return "Generation cancelled"
+            default: return "Selected-pose generation couldn't finish"
+            }
+        }
         switch status {
         case "queued": return "Waiting for the 3D worker"
         case "retrying": return "Waiting to retry generation"
@@ -105,30 +115,60 @@ struct CloudReconstruction: Decodable {
     }
 
     func validateMotion(owner: String, project: CloudProject) throws {
+        try validate(owner: owner, project: project, keyframes: false)
+    }
+
+    func validateKeyframes(owner: String, project: CloudProject) throws {
+        try validate(owner: owner, project: project, keyframes: true)
+    }
+
+    private func validate(owner: String, project: CloudProject, keyframes: Bool) throws {
         try sourceAsset.validate(prefix: "users/\(owner)/projects/\(project.id)/media/")
-        guard schemaVersion == 1, contract.schemaVersion == 1, profileVersion == "body-motion-30fps-v1",
-              mode == "motion", contract.encoding == "motionBuffers", contract.coordinateSystem == "rightHandedYUp",
+        guard schemaVersion == 1, contract.schemaVersion == 1,
+              profileVersion == (keyframes ? "body-keyframes-v1" : "body-motion-30fps-v1"),
+              mode == (keyframes ? "keyframes" : "motion"), contract.encoding == (keyframes ? "glb" : "motionBuffers"),
+              contract.coordinateSystem == "rightHandedYUp",
               contract.units == "meters" else { throw CloudPlaybackError.unsupportedVersion }
         guard ownerId == owner, projectId == project.id, jobId == id, inputRevision == project.inputRevision,
               sourceAsset == project.preparedMedia?.video,
               sourceAsset.contentType == "video/mp4", project.preparedMedia?.profileVersion == "media-720p30-v1",
               project.preparedMedia?.fps == 30,
-              ["ready", "partial"].contains(outcome), (30...300).contains(requestedFrameCount),
+              ["ready", "partial"].contains(outcome), (keyframes ? 1...24 : 30...300).contains(requestedFrameCount),
               reconstructedFrameCount > 0, missingFrameCount >= 0,
               reconstructedFrameCount + missingFrameCount == requestedFrameCount,
-              (outcome == "ready") == (missingFrameCount == 0), (3...32).contains(artifacts.count)
+              (outcome == "ready") == (missingFrameCount == 0), (keyframes ? 2...25 : 3...32).contains(artifacts.count)
         else { throw CloudPlaybackError.invalidResult }
         let prefix = "users/\(owner)/projects/\(projectId)/reconstruction/\(jobId)/"
         var names = Set<String>(), attempt: String?
         for asset in artifacts {
             try asset.validate(prefix: prefix)
             let parts = asset.objectKey.dropFirst(prefix.count).split(separator: "/")
-            guard parts.count == 2, let number = Int(parts[0]), number > 0,
+            guard parts.count == 2, let number = Int(parts[0]), (1...5).contains(number),
                   attempt == nil || attempt == String(parts[0]), names.insert(String(parts[1])).inserted
             else { throw CloudPlaybackError.invalidAsset }
             attempt = String(parts[0])
         }
-        guard names.contains("sequence.json"), names.contains("video.mp4") else { throw CloudPlaybackError.invalidResult }
+        if keyframes {
+            guard names.contains("keyframes.json"), artifacts.count == reconstructedFrameCount + 1,
+                  artifacts.allSatisfy({ $0.objectKey.hasSuffix("/keyframes.json") ? $0.contentType == "application/json" :
+                    $0.contentType == "model/gltf-binary" && $0.byteSize <= 4_194_304 &&
+                    $0.objectKey.split(separator: "/").last!.range(of: "^frame-[0-9]{4}\\.glb$", options: .regularExpression) != nil })
+            else { throw CloudPlaybackError.invalidResult }
+        } else {
+            guard names.contains("sequence.json"), names.contains("video.mp4") else { throw CloudPlaybackError.invalidResult }
+        }
+    }
+}
+
+struct CloudKeyframeSelection: Codable, Equatable {
+    let frameIndex: Int
+    let bbox: [Double]
+    func validate(frameCount: Int) throws {
+        guard frameIndex >= 0, frameIndex < frameCount, Self.validBox(bbox) else { throw CloudPlaybackError.invalidResult }
+    }
+    static func validBox(_ box: [Double]) -> Bool {
+        box.count == 4 && box.allSatisfy { $0.isFinite && (0...1).contains($0) }
+            && box[2]-box[0] >= 0.03 && box[3]-box[1] >= 0.03
     }
 }
 

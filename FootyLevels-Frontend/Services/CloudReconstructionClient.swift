@@ -49,6 +49,34 @@ final class CloudReconstructionClient {
             "segment": ["startFrame": startFrame, "endFrame": endFrame]])
         return try await jobResponse("POST", path: "/api/projects/\(project.id)/reconstructions/motion", body: body, project: project)
     }
+    func generateKeyframes(project: CloudProject, selections: [CloudKeyframeSelection]) async throws -> CloudJob {
+        try checkSession(); try validID(project.id)
+        guard project.ownerId == account.uid, project.state == "ready", let media = project.preparedMedia,
+              media.profileVersion == "media-720p30-v1", media.fps == 30, (1...24).contains(selections.count),
+              Set(selections.map(\.frameIndex)).count == selections.count else { throw CloudPlaybackError.invalidResult }
+        for selection in selections { try selection.validate(frameCount: media.frameCount) }
+        struct Body: Encodable { let inputRevision: Int; let keyframes: [CloudKeyframeSelection] }
+        let body = try JSONEncoder().encode(Body(inputRevision: project.inputRevision, keyframes: selections))
+        return try await jobResponse("POST", path: "/api/projects/\(project.id)/reconstructions/keyframes", body: body, project: project)
+    }
+
+    func keyframeResult(_ id: String, project: CloudProject) async throws -> (CloudReconstruction, CloudJob, PrivatePlaybackAssets) {
+        try checkSession(); try validID(id)
+        let result = try JSONDecoder().decode(CloudReconstruction.self,
+            from: await api.request("GET", path: "/api/reconstructions/\(id)"))
+        try checkSession(); guard result.id == id else { throw CloudPlaybackError.invalidResult }
+        try result.validateKeyframes(owner: account.uid, project: project)
+        let job = try await self.job(result.jobId, project: project)
+        guard job.reconstructionId == result.id, ["succeeded", "partial"].contains(job.status),
+              job.kind == "reconstructKeyframes", job.sourceAsset == result.sourceAsset,
+              job.profileVersion == result.profileVersion, let selections = job.keyframes,
+              selections.count == result.requestedFrameCount, job.attemptCount > 0 else { throw CloudPlaybackError.invalidResult }
+        for selection in selections { try selection.validate(frameCount: project.preparedMedia!.frameCount) }
+        guard Set(selections.map(\.frameIndex)).count == selections.count else { throw CloudPlaybackError.invalidResult }
+        let mapping = Dictionary(uniqueKeysWithValues: result.artifacts.map { ($0.objectKey.split(separator: "/").last!.description, $0) })
+        return (result, job, try PrivatePlaybackAssets(api: api, credentials: credentials, environment: environment,
+            grantPath: "/api/reconstructions/\(id)/assets", artifacts: mapping))
+    }
     private func jobResponse(_ method: String, path: String, body: Data? = nil,
                              project: CloudProject, expectedID: String? = nil) async throws -> CloudJob {
         try checkSession()

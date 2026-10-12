@@ -107,7 +107,7 @@ private final class PlaybackFixture {
         let data = files[name]!
         return ["bucket": "private-media", "objectKey": "users/alice/projects/project/reconstruction/job/2/\(name)",
             "sha256": Self.sha(data), "byteSize": data.count,
-            "contentType": name == "sequence.json" ? "application/json" : name == "video.mp4" ? "video/mp4" : "application/octet-stream"]
+            "contentType": name.hasSuffix(".json") ? "application/json" : name.hasSuffix(".glb") ? "model/gltf-binary" : name == "video.mp4" ? "video/mp4" : "application/octet-stream"]
     }
     func grantJSON(token: String = "fixture-capability") -> [String: Any] {
         ["expiresAt": ISO8601DateFormatter.fractional.string(from: Date().addingTimeInterval(300)),
@@ -128,10 +128,148 @@ private final class PlaybackFixture {
             transport: transport ?? { url, _ in files[url.lastPathComponent]! })
     }
     func source() throws -> PrivateMotionAssetSource { try PrivateMotionAssetSource(result: result(), job: job(), assets: assets()) }
+
+    static func glb(documentChange: (inout [String: Any]) -> Void = { _ in }, positions: [Float] = [0,0,0,1,0,0,0,1,0], indices: [UInt32] = [0,1,2]) throws -> Data {
+        var bin = Data()
+        for index in indices { var v = index.littleEndian; withUnsafeBytes(of: &v) { bin.append(contentsOf: $0) } }
+        for point in positions { var v = point; withUnsafeBytes(of: &v) { bin.append(contentsOf: $0) } }
+        var document: [String: Any] = ["asset": ["version": "2.0"], "buffers": [["byteLength": bin.count]],
+            "nodes": [["children": [1]], ["mesh": 0]],
+            "meshes": [["primitives": [["attributes": ["POSITION": 0], "indices": 1]]]],
+            "bufferViews": [["buffer": 0, "byteOffset": indices.count*4, "byteLength": positions.count*4],
+                ["buffer": 0, "byteOffset": 0, "byteLength": indices.count*4]],
+            "accessors": [["bufferView": 0, "componentType": 5126, "count": positions.count/3, "type": "VEC3"],
+                ["bufferView": 1, "componentType": 5125, "count": indices.count, "type": "SCALAR"]]]
+        documentChange(&document)
+        var json = try encode(document); while json.count%4 != 0 { json.append(0x20) }
+        var data = Data("glTF".utf8)
+        func u32(_ n: Int) { var v = UInt32(n).littleEndian; withUnsafeBytes(of: &v) { data.append(contentsOf: $0) } }
+        u32(2); u32(12+8+json.count+8+bin.count); u32(json.count); u32(0x4E4F534A); data.append(json)
+        u32(bin.count); u32(0x004E4942); data.append(bin); return data
+    }
+
+    func makeKeyframes() throws {
+        files = ["frame-0000.glb": try Self.glb()]
+        var contract = resultJSON["contract"] as! [String: Any]; contract["encoding"] = "glb"
+        resultJSON["contract"] = contract; resultJSON["mode"] = "keyframes"
+        resultJSON["profileVersion"] = "body-keyframes-v1"; resultJSON["requestedFrameCount"] = 2
+        resultJSON["reconstructedFrameCount"] = 1
+        jobJSON["kind"] = "reconstructKeyframes"; jobJSON["profileVersion"] = "body-keyframes-v1"
+        jobJSON.removeValue(forKey: "motionSegment")
+        jobJSON["keyframes"] = [["frameIndex": 0, "bbox": [0,0,1,1]], ["frameIndex": 5, "bbox": [0,0,1,1]]]
+        metadata = ["schemaVersion": 1, "jobId": "job", "attempt": 2, "inputRevision": 2,
+            "inputHash": jobJSON["inputHash"]!, "sourceSha256": String(repeating: "a",count: 64),
+            "profileVersion": "body-keyframes-v1", "contract": contract, "engine": resultJSON["engine"]!,
+            "frames": [["frameIndex": 0, "timestamp": 0, "bbox": [0,0,1,1], "artifact": "frame-0000.glb",
+                "metadata": ["vertexCount": 3, "faceCount": 1]]], "missingFrameIndices": [5]]
+        try rebuildKeyframes()
+    }
+    func rebuildKeyframes() throws {
+        files["keyframes.json"] = try Self.encode(metadata)
+        resultJSON["artifacts"] = files.keys.sorted().map { asset($0) }
+    }
+    func poseSource() throws -> PrivateKeyframeAssetSource {
+        PrivateKeyframeAssetSource(result: try result(), job: try job(), assets: try assets())
+    }
 }
 
 final class CloudPlaybackTests: XCTestCase {
     override func tearDown() { PlaybackURLProtocol.handler = nil; super.tearDown() }
+
+    @MainActor
+    func testPrivateKeyframeDrivesReusedPoseInspectorAndMissingFrameClearsPreviousMesh() async throws {
+        let fixture = try PlaybackFixture(); try fixture.makeKeyframes()
+        _ = try await fixture.client.keyframeResult("job", project: fixture.project())
+        let source = try fixture.poseSource(), model = PoseInspectorModel()
+        defer { model.clear(); source.close() }
+        await model.showPrivate(frameIndex: 0, source: source)
+        XCTAssertNotNil(model.stageRoot?.findEntity(named: "body")); XCTAssertNil(model.errorMessage)
+        model.show(.left); model.wireframe = true; model.autoRotate = true
+        await model.showPrivate(frameIndex: 5, source: source)
+        XCTAssertTrue(model.missingPose); XCTAssertNil(model.stageRoot); XCTAssertNil(model.info)
+        fixture.credentials.currentSession = nil
+        await model.showPrivate(frameIndex: 0, source: source)
+        XCTAssertNil(model.stageRoot); XCTAssertNotNil(model.errorMessage)
+    }
+
+    @MainActor
+    func testKeyframeSubmissionHasOnlyOwnedRevisionAndSelectionsAndRejectsInvalidBoxes() async throws {
+        let fixture = try PlaybackFixture(); try fixture.makeKeyframes()
+        PlaybackURLProtocol.handler = { request in
+            XCTAssertEqual(request.url?.path,"/api/projects/project/reconstructions/keyframes")
+            let bytes: Data
+            if let body = request.httpBody { bytes = body }
+            else {
+                let stream = try XCTUnwrap(request.httpBodyStream); stream.open(); defer { stream.close() }
+                var buffer = [UInt8](repeating: 0,count: 2048); let n = stream.read(&buffer,maxLength: buffer.count)
+                bytes = Data(buffer.prefix(n))
+            }
+            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: bytes) as? [String: Any])
+            XCTAssertEqual(Set(body.keys),["inputRevision","keyframes"])
+            XCTAssertEqual(body["inputRevision"] as? Int,2)
+            return (202,[:],try PlaybackFixture.encode(fixture.jobJSON))
+        }
+        let selection = CloudKeyframeSelection(frameIndex: 0,bbox: [0,0,1,1])
+        _ = try await fixture.client.generateKeyframes(project: fixture.project(),selections: [selection])
+        for selections in [[],[selection,selection],[.init(frameIndex: 60,bbox: [0,0,1,1])],
+                           [.init(frameIndex: 0,bbox: [0,0,0.01,1])],[.init(frameIndex: 0,bbox: [0,0,Double.nan,1])]] {
+            do { _ = try await fixture.client.generateKeyframes(project: fixture.project(),selections: selections); XCTFail("Invalid selection submitted") }
+            catch { XCTAssertEqual(error as? CloudPlaybackError,.invalidResult) }
+        }
+    }
+
+    @MainActor
+    func testKeyframeManifestRejectsChangedProvenanceTimesSelectionsAndMixedAttempts() async throws {
+        for (key,value) in [("attempt",1 as Any),("inputRevision",3 as Any),("sourceSha256","wrong" as Any),
+                            ("schemaVersion",2 as Any),("missingFrameIndices",[0] as Any)] {
+            let fixture = try PlaybackFixture(); try fixture.makeKeyframes(); fixture.metadata[key] = value
+            try fixture.rebuildKeyframes()
+            do { _ = try await fixture.poseSource().manifest(); XCTFail("Invalid manifest accepted") } catch {}
+        }
+        for key in ["timestamp","bbox","artifact"] {
+            let fixture = try PlaybackFixture(); try fixture.makeKeyframes()
+            var frames = fixture.metadata["frames"] as! [[String: Any]]
+            frames[0][key] = key == "timestamp" ? 0.1 as Any : key == "bbox" ? [0,0,0.5,1] as Any : "../frame.glb" as Any
+            fixture.metadata["frames"] = frames; try fixture.rebuildKeyframes()
+            do { _ = try await fixture.poseSource().manifest(); XCTFail("Changed frame accepted") } catch {}
+        }
+    }
+
+    @MainActor
+    func testPrivateGLBRejectsUnsafeAccessorLayoutsNonFiniteVerticesIndicesAndTransforms() throws {
+        XCTAssertEqual(try GLBLoader.loadPrivate(PlaybackFixture.glb()).positions.count,3)
+        let changes: [(inout [String: Any]) -> Void] = [
+            { d in var a = d["accessors"] as! [[String: Any]]; a[0]["count"] = Int.max; d["accessors"] = a },
+            { d in var a = d["accessors"] as! [[String: Any]]; a[0]["normalized"] = true; d["accessors"] = a },
+            { d in var a = d["bufferViews"] as! [[String: Any]]; a[0]["byteOffset"] = -1; d["bufferViews"] = a },
+            { d in var a = d["bufferViews"] as! [[String: Any]]; a[0]["byteStride"] = 0; d["bufferViews"] = a },
+            { d in var a = d["bufferViews"] as! [[String: Any]]; a[0]["byteLength"] = 4; d["bufferViews"] = a },
+            { $0["nodes"] = [["mesh": 0,"translation": [1,0,0]]] },
+            { $0["buffers"] = [["byteLength": 48,"uri": "https://foreign.test/mesh.bin"]] }
+        ]
+        for change in changes { XCTAssertThrowsError(try GLBLoader.loadPrivate(PlaybackFixture.glb(documentChange: change))) }
+        XCTAssertThrowsError(try GLBLoader.loadPrivate(PlaybackFixture.glb(positions: [0,0,0,1,0,0,0,Float.nan,0])))
+        XCTAssertThrowsError(try GLBLoader.loadPrivate(PlaybackFixture.glb(indices: [0,1,99])))
+        var tailed = try PlaybackFixture.glb(); tailed.append(0)
+        XCTAssertThrowsError(try GLBLoader.loadPrivate(tailed))
+    }
+
+    @MainActor
+    func testPrivateGLBContractAlsoDecodesExistingBundledBodyGeometry() throws {
+        let sample = try XCTUnwrap(BundledSample.project)
+        let path = try XCTUnwrap(sample.frames.first?.meshUrl)
+        let url = try XCTUnwrap(BundledSample.fileURL(forAssetPath: path))
+        let mesh = try GLBLoader.loadPrivate(Data(contentsOf: url))
+        XCTAssertEqual(mesh.positions.count,18_439); XCTAssertEqual(mesh.indices.count,36_874*3)
+    }
+
+    @MainActor
+    func testKeyframeGeometryMustMatchPinnedTopologyAndManifestCounts() async throws {
+        let fixture = try PlaybackFixture(); try fixture.makeKeyframes()
+        fixture.files["frame-0000.glb"] = try PlaybackFixture.glb(indices: [0,2,1]); try fixture.rebuildKeyframes()
+        do { _ = try await fixture.poseSource().mesh(frameIndex: 0); XCTFail("Wrong topology accepted") }
+        catch { XCTAssertEqual(error as? CloudPlaybackError,.corruptFile) }
+    }
 
     @MainActor
     func testPrivateDecoderDrivesReusedPlayerAndHidesMissingOrSignedOutPoses() async throws {
