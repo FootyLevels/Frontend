@@ -104,3 +104,17 @@ Both Release configuration tests also passed with a test-only
 `ENABLE_TESTABILITY=YES` build override: Demo Firebase is selected, loopback
 authenticated origins and legacy service access are disabled, and the bundled
 example remains available. The app's Release build settings are unchanged.
+
+## Owned recording removal — FP-18
+
+The private library offers a trash action with explicit Delete/Cancel confirmation.
+After the authenticated API accepts removal, the recording leaves the owned list,
+and a separate removal-status section describes stored-file cleanup. Refresh
+queries server progress; an unavailable service retains an actionable error.
+A 202 only accepts the request. Prior read/upload/writer capabilities have bounded
+grace periods, so storage quota can remain held while exact cleanup is pending.
+No immediate erasure or immediate quota release is implied. The server verifies
+exact absence before releasing each reservation once and erases dependent models,
+comparisons and nested metadata. Account application-data cleanup is a server
+capability; this library change adds no account-settings or Firebase identity
+delete screen. Physical confirmation/Cancel acceptance remains a human check.
