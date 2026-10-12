@@ -28,6 +28,8 @@ final class MotionPlayerViewModel {
     var loadedChunks = 0
     /// False when the current frame has no reconstruction.
     var missingPose = false
+    var waitingForChunk = false
+    var assetWarning: String?
     var contactLabel: String?
     var stageRoot: Entity?
     var angle: CameraAngle = .source
@@ -37,7 +39,7 @@ final class MotionPlayerViewModel {
     var wireframe = false { didSet { body?.wireframe = wireframe } }
 
     @ObservationIgnored let camera = OrbitCamera()
-    @ObservationIgnored private let sequencePath: String
+    @ObservationIgnored private let assets: any MotionAssetSource
     @ObservationIgnored private let player: AVPlayer
     @ObservationIgnored private var body: AnimatedBodyMesh?
     @ObservationIgnored private var ball: Entity?
@@ -52,8 +54,17 @@ final class MotionPlayerViewModel {
 
     init(projectId: String, sequencePath: String, player: AVPlayer) {
         self.projectId = projectId
-        self.sequencePath = sequencePath
+        self.assets = LegacyMotionAssetSource(projectId: projectId, sequencePath: sequencePath)
         self.player = player
+    }
+
+    init(projectId: String, assets: any MotionAssetSource, player: AVPlayer) {
+        self.projectId = projectId; self.assets = assets; self.player = player
+    }
+
+    var sourceTime: Double { assets.sourceTimeOffset + Double(currentFrame) / fps }
+    var accessibilityStatus: String {
+        switch state { case .ready: return "Ready"; case .loading: return "Loading"; case .failed: return "Failed" }
     }
 
     var fps: Double { sequence?.fps ?? 30 }
@@ -67,23 +78,23 @@ final class MotionPlayerViewModel {
     /// are still arriving.
     func load() async {
         guard stageRoot == nil else { return }
-        let client = SkillLabClient.shared
         do {
-            let sequence = try await client.sequence(path: sequencePath)
+            let sequence = try await assets.sequence()
             guard sequence.encoding == "uint16-le-xyz-gzip" else {
                 throw MeshDecodingError.unsupportedEncoding(sequence.encoding)
             }
             self.sequence = sequence
             chunkForFrame = Self.chunkLookup(for: sequence)
 
-            async let topologyTask = client.data(path: client.motionAssetPath(projectId: projectId, file: sequence.topologyFile))
+            async let topologyTask = assets.data(file: sequence.topologyFile)
             async let ballTask = loadBallMesh(sequence)
 
             let firstChunk = chunkForFrame.first ?? 0
             let firstChunkTask = Task { try await self.fetchChunk(firstChunk, sequence) }
+            defer { firstChunkTask.cancel() }
 
             let indices = BinaryBuffers.array(of: UInt32.self, from: try await topologyTask)
-            guard indices.count == sequence.faceCount * 3 else {
+            guard indices.count == sequence.faceCount * 3, indices.allSatisfy({ $0 < sequence.vertexCount }) else {
                 throw MeshDecodingError.chunkSizeMismatch(file: sequence.topologyFile,
                                                           expected: sequence.faceCount * 12,
                                                           actual: indices.count * 4)
@@ -101,7 +112,7 @@ final class MotionPlayerViewModel {
             // A generous floor centred on the action, in 25 cm cells like the
             // web viewer's grid.
             let floorCenter = (sequence.lowerBound + sequence.upperBound) / 2
-            let floorSize = Swift.max(sequence.extent.x, sequence.extent.z) + 10
+            let floorSize = Swift.min(50, Swift.max(sequence.extent.x, sequence.extent.z) + 10)
             let stage = await StageBuilder.makeStage(content: [body.entity, ball].compactMap { $0 },
                                                      floorCenter: floorCenter, floorSize: floorSize)
             stageRoot = stage.root
@@ -133,11 +144,13 @@ final class MotionPlayerViewModel {
                 group.addTask { (index, try? await self.fetchChunk(index, sequence)) }
             }
             for await (index, values) in group {
-                if Task.isCancelled { return }
+                if Task.isCancelled { group.cancelAll(); return }
                 if let values {
                     chunks[index] = values
                     loadedChunks += 1
                     render(time: player.currentTime().seconds, force: true)
+                } else {
+                    assetWarning = "Some 3D frames couldn't be loaded. Reload the result to try again."
                 }
                 if let next = iterator.next() {
                     group.addTask { (next, try? await self.fetchChunk(next, sequence)) }
@@ -148,14 +161,14 @@ final class MotionPlayerViewModel {
 
     /// Downloads and inflates one chunk off the main actor, checking its size
     /// against the header so a truncated file can't masquerade as a pose.
-    nonisolated private func fetchChunk(_ index: Int, _ sequence: MotionSequence) async throws -> [UInt16] {
+    private func fetchChunk(_ index: Int, _ sequence: MotionSequence) async throws -> [UInt16] {
         let chunk = sequence.chunks[index]
-        let client = SkillLabClient.shared
-        let compressed = try await client.data(path: client.motionAssetPath(projectId: projectId, file: chunk.file))
+        let compressed = try await assets.data(file: chunk.file)
+        let strict = assets.usesPrivateContract
 
         return try await Task.detached(priority: .userInitiated) {
-            let raw = try Gzip.decompress(compressed)
             let expected = chunk.count * sequence.vertexCount * 3 * MemoryLayout<UInt16>.size
+            let raw = try strict ? Gzip.decompress(compressed, expectedByteCount: expected) : Gzip.decompress(compressed)
             guard raw.count == expected else {
                 throw MeshDecodingError.chunkSizeMismatch(file: chunk.file, expected: expected, actual: raw.count)
             }
@@ -173,8 +186,7 @@ final class MotionPlayerViewModel {
 
         var resource: MeshResource?
         if let file = sequence.ball.file {
-            let client = SkillLabClient.shared
-            if let data = try? await client.data(path: client.motionAssetPath(projectId: projectId, file: file)),
+            if let data = try? await assets.data(file: file),
                var mesh = try? GLBLoader.load(data) {
                 // Recentre and resize to the diameter the tracker assumed, so the
                 // mesh sits where the ball positions say it does.
@@ -230,6 +242,14 @@ final class MotionPlayerViewModel {
     }
 
     private func render(time: Double, force: Bool = false) {
+        do { try assets.checkSession() } catch {
+            body?.entity.isEnabled = false; ball?.isEnabled = false
+            teardown()
+            player.pause(); player.replaceCurrentItem(with: nil)
+            chunks.removeAll(); sequence = nil; body = nil; ball = nil
+            stageRoot = nil; state = .failed("Your account changed. Open this project again after signing in.")
+            return
+        }
         guard let sequence, let body, sequence.frameCount > 0 else { return }
         let seconds = time.isFinite ? time : 0
         guard force || seconds != lastTime else { return }
@@ -246,6 +266,7 @@ final class MotionPlayerViewModel {
         if index != currentFrame || force {
             currentFrame = index
             missingPose = !a.valid
+            waitingForChunk = a.valid && pose(index, in: sequence) == nil
             contactLabel = sequence.contactLabel(frame: index)
         }
 
@@ -281,6 +302,7 @@ final class MotionPlayerViewModel {
 
     func teardown() {
         backgroundLoad?.cancel()
+        assets.close()
         if let timeObserver {
             player.removeTimeObserver(timeObserver)
             self.timeObserver = nil

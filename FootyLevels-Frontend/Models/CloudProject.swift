@@ -8,6 +8,9 @@ struct CloudProject: Decodable, Identifiable, Hashable {
     let label: String?
     let state: String
     let inputRevision: Int
+    let activeJobId: String?
+    let latestReconstructionId: String?
+    let preparedMedia: CloudPreparedMedia?
 
     var statusText: String {
         switch state {

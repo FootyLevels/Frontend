@@ -13,6 +13,10 @@ final class FootyLevels_FrontendUITests: XCTestCase {
         app.staticTexts["The over fake"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "Included example").firstMatch.waitForExistence(timeout: 15))
         XCTAssertFalse(app.staticTexts["Welcome to FootyLevels"].exists)
+        let stage = app.descendants(matching: .any).matching(identifier: "motion-stage").firstMatch
+        XCTAssertTrue(stage.waitForExistence(timeout: 20))
+        XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "Ready"), object: stage)], timeout: 45) == .completed,
+                      "The bundled 3D motion must finish decoding into the reused player")
     }
 
     /// Run after the live SDK probe signs out and deletes its temporary accounts.

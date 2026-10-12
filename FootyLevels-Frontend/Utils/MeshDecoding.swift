@@ -1,5 +1,6 @@
 import Foundation
 import RealityKit
+import zlib
 
 // Decoders for the backend's binary assets: gzip'd motion chunks, uint32
 // topology, and GLB meshes. RealityKit loads USDZ but not glTF, so key-frame
@@ -8,6 +9,29 @@ import RealityKit
 // MARK: - Gzip
 
 enum Gzip {
+    /// The private format requires a complete gzip member, valid CRC/trailer,
+    /// exact output size and no trailing data. Never inflate beyond this buffer.
+    static func decompress(_ data: Data, expectedByteCount: Int) throws -> Data {
+        guard (1...4_500_000).contains(expectedByteCount), data.count <= 52_428_800 else { throw CloudPlaybackError.corruptFile }
+        var stream = z_stream()
+        guard inflateInit2_(&stream, MAX_WBITS + 16, ZLIB_VERSION, Int32(MemoryLayout<z_stream>.size)) == Z_OK
+        else { throw CloudPlaybackError.corruptFile }
+        defer { inflateEnd(&stream) }
+        var result = Data(count: expectedByteCount + 1)
+        let status = data.withUnsafeBytes { input in
+            result.withUnsafeMutableBytes { output in
+                stream.next_in = UnsafeMutablePointer(mutating: input.bindMemory(to: Bytef.self).baseAddress)
+                stream.avail_in = uInt(data.count)
+                stream.next_out = output.bindMemory(to: Bytef.self).baseAddress
+                stream.avail_out = uInt(output.count)
+                return inflate(&stream, Z_FINISH)
+            }
+        }
+        guard status == Z_STREAM_END, stream.total_out == expectedByteCount, stream.avail_in == 0
+        else { throw CloudPlaybackError.corruptFile }
+        result.removeLast(); return result
+    }
+
     /// Inflates a gzip member (RFC 1952). Data that isn't gzip is returned as-is,
     /// in case a proxy or server ever sends it with `Content-Encoding: gzip` and
     /// URLSession has already decoded it.
