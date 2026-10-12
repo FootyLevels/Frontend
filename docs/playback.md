@@ -63,8 +63,37 @@ The tests also exercise corrupt/oversized files, gzip CRC/tails/bounds, topology
 unknown formats, exact motion submission, private grant scopes, expiry refresh
 and account-generation isolation. Synthetic geometry is component evidence.
 
-The new API still runs on DGX loopback 8011, while public ngrok port 8010 remains
-legacy compatibility. Use the existing SSH loopback forward for Development
-simulator verification. Real Firebase/DGX/Supabase motion playback verification is
-next; named physical-iPhone playback, interactive Google sign-in and authenticated
-public routing remain open. FP-40 stays In Progress.
+The opted-in real service/player probe also passed on the iPhone 17 Pro simulator
+(iOS 26.4). A real temporary Development Firebase SDK email account created an
+owned project, uploaded a two-second video-only bundled clip to private Supabase,
+and waited for the deployed media worker to prepare 60 frames. It submitted frames
+15–45 through the authenticated API; the actual DGX GPU worker generated all 30
+poses on attempt 1, with 18,439 vertices and 36,874 faces. The app verified the
+ten-file result's provenance, sizes/hashes, topology and compressed buffers, and
+the reused RealityKit motion player reached ready. Seeking local frame 15 landed
+at original source time 1.0 seconds. Camera, wireframe, speed, stale-session denial
+and local-file removal passed. The live XCTest result is one pass, no failures or
+skips. The account and exact 18 source/prepared/result files, metadata, quota and
+one private model cache entry were removed; absence and quiescence were verified.
+See [credential-free verification evidence](private-playback-evidence.json).
+
+This is real simulator service/player integration, including GPU generation, not
+a complete interactive app or physical-device acceptance test. Actual output had
+30/30 valid poses; missing-frame behavior remains covered separately by component
+tests. Workers poll conservatively to protect free-tier Firestore usage, so queue
+pickup can take several minutes. The API still runs on DGX loopback 8011, while
+public ngrok port 8010 remains legacy compatibility. Named physical-iPhone
+playback, interactive Google sign-in, authenticated public routing and private
+selected-keyframe UI remain open. FP-40 stays In Progress.
+
+`LivePrivatePlaybackTests` is skipped by default. After starting the private SSH
+forward from Mac port 8012 to DGX port 8011, set `FOOTYLEVELS_LIVE_PLAYBACK_TESTS=1`
+and `FOOTYLEVELS_AUTH_TEST_API=http://127.0.0.1:8012` in a copy of the Development
+`.xctestrun` inside `Build/Products`. Run only this class, with serial testing and
+a 1,500-second test allowance. No secrets belong in the run configuration. Once
+the SDK test finishes, its Documents/fp40-ios-evidence.json holds non-secret exact
+cleanup IDs. Run Backend's `scripts/cleanup_ios_playback_fixtures.py` with that file
+using the configured Mac ADC; it checks the temporary account's exact invocation
+email, project title/owner/environment, waits for writers, deletes only that
+fixture's assets/records/cache and releases only its reserved quota. Preserve
+evidence and retry cleanup if writers remain active; never broadly clear storage.
