@@ -6,7 +6,8 @@ import XCTest
 @testable import FootyLevels_Frontend
 
 /// Explicit Development-only service/player proof. Never substitutes for a
-/// named physical iPhone, interactive Google consent, or the public API route.
+/// named physical iPhone or interactive Google consent. The operator may select
+/// either the private SSH forward or the approved Development HTTPS endpoint.
 final class LivePrivatePlaybackTests: XCTestCase {
     @MainActor
     func testRealUploadDGXMotionAndPrivatePlayer() async throws {
@@ -15,7 +16,8 @@ final class LivePrivatePlaybackTests: XCTestCase {
         }
         guard FirebaseApp.app()?.options.projectID == "footylevels-dev-20261009",
               let text = ProcessInfo.processInfo.environment["FOOTYLEVELS_AUTH_TEST_API"],
-              let url = URL(string: text), url.scheme == "http", url.host == "127.0.0.1", url.port == 8012
+              let url = URL(string: text),
+              text == "http://127.0.0.1:8012" || text == "https://ranting-pesticide-thespian.ngrok-free.dev"
         else { throw AccountAPIError.unsafeAddress }
         let runID = UUID().uuidString.lowercased()
         let email = "fp40-ios-\(runID)@example.invalid"
@@ -36,7 +38,8 @@ final class LivePrivatePlaybackTests: XCTestCase {
                 "users": uid.map { [$0] } ?? [], "projects": pid.map { [$0] } ?? [],
                 "jobs": jobID.map { [$0] } ?? [], "phases": phases, "details": details,
                 "accountsDeleted": accountsDeleted, "physicalDeviceVerified": false,
-                "publicAuthenticatedRouteVerified": false, "interactiveGoogleLoginVerified": false]
+                "publicAuthenticatedRouteVerified": url.scheme == "https" && phase.hasPrefix("passed-account-deleted-"),
+                "interactiveGoogleLoginVerified": false]
             try JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted, .sortedKeys])
                 .write(to: evidence, options: .atomic)
         }

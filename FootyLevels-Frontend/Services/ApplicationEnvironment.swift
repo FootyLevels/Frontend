@@ -26,6 +26,9 @@ enum ApplicationEnvironment: String {
         if let address = ProcessInfo.processInfo.environment["FOOTYLEVELS_API_URL"] {
             return URL(string: address)
         }
+        // The free public endpoint serves Development only. An explicit Demo
+        // test still needs its own origin; never send Demo tokens to this default.
+        guard current == .dev else { return nil }
         #endif
         guard let address = Bundle.main.object(forInfoDictionaryKey: "FootyLevelsAPIBaseURL") as? String,
               !address.isEmpty else { return nil }
