@@ -28,6 +28,24 @@ struct CloudProjectsPage: Decodable {
     let nextCursor: String?
 }
 
+struct CloudDeletion: Decodable, Identifiable {
+    let id: String
+    let ownerId: String
+    let scope: String
+    let projectId: String?
+    let state: String
+    let notBefore: String
+    let completedAt: String?
+    let lastError: String?
+
+    var statusText: String {
+        if state == "completed" { return "Stored files deleted" }
+        if lastError == "reconciliation_required" { return "Recording hidden · stored-file cleanup needs support" }
+        if lastError != nil { return "Recording hidden · storage cleanup will retry" }
+        return "Recording hidden · stored files waiting for removal"
+    }
+}
+
 /// These capabilities exist only in memory; never encode them into draft JSON.
 struct PrivateUploadGrant: Decodable {
     let id: String

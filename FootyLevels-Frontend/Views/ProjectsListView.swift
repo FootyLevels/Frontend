@@ -18,6 +18,7 @@ struct ProjectsListView: View {
     @State private var path = NavigationPath()
     @State private var pickedVideo: PhotosPickerItem?
     @State private var showServerSettings = false
+    @State private var deletionTarget: CloudProject?
 
     /// Server projects, minus the example — that one always opens from the
     /// bundle, so it isn't listed twice when the server has it too.
@@ -129,6 +130,14 @@ struct ProjectsListView: View {
             .alert("Recording unavailable", isPresented: Binding(get: { cameraError != nil }, set: { if !$0 { cameraError = nil } })) {
                 Button("OK", role: .cancel) { cameraError = nil }
             } message: { Text(cameraError ?? "") }
+            .confirmationDialog("Delete recording?", isPresented: Binding(
+                get: { deletionTarget != nil }, set: { if !$0 { deletionTarget = nil } }),
+                titleVisibility: .visible, presenting: deletionTarget) { project in
+                Button("Delete recording", role: .destructive) { cloud.delete(project); deletionTarget = nil }
+                Button("Cancel", role: .cancel) { deletionTarget = nil }
+            } message: { project in
+                Text("Remove \(project.title) and its 3D results from your library? Stored files are cleared after outstanding links expire.")
+            }
             .onChange(of: scenePhase) { _, phase in
                 if phase != .active { cloud.pause() }
                 else if hasAccount, !showCamera, !requestingCamera { Task { await cloud.refresh() } }
@@ -181,6 +190,7 @@ struct ProjectsListView: View {
                     .background(SL.page, in: RoundedRectangle(cornerRadius: 12))
             }
             ForEach(cloud.projects.filter { project in !cloud.drafts.contains(where: { $0.projectId == project.id }) }) { project in
+                HStack {
                 NavigationLink(value: project) {
                     HStack(spacing: 14) {
                         Image(systemName: "lock.fill").foregroundStyle(SL.green)
@@ -193,6 +203,22 @@ struct ProjectsListView: View {
                         Image(systemName: "chevron.right").foregroundStyle(SL.muted)
                     }.padding(16).background(SL.page, in: RoundedRectangle(cornerRadius: 12))
                 }.buttonStyle(.plain)
+                Button(role: .destructive) { deletionTarget = project } label: {
+                    Image(systemName: "trash").padding(10)
+                }.accessibilityLabel("Delete \(project.title)")
+                    .disabled(cloud.isBusy || cloud.isLoading)
+                }
+            }
+            if !cloud.deletions.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("REMOVAL STATUS").font(.caption.bold())
+                    ForEach(cloud.deletions) { removal in
+                        Text(removal.statusText).font(.callout).foregroundStyle(SL.muted)
+                    }
+                    Button("Check removal status") { Task { await cloud.refresh() } }
+                        .disabled(cloud.isBusy || cloud.isLoading)
+                }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(SL.page, in: RoundedRectangle(cornerRadius: 12))
             }
             if cloud.hasMore { Button("Load more projects") { Task { await cloud.refresh(more: true) } }.disabled(cloud.isBusy || cloud.isLoading) }
             importPicker { Label(cloud.projects.isEmpty ? "Import a video" : "Import another video", systemImage: "photo.on.rectangle") }

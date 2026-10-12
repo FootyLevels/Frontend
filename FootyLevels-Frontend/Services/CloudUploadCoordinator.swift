@@ -36,6 +36,37 @@ final class CloudUploadCoordinator {
         return page
     }
 
+    func deletions() async throws -> [CloudDeletion] {
+        struct Page: Decodable { let items: [CloudDeletion] }
+        try checkSession()
+        let page = try JSONDecoder().decode(Page.self, from: await api.request("GET", path: "/api/deletions"))
+        try checkSession()
+        guard page.items.allSatisfy({ $0.ownerId == account.uid && ["pending", "completed"].contains($0.state) })
+        else { throw AccountAPIError.sessionChanged }
+        return page.items
+    }
+
+    func delete(_ project: CloudProject) async throws -> CloudDeletion {
+        struct Accepted: Decodable { let id: String; let state: String; let deletionId: String }
+        try checkSession()
+        guard project.ownerId == account.uid,
+              project.id.range(of: "^[a-zA-Z0-9_-]{1,128}$", options: .regularExpression) != nil
+        else { throw AccountAPIError.sessionChanged }
+        let accepted = try JSONDecoder().decode(Accepted.self,
+            from: await api.request("DELETE", path: "/api/projects/\(project.id)"))
+        try checkSession()
+        guard accepted.id == project.id, ["deleting", "deleted"].contains(accepted.state),
+              accepted.deletionId.range(of: "^[a-zA-Z0-9_-]{1,128}$", options: .regularExpression) != nil
+        else { throw AccountAPIError.unavailable }
+        let result = try JSONDecoder().decode(CloudDeletion.self,
+            from: await api.request("GET", path: "/api/deletions/\(accepted.deletionId)"))
+        try checkSession()
+        guard result.id == accepted.deletionId, result.ownerId == account.uid,
+              result.scope == "project", result.projectId == project.id,
+              ["pending", "completed"].contains(result.state) else { throw AccountAPIError.unavailable }
+        return result
+    }
+
     func upload(_ saved: UploadDraft, progress: (Double) -> Void) async throws -> CloudProject {
         try check(saved)
         var draft = saved

@@ -14,6 +14,7 @@ struct PendingClip: Identifiable {
 @Observable
 final class CloudUploadsViewModel {
     var projects: [CloudProject] = []
+    var deletions: [CloudDeletion] = []
     var drafts: [UploadDraft] = []
     var pending: PendingClip?
     var errorMessage: String?
@@ -45,6 +46,7 @@ final class CloudUploadsViewModel {
             else { projects = page.items }
             nextCursor = page.nextCursor
             drafts = try coordinator.store.load()
+            deletions = try await coordinator.deletions()
             errorMessage = nil
         } catch { errorMessage = error.localizedDescription }
     }
@@ -137,6 +139,15 @@ final class CloudUploadsViewModel {
     }
 
     func pause() { task?.cancel() }
+
+    func delete(_ project: CloudProject) {
+        guard let coordinator else { return }
+        start("Removing recording…") { [weak self] in
+            _ = try await coordinator.delete(project)
+            self?.projects.removeAll { $0.id == project.id }
+            await self?.refresh(afterMutation: true)
+        }
+    }
 
     private func start(_ label: String, operation: @escaping @MainActor () async throws -> Void) {
         startTask(label, operation: operation)

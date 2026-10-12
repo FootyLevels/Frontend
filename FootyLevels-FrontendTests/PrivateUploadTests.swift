@@ -262,3 +262,57 @@ extension PrivateUploadTests {
         }
     }
 }
+
+extension PrivateUploadTests {
+    @MainActor
+    func testConfirmedOwnedDeletionReportsPendingCleanup() async throws {
+        let credentials = UploadCredentials()
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let coordinator = try CloudUploadCoordinator(apiURL: URL(string: "https://api.example.test")!,
+            environment: .dev, credentials: credentials, apiSession: session(), root: root)
+        let project = try JSONDecoder().decode(CloudProject.self,
+            from: Data(#"{"id":"project","ownerId":"alice","title":"Practice","state":"ready","inputRevision":2}"#.utf8))
+        var paths: [String] = []
+        StorageProtocol.handler = { request in
+            paths.append(request.url!.path)
+            XCTAssertNotNil(request.value(forHTTPHeaderField: "Authorization"))
+            if request.httpMethod == "DELETE" {
+                XCTAssertEqual(request.url?.path, "/api/projects/project")
+                return (202, [:], Data(#"{"id":"project","state":"deleting","deletionId":"intent"}"#.utf8))
+            }
+            return (200, [:], Data(#"{"id":"intent","ownerId":"alice","scope":"project","projectId":"project","state":"pending","notBefore":"2026-10-15T00:00:00Z"}"#.utf8))
+        }
+        let result = try await coordinator.delete(project)
+        XCTAssertEqual(result.state, "pending")
+        XCTAssertTrue(result.statusText.contains("waiting"))
+        XCTAssertEqual(paths, ["/api/projects/project", "/api/deletions/intent"])
+        let foreign = try JSONDecoder().decode(CloudProject.self,
+            from: Data(#"{"id":"foreign","ownerId":"bob","title":"Other","state":"ready","inputRevision":2}"#.utf8))
+        do { _ = try await coordinator.delete(foreign); XCTFail("Foreign deletion allowed") }
+        catch { XCTAssertEqual(error as? AccountAPIError, .sessionChanged) }
+        XCTAssertEqual(paths.count, 2)
+    }
+
+    @MainActor
+    func testDeletionProgressRejectsForeignOwnerAndUnsafeReturnedID() async throws {
+        let credentials = UploadCredentials()
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let coordinator = try CloudUploadCoordinator(apiURL: URL(string: "https://api.example.test")!,
+            environment: .dev, credentials: credentials, apiSession: session(), root: root)
+        StorageProtocol.handler = { _ in
+            (200, [:], Data(#"{"items":[{"id":"intent","ownerId":"bob","scope":"project","projectId":"foreign","state":"pending","notBefore":"2026-10-15T00:00:00Z"}]}"#.utf8))
+        }
+        do { _ = try await coordinator.deletions(); XCTFail("Foreign progress displayed") }
+        catch { XCTAssertEqual(error as? AccountAPIError, .sessionChanged) }
+        let project = try JSONDecoder().decode(CloudProject.self,
+            from: Data(#"{"id":"project","ownerId":"alice","title":"Practice","state":"ready","inputRevision":2}"#.utf8))
+        StorageProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            return (202, [:], Data(#"{"id":"project","state":"deleting","deletionId":"../other"}"#.utf8))
+        }
+        do { _ = try await coordinator.delete(project); XCTFail("Unsafe follow-up allowed") }
+        catch { XCTAssertEqual(error as? AccountAPIError, .unavailable) }
+    }
+}
