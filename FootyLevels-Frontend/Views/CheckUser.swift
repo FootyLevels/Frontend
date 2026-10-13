@@ -21,10 +21,10 @@ struct CheckUser: View {
                     .transition(.opacity)
                 
             case .loggedIn:
-                // Skill Lab projects: upload a clip, reconstruct key frames or
-                // the whole video. It owns its NavigationStack; appState is
-                // handed down so it can offer sign-out.
-                ProjectsListView(appState: appState)
+                // Videos (upload a clip, reconstruct key frames or the whole
+                // video) and Overlay (compare two clips' 3D motion), as tabs.
+                // appState is handed down so the Videos tab can offer sign-out.
+                MainTabView(appState: appState)
                 // 2. Define how this view enters/exits
                 .transition(.opacity)
                 

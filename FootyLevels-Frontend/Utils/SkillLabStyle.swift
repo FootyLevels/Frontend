@@ -84,6 +84,10 @@ enum SL {
 
     // 3D scene, as UIColor for RealityKit materials
     static let bodyTint = UIColor(red: 0xA1 / 255, green: 0xBD / 255, blue: 0x9B / 255, alpha: 1)
+    // The two bodies in the overlay. Blue and orange stay apart with red-green
+    // color blindness, where green and orange would not.
+    static let overlayFirst = UIColor(red: 0x3E / 255, green: 0x7C / 255, blue: 0xB1 / 255, alpha: 1)
+    static let overlaySecond = UIColor(red: 0xE0 / 255, green: 0x7B / 255, blue: 0x39 / 255, alpha: 1)
 
     // Type — Manrope for display, DM Sans for text in the web app. The system
     // face with tightened tracking gets close without bundling fonts.

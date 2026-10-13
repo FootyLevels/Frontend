@@ -298,7 +298,7 @@ private struct StageFrameLabel: View {
     }
 }
 
-private struct StageMessage: View {
+struct StageMessage: View {
     let message: String
     let isLoading: Bool
 
@@ -341,7 +341,7 @@ private struct DotGrid: View {
 }
 
 /// Source · Left · Right · Back · Above, plus reset.
-private struct PresetToolbar: View {
+struct PresetToolbar: View {
     let selection: CameraAngle
     let enabled: Bool
     let onSelect: (CameraAngle) -> Void

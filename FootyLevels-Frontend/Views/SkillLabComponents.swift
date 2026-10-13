@@ -9,6 +9,8 @@ import SwiftUI
 struct ModelStageView: View {
     let root: Entity?
     let camera: OrbitCamera
+    /// Called after a drag or pinch moved the camera, e.g. to move a linked one.
+    var onCameraChange: (() -> Void)? = nil
 
     @State private var dragStart: (yaw: Float, pitch: Float)?
     @State private var zoomStart: Float?
@@ -40,6 +42,7 @@ struct ModelStageView: View {
                     let start = dragStart ?? camera.orientation
                     dragStart = start
                     camera.orbit(from: start, translation: value.translation)
+                    onCameraChange?()
                 }
                 .onEnded { _ in dragStart = nil }
         )
@@ -49,6 +52,7 @@ struct ModelStageView: View {
                     let start = zoomStart ?? camera.currentDistance
                     zoomStart = start
                     camera.zoom(from: start, magnification: value.magnification)
+                    onCameraChange?()
                 }
                 .onEnded { _ in zoomStart = nil }
         )

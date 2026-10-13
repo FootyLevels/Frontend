@@ -59,10 +59,15 @@ struct ProjectDetailView: View {
         .task(id: viewModel.project?.video.url) { preparePlayback() }
         .task(id: motionKey) { await prepareMotion() }
         .task(id: poseKey) { await pose.show(meshPath: viewModel.mode == .frames ? viewModel.selectedFrame?.meshUrl : nil) }
+        // Switching tabs also disappears this view. Rebuild what was torn down
+        // rather than leave a player whose observers are gone.
+        .onAppear { preparePlayback() }
         .onDisappear {
             viewModel.stopPolling()
             motion?.teardown()
             playback?.teardown()
+            motion = nil
+            playback = nil
         }
         .sheet(isPresented: $showCrop) {
             if let project = viewModel.project, let frame = viewModel.selectedFrame {

@@ -6,8 +6,9 @@ import SwiftUI
 struct ProjectsListView: View {
     /// Supplied behind the auth gate to enable log-out.
     var appState: AppStateViewModel?
+    /// Owned by the tab bar, so a video imported on another tab shows up here.
+    let viewModel: ProjectsListViewModel
 
-    @State private var viewModel = ProjectsListViewModel()
     @State private var path: [String] = []
     @State private var pickedVideo: PhotosPickerItem?
     @State private var showServerSettings = false
@@ -88,7 +89,7 @@ struct ProjectsListView: View {
             }
             .refreshable { await viewModel.refresh() }
             .toolbar { toolbar }
-            .overlay { uploadOverlay }
+            .overlay { UploadProgressOverlay(phase: viewModel.uploadPhase) }
             .sheet(isPresented: $showServerSettings) {
                 ServerSettingsView(suggestions: viewModel.health?.network?.urls ?? []) {
                     Task { await viewModel.refresh() }
@@ -299,35 +300,6 @@ struct ProjectsListView: View {
             }
         }
     }
-
-    @ViewBuilder
-    private var uploadOverlay: some View {
-        if let phase = viewModel.uploadPhase {
-            VStack(spacing: 14) {
-                switch phase {
-                case .importing:
-                    ProgressView().tint(Color(hex: "EEF5E2"))
-                    Text("Preparing video…")
-                case .uploading(let fraction):
-                    ProgressView(value: fraction)
-                        .tint(SL.lime)
-                        .frame(width: 180)
-                    Text("Uploading \(Int(fraction * 100))%")
-                case .processing:
-                    ProgressView().tint(Color(hex: "EEF5E2"))
-                    Text("Transcoding and picking key frames…")
-                    Text("This runs on the server and can take a minute.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(hex: "B9C9B0"))
-                }
-            }
-            .font(.system(size: 13))
-            .foregroundStyle(Color(hex: "EEF5E2"))
-            .padding(24)
-            .background(Color(hex: "183D2C"), in: RoundedRectangle(cornerRadius: 12))
-            .shadow(color: Color(hex: "183D2C").opacity(0.3), radius: 20, y: 6)
-        }
-    }
 }
 
 // MARK: - Cards
@@ -482,5 +454,5 @@ private struct ServerStatusCard: View {
 }
 
 #Preview {
-    ProjectsListView()
+    ProjectsListView(viewModel: ProjectsListViewModel())
 }

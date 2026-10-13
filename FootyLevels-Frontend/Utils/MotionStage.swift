@@ -36,7 +36,8 @@ final class AnimatedBodyMesh {
     private let lowerBound: SIMD3<Float>
     /// `span / 65535` — multiplying a quantised value by this recovers metres.
     private let step: SIMD3<Float>
-    private var positions: [SIMD3<Float>]
+    /// The most recently written pose, in metres — what the overlay aligns.
+    private(set) var positions: [SIMD3<Float>]
     private var normals: [SIMD3<Float>]
     private var material: SimpleMaterial
 
@@ -270,6 +271,13 @@ final class OrbitCamera {
     func show(_ angle: CameraAngle) {
         (yaw, pitch) = angle.orientation
         distance = homeDistance
+        apply()
+    }
+
+    /// Takes another camera's angle and distance but keeps this one's target,
+    /// so two stages side by side view their bodies from the same direction.
+    func match(_ other: OrbitCamera) {
+        (yaw, pitch, distance) = (other.yaw, other.pitch, other.distance)
         apply()
     }
 
