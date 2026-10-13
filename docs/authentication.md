@@ -11,6 +11,22 @@ DEBUG still opens the included example without login, as requested for local
 work. Launch with `--require-login` to test the ordinary login route. Release
 always uses that route. The bypass provides no identity to the account API.
 
+## Run from Xcode
+
+Open `FootyLevels-Frontend.xcodeproj` from this `Frontend` checkout and select
+the shared **FootyLevels-Development** scheme. Its Run action uses **Debug**,
+`FOOTYLEVELS_ENVIRONMENT=dev` and the enabled `--require-login` argument. Choose
+your iPhone or an available iPhone simulator, then Run. The Development HTTPS API
+is already supplied by the Debug build setting; no server key or local tunnel
+setting belongs in the scheme.
+
+The shared **FootyLevels-Frontend** scheme keeps the original Debug bundled-example
+entry without login arguments. The Development scheme's Profile/Archive actions
+retain Release, which selects Demo; use its Debug Run action for the current
+Development test. Complete your own personal sign-in in the running app, then
+import/capture a short clip, generate a pose or motion segment and check playback.
+Successful building/launching does not verify Google sign-in or a physical device.
+
 ## Account API configuration
 
 The authenticated transport is separate from the older Skill Lab connection.
