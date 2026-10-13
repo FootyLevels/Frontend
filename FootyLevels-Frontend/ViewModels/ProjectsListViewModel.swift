@@ -69,8 +69,14 @@ final class ProjectsListViewModel {
             }
             defer { try? FileManager.default.removeItem(at: movie.url.deletingLastPathComponent()) }
 
+            // Still "Preparing video…": the audio stays on the phone. The copy
+            // goes in the picked file's folder, so the line above removes it too.
+            let clip = try await UploadPreparation.removingAudio(
+                from: movie.url,
+                into: movie.url.deletingLastPathComponent().appendingPathComponent("upload", isDirectory: true))
+
             uploadPhase = .uploading(0)
-            let project = try await SkillLabClient.shared.uploadVideo(at: movie.url) { [weak self] fraction in
+            let project = try await SkillLabClient.shared.uploadVideo(at: clip) { [weak self] fraction in
                 Task { @MainActor in
                     guard let self, case .uploading = self.uploadPhase else { return }
                     self.uploadPhase = fraction >= 1 ? .processing : .uploading(fraction)
