@@ -12,7 +12,6 @@ struct CropEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var box: [Double]
-    @State private var dragStart: CGPoint?
     @State private var isSaving = false
 
     init(frame: KeyFrame, aspectRatio: Double, onSave: @escaping ([Double]) async -> Bool) {
@@ -84,39 +83,7 @@ struct CropEditorView: View {
                     ProgressView().tint(.white)
                 }
             }
-            .overlay {
-                GeometryReader { geometry in
-                    let size = geometry.size
-                    let rect = Self.rect(box, in: size)
-                    ZStack(alignment: .topLeading) {
-                        // Dim everything outside the box, so it's obvious what
-                        // the model will actually see.
-                        Path { path in
-                            path.addRect(CGRect(origin: .zero, size: size))
-                            path.addRect(rect)
-                        }
-                        .fill(Color(hex: "12200C").opacity(0.4), style: FillStyle(eoFill: true))
-
-                        Rectangle()
-                            .fill(Color(hex: "B5D83A").opacity(0.1))
-                            .overlay(Rectangle().stroke(Color(hex: "E4F683"), lineWidth: 2))
-                            .frame(width: rect.width, height: rect.height)
-                            .offset(x: rect.minX, y: rect.minY)
-                    }
-                    .contentShape(Rectangle())
-                    // High priority so drawing beats the scroll view claiming
-                    // the same vertical drag.
-                    .highPriorityGesture(
-                        DragGesture(minimumDistance: 2)
-                            .onChanged { value in
-                                let start = dragStart ?? value.startLocation
-                                dragStart = start
-                                box = Self.normalisedBox(from: start, to: value.location, in: size)
-                            }
-                            .onEnded { _ in dragStart = nil }
-                    )
-                }
-            }
+            .overlay { SubjectBoxOverlay(box: $box) }
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .accessibilityLabel("Draw a box around the player to reconstruct")
     }
@@ -145,27 +112,7 @@ struct CropEditorView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Geometry
-
-    private static func rect(_ box: [Double], in size: CGSize) -> CGRect {
-        guard box.count == 4 else { return CGRect(origin: .zero, size: size) }
-        return CGRect(x: box[0] * size.width, y: box[1] * size.height,
-                      width: Swift.max(0, box[2] - box[0]) * size.width,
-                      height: Swift.max(0, box[3] - box[1]) * size.height)
-    }
-
-    private static func normalisedBox(from a: CGPoint, to b: CGPoint, in size: CGSize) -> [Double] {
-        func clamp(_ value: CGFloat, _ limit: CGFloat) -> Double {
-            Double(Swift.min(Swift.max(value / Swift.max(limit, 1), 0), 1))
-        }
-        return [clamp(Swift.min(a.x, b.x), size.width), clamp(Swift.min(a.y, b.y), size.height),
-                clamp(Swift.max(a.x, b.x), size.width), clamp(Swift.max(a.y, b.y), size.height)]
-    }
-
-    /// Mirrors the server's `FramePatch` validation, so an invalid box can't
-    /// be submitted just to come back as a 422.
     private static func isValid(_ box: [Double]) -> Bool {
-        box.count == 4 && box.allSatisfy { (0...1).contains($0) }
-            && box[2] - box[0] >= 0.03 && box[3] - box[1] >= 0.03
+        CloudKeyframeSelection.validBox(box)
     }
 }

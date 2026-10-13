@@ -13,15 +13,23 @@ import GoogleSignIn
 @main
 struct FootyLevels_FrontendApp: App {
     init() {
-            FirebaseApp.configure()
-            print("Firebase configured successfully.")
+            ApplicationEnvironment.configureFirebase()
         }
     
     var body: some Scene {
         WindowGroup {
-            // CheckUser gates on auth state and shows either the sign-in flow
-            // or the 3D reconstruction view.
-            CheckUser()
+            Group {
+                #if DEBUG
+                // Local sample entry remains available; it grants no API identity.
+                if ProcessInfo.processInfo.arguments.contains("--require-login") {
+                    CheckUser()
+                } else {
+                    MainTabView(appState: nil)
+                }
+                #else
+                CheckUser()
+                #endif
+            }
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }

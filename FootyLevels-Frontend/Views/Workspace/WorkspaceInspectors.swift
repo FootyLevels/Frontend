@@ -27,6 +27,8 @@ struct MotionInspectorPanel: View {
                     // only runs its setup once, so give it a fresh identity.
                     ModelStageView(root: model.stageRoot, camera: model.camera)
                         .id(ObjectIdentifier(model))
+                        .accessibilityIdentifier("motion-stage")
+                        .accessibilityValue(model.accessibilityStatus)
                     MotionStageOverlays(model: model)
                 } else {
                     SL.stage.overlay(DotGrid())

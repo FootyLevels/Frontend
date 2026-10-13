@@ -1,0 +1,47 @@
+{
+  "ticket": "FP-40",
+  "verifiedDate": "2026-10-11",
+  "environment": "dev",
+  "device": "iPhone 17 Pro simulator, iOS 26.4",
+  "frontendBranch": "codex/fp-40-private-playback",
+  "frontendProbeCommit": "5efa2b3",
+  "apiTransport": "SSH loopback forward 127.0.0.1:8012 to DGX 127.0.0.1:8011",
+  "cloudApiRelease": "e43109d",
+  "modelRelease": "4017f11",
+  "identity": "Real Development Firebase SDK temporary email account",
+  "realServices": ["Firebase Auth", "Firestore", "Supabase private storage", "DGX media worker", "DGX GPU worker"],
+  "source": "Two-second video-only export of the permitted bundled example; no padding",
+  "preparedFrameCount": 60,
+  "motionSegment": {"startFrame": 15, "endFrame": 45, "fps": 30, "sourceTimeOffset": 0.5},
+  "result": {
+    "status": "succeeded", "attempt": 1, "frameCount": 30, "validFrameCount": 30,
+    "vertices": 18439, "faces": 36874, "privateArtifactCount": 10,
+    "topologyVersion": "mhr-f6748e290ef37fbb6877c4cc-v1"
+  },
+  "verified": [
+    "Owned project and app private upload/finalize",
+    "Prepared private video exact size/hash verified by app transport",
+    "Authenticated durable motion submission and status polling",
+    "Result/winning-job/engine/source/contract provenance validation",
+    "Private sequence/topology/chunk/video downloads with exact size/hash validation",
+    "Actual reused RealityKit motion player reaches ready with generated geometry",
+    "AVPlayer seek to local frame 15 maps to source time 1.0 seconds",
+    "Camera presets, wireframe and playback speed controls",
+    "Logout rejects stale source and teardown removes private local video",
+    "Temporary Firebase account deleted and its absence independently verified"
+  ],
+  "liveXCTest": {"passed": 1, "failed": 0, "skipped": 0},
+  "priorDebugRegression": {"passed": 36, "liveTestsSkipped": 2},
+  "privateComponentChecks": {"passed": 11, "fixture": "Synthetic triangle sequence, including missing frames"},
+  "cleanup": {"sourceObjects": 1, "reservedOutputObjects": 17, "totalObjects": 18,
+    "privateModelCacheEntries": 1, "metadataAndObjectsAbsent": true, "ownerQuotaReleased": true,
+    "globalReservedBytesAfterCleanup": 0, "writersQuiescent": true},
+  "limits": {
+    "physicalIPhoneVerified": false, "interactiveGoogleLoginVerified": false,
+    "publicAuthenticatedRouteVerified": false, "fullInteractiveAppEndToEndVerified": false,
+    "privateSelectedKeyframeUIIntegrated": false,
+    "realResultHasMissingFrames": false,
+    "queue": "Bounded database polling can add several minutes before work starts",
+    "tracking": "Body-only profile; no ball reconstruction, correctness scoring or measured ground/scale calibration"
+  }
+}

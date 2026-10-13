@@ -25,6 +25,7 @@ struct CheckUser: View {
                 // video) and Overlay (compare two clips' 3D motion), as tabs.
                 // appState is handed down so the Videos tab can offer sign-out.
                 MainTabView(appState: appState)
+                .id(appState.currentUser?.uid)
                 // 2. Define how this view enters/exits
                 .transition(.opacity)
                 

@@ -9,11 +9,19 @@ struct ProjectsListView: View {
     /// Owned by the tab bar, so a video imported on another tab shows up here.
     let viewModel: ProjectsListViewModel
 
-    @State private var path: [String] = []
+    @State private var cloud = CloudUploadsViewModel()
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var showCamera = false
+    @State private var recordedFile: URL?
+    @State private var requestingCamera = false
+    @State private var cameraError: String?
+    private var hasAccount: Bool { appState?.isLoggedIn == .loggedIn }
+    @State private var path = NavigationPath()
     @State private var pickedVideo: PhotosPickerItem?
     @State private var showServerSettings = false
     /// Set by "Delete Video…"; non-nil while the confirmation dialog is up.
     @State private var pendingDelete: SkillLabProject?
+    @State private var deletionTarget: CloudProject?
 
     /// Server projects, minus the example — that one always opens from the
     /// bundle, so it isn't listed twice when the server has it too.
@@ -27,8 +35,19 @@ struct ProjectsListView: View {
                 VStack(alignment: .leading, spacing: 26) {
                     intro
 
-                    Button {
-                        showServerSettings = true
+                    if let error = appState?.accountError {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(error).font(.callout)
+                            Button("Retry account connection") {
+                                Task { await appState?.connectAccount() }
+                            }
+                        }
+                        .foregroundStyle(SL.errorText)
+                    }
+
+                    if !hasAccount {
+                        Button {
+                            showServerSettings = true
                     } label: {
                         ServerStatusCard(health: viewModel.health,
                                          isLoading: viewModel.isLoading && viewModel.health == nil,
@@ -36,9 +55,11 @@ struct ProjectsListView: View {
                     }
                     .buttonStyle(.plain)
 
+                    }
+
                     // When the server is unreachable the status card already
                     // says so; repeating it as an error adds nothing.
-                    if let error = viewModel.errorMessage, viewModel.health != nil {
+                    if !hasAccount, let error = viewModel.errorMessage, viewModel.health != nil {
                         Text(error)
                             .font(.system(size: 13))
                             .foregroundStyle(SL.errorText)
@@ -56,23 +77,27 @@ struct ProjectsListView: View {
                         }
                     }
 
-                    section("YOUR PROJECTS") {
-                        if serverProjects.isEmpty, !viewModel.isLoading {
-                            welcome
-                        }
-                        ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
-                            let isDeleting = viewModel.deletingId == project.id
-                            NavigationLink(value: project.id) {
-                                ProjectCard(project: project, number: index + 2, isSample: false)
+                    if hasAccount {
+                        privateProjects
+                    } else {
+                        section("YOUR PROJECTS") {
+                            if serverProjects.isEmpty, !viewModel.isLoading {
+                                welcome
                             }
-                            .buttonStyle(.plain)
-                            .opacity(isDeleting ? 0.5 : 1)
-                            .disabled(isDeleting)
-                            .overlay(alignment: .topTrailing) { projectMenu(for: project, isDeleting: isDeleting) }
-                            .contextMenu { deleteButton(for: project) }
-                        }
-                        if !serverProjects.isEmpty {
-                            addAnother
+                            ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
+                                let isDeleting = viewModel.deletingId == project.id
+                                NavigationLink(value: project.id) {
+                                    ProjectCard(project: project, number: index + 2, isSample: false)
+                                }
+                                .buttonStyle(.plain)
+                                .opacity(isDeleting ? 0.5 : 1)
+                                .disabled(isDeleting)
+                                .overlay(alignment: .topTrailing) { projectMenu(for: project, isDeleting: isDeleting) }
+                                .contextMenu { deleteButton(for: project) }
+                            }
+                            if !serverProjects.isEmpty {
+                                addAnother
+                            }
                         }
                     }
 
@@ -87,9 +112,10 @@ struct ProjectsListView: View {
             .navigationDestination(for: String.self) { projectId in
                 ProjectDetailView(projectId: projectId, projectNumber: number(for: projectId))
             }
-            .refreshable { await viewModel.refresh() }
+            .navigationDestination(for: CloudProject.self) { CloudProjectStatusView(project: $0) }
+            .refreshable { if hasAccount { await cloud.refresh() } else { await viewModel.refresh() } }
             .toolbar { toolbar }
-            .overlay { UploadProgressOverlay(phase: viewModel.uploadPhase) }
+            .overlay { uploadOverlay }
             .sheet(isPresented: $showServerSettings) {
                 ServerSettingsView(suggestions: viewModel.health?.network?.urls ?? []) {
                     Task { await viewModel.refresh() }
@@ -103,7 +129,38 @@ struct ProjectsListView: View {
             } message: { project in
                 Text("“\(project.title)” and its key frames and 3D results will be removed from the server. This can't be undone.")
             }
+            .sheet(item: Binding(get: { cloud.pending }, set: { if $0 == nil { cloud.cancelEditor() } })) { clip in
+                ClipImportEditor(clip: clip, onCancel: { cloud.cancelEditor() }) { title, label, start, end in
+                    cloud.submit(title: title, label: label, start: start, end: end)
+                }
+            }
+            .fullScreenCover(isPresented: $showCamera, onDismiss: {
+                if let file = recordedFile { recordedFile = nil; cloud.importCamera(file) }
+            }) {
+                VideoRecordingPicker(onCancel: { showCamera = false }, onRecorded: { file in
+                    showCamera = false
+                    recordedFile = file
+                }, onError: { message in showCamera = false; cameraError = message })
+                .ignoresSafeArea()
+            }
+            .alert("Recording unavailable", isPresented: Binding(get: { cameraError != nil }, set: { if !$0 { cameraError = nil } })) {
+                Button("OK", role: .cancel) { cameraError = nil }
+            } message: { Text(cameraError ?? "") }
+            .confirmationDialog("Delete recording?", isPresented: Binding(
+                get: { deletionTarget != nil }, set: { if !$0 { deletionTarget = nil } }),
+                titleVisibility: .visible, presenting: deletionTarget) { project in
+                Button("Delete recording", role: .destructive) { cloud.delete(project); deletionTarget = nil }
+                Button("Cancel", role: .cancel) { deletionTarget = nil }
+            } message: { project in
+                Text("Remove \(project.title) and its 3D results from your library? Stored files are cleared after outstanding links expire.")
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active { cloud.pause() }
+                else if hasAccount, !showCamera, !requestingCamera { Task { await cloud.refresh() } }
+            }
+            .onDisappear { cloud.pause(); cloud.cancelEditor() }
             .task {
+                if hasAccount { await appState?.connectAccount(); cloud.configure(); await cloud.refresh(); return }
                 // With no address yet (a fresh device install) there's nothing to
                 // fetch — the example still works, and the status card offers setup.
                 if viewModel.isConfigured {
@@ -113,6 +170,7 @@ struct ProjectsListView: View {
             .onChange(of: pickedVideo) { _, item in
                 guard let item else { return }
                 pickedVideo = nil
+                if hasAccount { cloud.importGallery(item); return }
                 Task {
                     if let projectId = await viewModel.upload(item) {
                         path.append(projectId)
@@ -121,6 +179,76 @@ struct ProjectsListView: View {
             }
         }
         .tint(SL.green)
+    }
+
+    private var privateProjects: some View {
+        section("YOUR PRIVATE PROJECTS") {
+            if let error = cloud.errorMessage {
+                Text(error).font(.callout).foregroundStyle(SL.errorText)
+            }
+            if ApplicationEnvironment.apiBaseURL == nil {
+                Text("Private uploads need the account API connection. The included example is available on this page.")
+                    .font(.callout).foregroundStyle(SL.muted)
+            }
+            if cloud.isLoading { ProgressView("Loading your projects…") }
+            ForEach(cloud.drafts) { draft in
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(draft.title).font(.headline)
+                    Text(draft.discarding ? "Removal waiting to complete" : "Saved on this device · upload unfinished")
+                        .font(.caption).foregroundStyle(SL.muted)
+                    HStack {
+                        Button(draft.discarding ? "Retry removal" : "Resume") { cloud.resume(draft) }
+                        if !draft.discarding {
+                            Button("Discard", role: .destructive) { cloud.discard(draft) }
+                        }
+                    }.disabled(cloud.isBusy || cloud.isLoading)
+                }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(SL.page, in: RoundedRectangle(cornerRadius: 12))
+            }
+            ForEach(cloud.projects.filter { project in !cloud.drafts.contains(where: { $0.projectId == project.id }) }) { project in
+                HStack {
+                NavigationLink(value: project) {
+                    HStack(spacing: 14) {
+                        Image(systemName: "lock.fill").foregroundStyle(SL.green)
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(project.title).font(SL.display(17, .bold)).foregroundStyle(SL.ink)
+                            Text(project.statusText).font(.caption).foregroundStyle(SL.muted)
+                            if let label = project.label { Text(label).font(.caption).foregroundStyle(SL.muted) }
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").foregroundStyle(SL.muted)
+                    }.padding(16).background(SL.page, in: RoundedRectangle(cornerRadius: 12))
+                }.buttonStyle(.plain)
+                Button(role: .destructive) { deletionTarget = project } label: {
+                    Image(systemName: "trash").padding(10)
+                }.accessibilityLabel("Delete \(project.title)")
+                    .disabled(cloud.isBusy || cloud.isLoading)
+                }
+            }
+            if !cloud.deletions.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("REMOVAL STATUS").font(.caption.bold())
+                    ForEach(cloud.deletions) { removal in
+                        Text(removal.statusText).font(.callout).foregroundStyle(SL.muted)
+                    }
+                    Button("Check removal status") { Task { await cloud.refresh() } }
+                        .disabled(cloud.isBusy || cloud.isLoading)
+                }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(SL.page, in: RoundedRectangle(cornerRadius: 12))
+            }
+            if cloud.hasMore { Button("Load more projects") { Task { await cloud.refresh(more: true) } }.disabled(cloud.isBusy || cloud.isLoading) }
+            importPicker { Label(cloud.projects.isEmpty ? "Import a video" : "Import another video", systemImage: "photo.on.rectangle") }
+                .buttonStyle(.slPrimary)
+            Button {
+                requestingCamera = true
+                Task {
+                    defer { requestingCamera = false }
+                    cameraError = await VideoRecordingPicker.permissionError()
+                    if cameraError == nil { showCamera = true }
+                }
+            } label: { Label("Record a video", systemImage: "video") }
+                .disabled(!canImport).accessibilityIdentifier("recordPrivateVideo")
+        }
     }
 
     private func number(for projectId: String) -> Int {
@@ -207,7 +335,7 @@ struct ProjectsListView: View {
 
     /// False while an upload is running or the server is unreachable.
     private var canImport: Bool {
-        viewModel.uploadPhase == nil && viewModel.health != nil
+        hasAccount ? (!cloud.isBusy && !cloud.isLoading && !requestingCamera && cloud.pending == nil && cloud.isConfigured) : (viewModel.uploadPhase == nil && viewModel.health != nil)
     }
 
     /// The video picker behind every import entry point.
@@ -283,12 +411,14 @@ struct ProjectsListView: View {
                 Label("Import video", systemImage: "plus")
             }
         }
+        if !hasAccount {
         ToolbarItem(placement: .topBarTrailing) {
             Button {
                 showServerSettings = true
             } label: {
                 Label("Server", systemImage: "server.rack")
             }
+        }
         }
         if let appState {
             ToolbarItem(placement: .topBarLeading) {
@@ -298,6 +428,23 @@ struct ProjectsListView: View {
                     Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var uploadOverlay: some View {
+        if hasAccount, let phase = cloud.phase {
+            VStack(spacing: 14) {
+                Text(phase)
+                if let progress = cloud.progress {
+                    ProgressView(value: progress).frame(width: 180)
+                    Text("\(Int(progress * 100))%")
+                } else { ProgressView() }
+                Button("Pause") { cloud.pause() }.accessibilityIdentifier("pausePrivateUpload")
+            }
+            .padding(24).background(SL.page, in: RoundedRectangle(cornerRadius: 12)).shadow(radius: 16)
+        } else {
+            UploadProgressOverlay(phase: viewModel.uploadPhase)
         }
     }
 }

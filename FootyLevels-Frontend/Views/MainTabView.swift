@@ -3,7 +3,8 @@ import SwiftUI
 /// The signed-in app: the video library and the overlay comparison, on a
 /// bottom tab bar. Each tab owns its own navigation.
 struct MainTabView: View {
-    let appState: AppStateViewModel
+    /// Nil for the Debug local-sample entry, which has no account.
+    let appState: AppStateViewModel?
 
     /// Shared by both tabs, so a video imported on one shows up on the other.
     @State private var library = ProjectsListViewModel()

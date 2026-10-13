@@ -10,10 +10,6 @@ struct EmailSignUpView: View {
     @Binding var appState:AppStateViewModel
 
     @State var signUpVM = UserSigninViewModel()
-    // State variables to hold user input
-    @State private var name = ""
-    @State private var email = ""
-    @State private var password = ""
     @State private var confirmPassword = ""
     
     // Simple computed property for password validation feedback
@@ -85,16 +81,18 @@ struct EmailSignUpView: View {
                     }
                 }
                 
+                if let error = signUpVM.errorMessage {
+                    Text(error).foregroundStyle(.red).font(.callout)
+                }
+
                 // --- Sign Up Button ---
                 Button {
                     Task{
                         if let user = await signUpVM.signUpWithEmail(){
-                            print("User Signed Up: \(user)")
                             appState.currentUser = user
                             appState.isLoggedIn = .loggedIn
                         }
                     }
-                    print("Attempting to sign up with Email: \(email)")
                 } label: {
                     Text("Sign Up")
                         .font(.title3)
@@ -106,7 +104,7 @@ struct EmailSignUpView: View {
                         .cornerRadius(10)
                 }
                 // Disable the button if passwords don't match or required fields are empty
-//                .disabled(!passwordsMatch || email.isEmpty || password.isEmpty || name.isEmpty)
+                .disabled(!passwordsMatch || signUpVM.email.isEmpty || signUpVM.password.isEmpty || signUpVM.name.isEmpty || signUpVM.isLoading)
                 .padding(.top, 10)
                 
                 Spacer() // Pushes content to the top

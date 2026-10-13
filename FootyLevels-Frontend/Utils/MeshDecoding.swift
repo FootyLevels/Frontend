@@ -1,5 +1,6 @@
 import Foundation
 import RealityKit
+import zlib
 
 // Decoders for the backend's binary assets: gzip'd motion chunks, uint32
 // topology, and GLB meshes. RealityKit loads USDZ but not glTF, so key-frame
@@ -8,6 +9,29 @@ import RealityKit
 // MARK: - Gzip
 
 enum Gzip {
+    /// The private format requires a complete gzip member, valid CRC/trailer,
+    /// exact output size and no trailing data. Never inflate beyond this buffer.
+    static func decompress(_ data: Data, expectedByteCount: Int) throws -> Data {
+        guard (1...4_500_000).contains(expectedByteCount), data.count <= 52_428_800 else { throw CloudPlaybackError.corruptFile }
+        var stream = z_stream()
+        guard inflateInit2_(&stream, MAX_WBITS + 16, ZLIB_VERSION, Int32(MemoryLayout<z_stream>.size)) == Z_OK
+        else { throw CloudPlaybackError.corruptFile }
+        defer { inflateEnd(&stream) }
+        var result = Data(count: expectedByteCount + 1)
+        let status = data.withUnsafeBytes { input in
+            result.withUnsafeMutableBytes { output in
+                stream.next_in = UnsafeMutablePointer(mutating: input.bindMemory(to: Bytef.self).baseAddress)
+                stream.avail_in = uInt(data.count)
+                stream.next_out = output.bindMemory(to: Bytef.self).baseAddress
+                stream.avail_out = uInt(output.count)
+                return inflate(&stream, Z_FINISH)
+            }
+        }
+        guard status == Z_STREAM_END, stream.total_out == expectedByteCount, stream.avail_in == 0
+        else { throw CloudPlaybackError.corruptFile }
+        result.removeLast(); return result
+    }
+
     /// Inflates a gzip member (RFC 1952). Data that isn't gzip is returned as-is,
     /// in case a proxy or server ever sends it with `Content-Encoding: gzip` and
     /// URLSession has already decoded it.
@@ -130,12 +154,54 @@ struct TriangleMesh {
 /// Node transforms are ignored — the backend writes vertices already in their
 /// final space with identity nodes. Materials and vertex colours are dropped.
 enum GLBLoader {
+    /// Private body files have one bounded, baked-in triangle mesh. Reject
+    /// unsupported scene transforms rather than silently misplacing a pose.
+    static func loadPrivate(_ data: Data) throws -> TriangleMesh {
+        guard data.count <= 4_194_304, data.count >= 20 else { throw CloudPlaybackError.corruptFile }
+        let bytes = [UInt8](data), length = Int(readUInt32(bytes, 12))
+        guard length <= data.count - 20 else { throw CloudPlaybackError.corruptFile }
+        let raw = try JSONSerialization.jsonObject(with: Data(bytes[20..<(20+length)]))
+        guard let json = raw as? [String: Any], let meshes = json["meshes"] as? [[String: Any]], meshes.count == 1,
+              let primitives = meshes[0]["primitives"] as? [[String: Any]], primitives.count == 1,
+              (primitives[0]["mode"] as? Int ?? 4) == 4, primitives[0]["indices"] is Int,
+              let buffers = json["buffers"] as? [[String: Any]], buffers.count == 1, buffers[0]["uri"] == nil,
+              let views = json["bufferViews"] as? [[String: Any]], views.allSatisfy({ $0["buffer"] as? Int == 0 }),
+              let accessors = json["accessors"] as? [[String: Any]],
+              accessors.allSatisfy({ $0["sparse"] == nil }),
+              primitives[0]["targets"] == nil, primitives[0]["extensions"] == nil,
+              json["extensionsRequired"] == nil, json["animations"] == nil, json["skins"] == nil,
+              let nodes = json["nodes"] as? [[String: Any]], (1...2).contains(nodes.count),
+              nodes.filter({ $0["mesh"] as? Int == 0 }).count == 1
+        else { throw CloudPlaybackError.unsupportedVersion }
+        guard let attributes = primitives[0]["attributes"] as? [String: Int], attributes["POSITION"] != nil,
+              let indexAccessor = primitives[0]["indices"] as? Int else { throw CloudPlaybackError.unsupportedVersion }
+        let geometryAccessors = [attributes["POSITION"],attributes["NORMAL"],indexAccessor].compactMap { $0 }
+        guard geometryAccessors.allSatisfy({ accessors.indices.contains($0) && (accessors[$0]["normalized"] as? Bool ?? false) == false })
+        else { throw CloudPlaybackError.unsupportedVersion }
+        let identity: [Double] = [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+        for node in nodes {
+            guard node["translation"] == nil, node["rotation"] == nil, node["scale"] == nil,
+                  node["skin"] == nil, node["weights"] == nil,
+                  node["matrix"] == nil || node["matrix"] as? [Double] == identity,
+                  node["mesh"] == nil || node["mesh"] as? Int == 0
+            else { throw CloudPlaybackError.unsupportedVersion }
+        }
+        let mesh = try load(data)
+        guard (1...25_000).contains(mesh.positions.count), (1...150_000).contains(mesh.indices.count),
+              mesh.indices.count % 3 == 0,
+              mesh.positions.allSatisfy({ p in p.x.isFinite && p.y.isFinite && p.z.isFinite && max(abs(p.x),abs(p.y),abs(p.z)) <= 10_000 }),
+              mesh.normals == nil || mesh.normals!.count == mesh.positions.count && mesh.normals!.allSatisfy({ $0.x.isFinite && $0.y.isFinite && $0.z.isFinite })
+        else { throw CloudPlaybackError.corruptFile }
+        return mesh
+    }
+
     static func load(_ data: Data) throws -> TriangleMesh {
         let bytes = [UInt8](data)
         guard bytes.count >= 20, readUInt32(bytes, 0) == 0x4654_6C67 else {
             throw MeshDecodingError.notGLB
         }
         guard readUInt32(bytes, 4) == 2 else { throw MeshDecodingError.unsupportedGLTFVersion }
+        guard Int(readUInt32(bytes, 8)) == bytes.count else { throw MeshDecodingError.truncated }
 
         var json: Data?
         var bin: Data?
@@ -146,11 +212,13 @@ enum GLBLoader {
             let start = offset + 8
             guard start + length <= bytes.count else { throw MeshDecodingError.truncated }
             let chunk = Data(bytes[start..<(start + length)])
-            if type == 0x4E4F_534A { json = chunk }       // "JSON"
-            else if type == 0x004E_4942 { bin = chunk }   // "BIN\0"
+            guard length % 4 == 0 else { throw MeshDecodingError.truncated }
+            if type == 0x4E4F_534A, json == nil, offset == 12 { json = chunk }
+            else if type == 0x004E_4942, bin == nil, json != nil { bin = chunk }
+            else { throw MeshDecodingError.unsupportedAccessor }
             offset = start + length
         }
-        guard let json, let bin else { throw MeshDecodingError.missingChunk }
+        guard offset == bytes.count, let json, let bin else { throw MeshDecodingError.missingChunk }
 
         let document = try JSONDecoder().decode(GLTFDocument.self, from: json)
         var mesh = TriangleMesh(positions: [], normals: [], indices: [])
@@ -224,7 +292,8 @@ private struct GLTFDocument: Decodable {
             throw MeshDecodingError.unsupportedAccessor
         }
         return try bin.withUnsafeBytes { raw in
-            guard start + stride * (accessor.count - 1) + 12 <= raw.count else {
+            guard start >= 0, start <= raw.count, 12 <= raw.count-start,
+                  accessor.count-1 <= (raw.count-start-12)/stride else {
                 throw MeshDecodingError.truncated
             }
             return (0..<accessor.count).map { i in
@@ -249,7 +318,8 @@ private struct GLTFDocument: Decodable {
         guard accessor.type == "SCALAR" else { throw MeshDecodingError.unsupportedAccessor }
 
         return try bin.withUnsafeBytes { raw in
-            guard start + stride * (accessor.count - 1) + size <= raw.count else {
+            guard start >= 0, start <= raw.count, size <= raw.count-start,
+                  accessor.count-1 <= (raw.count-start-size)/stride else {
                 throw MeshDecodingError.truncated
             }
             return (0..<accessor.count).map { i in
@@ -266,12 +336,17 @@ private struct GLTFDocument: Decodable {
     private func layout(_ index: Int, elementSize: Int) throws -> (Accessor, start: Int, stride: Int) {
         guard accessors.indices.contains(index) else { throw MeshDecodingError.unsupportedAccessor }
         let accessor = accessors[index]
-        guard accessor.count > 0,
+        guard (1...150_000).contains(accessor.count),
               let viewIndex = accessor.bufferView, bufferViews.indices.contains(viewIndex) else {
             throw MeshDecodingError.unsupportedAccessor   // sparse / empty accessors
         }
         let view = bufferViews[viewIndex]
-        return (accessor, (view.byteOffset ?? 0) + (accessor.byteOffset ?? 0), view.byteStride ?? elementSize)
+        let offset = accessor.byteOffset ?? 0, base = view.byteOffset ?? 0, stride = view.byteStride ?? elementSize
+        guard base >= 0, base <= 52_428_800, offset >= 0, offset <= view.byteLength,
+              view.byteLength <= 52_428_800, stride >= elementSize, stride <= 1_048_576,
+              elementSize <= view.byteLength-offset, accessor.count-1 <= (view.byteLength-offset-elementSize)/stride
+        else { throw MeshDecodingError.truncated }
+        return (accessor, base + offset, stride)
     }
 }
 
