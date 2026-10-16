@@ -26,6 +26,7 @@ struct CirclePostView: View {
                 if let error = model.errorMessage { CommunityNotice(message: error) }
                 video
                 if model.hasAccess {
+                    if model.post.motion != nil { motionPanel }
                     attemptLinks
                     commentComposer
                     comments
@@ -80,6 +81,46 @@ struct CirclePostView: View {
             }
         }
     }
+    private var motionPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("SHARED 3D MOTION", systemImage: "cube").font(.caption.weight(.semibold))
+            if let motion = model.motion {
+                ZStack {
+                    ModelStageView(root: motion.stageRoot, camera: motion.camera).id(ObjectIdentifier(motion))
+                        .accessibilityIdentifier("circle-shared-motion").accessibilityValue(motion.accessibilityStatus)
+                    switch motion.state {
+                    case .loading(let message): ProgressView(message)
+                    case .failed(let message): Text(message).font(.callout).foregroundStyle(SL.errorText).padding()
+                    case .ready: EmptyView()
+                    }
+                    if motion.isOutsideSegment { Text("Play the selected motion segment to see its 3D pose.").font(.callout).padding() }
+                }.frame(height: 320).clipped().background(SL.stage)
+                if motion.missingPose && !motion.isOutsideSegment { Text("Player not reconstructed in this frame").font(.callout).foregroundStyle(SL.noticeText) }
+                if motion.waitingForChunk { Text("Loading this frame’s 3D data…").font(.callout).foregroundStyle(SL.muted) }
+                if let warning = motion.assetWarning { Text(warning).font(.callout).foregroundStyle(SL.errorText) }
+                ScrollView(.horizontal) {
+                    HStack { ForEach(CameraAngle.allCases) { angle in Button(angle.rawValue) { motion.show(angle) } } }.font(.callout)
+                }
+                HStack {
+                    Toggle("Follow", isOn: Binding(get: { motion.follow }, set: { motion.follow = $0 }))
+                    Toggle("Wireframe", isOn: Binding(get: { motion.wireframe }, set: { motion.wireframe = $0 }))
+                }.font(.callout)
+                Button("Close 3D motion") { model.closeMotion() }.font(.callout)
+            } else {
+                Button { model.openMotion() } label: { Label("Open shared 3D motion", systemImage: "cube.transparent") }
+                    .buttonStyle(.slSecondary).disabled(model.isLoadingMotion || model.playback == nil)
+            }
+            if model.isLoadingMotion { ProgressView("Verifying and loading shared 3D motion…") }
+            if let error = model.motionErrorMessage { CommunityNotice(message: error) }
+            if let shared = model.post.motion {
+                Button("Jump to motion segment · \(CommunityValidation.timeLabel(shared.startTime))–\(CommunityValidation.timeLabel(shared.startTime + shared.duration))") { model.seekToMotion() }
+                    .font(.callout).disabled(model.playback == nil)
+            }
+            Text("The video controls also move the 3D model. Feedback timestamps always refer to the full video. Drag the model to orbit.")
+                .font(.footnote).foregroundStyle(SL.muted)
+        }.padding(16).slPanel()
+    }
+
     private var attemptLinks: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let id = model.post.previousPostId {

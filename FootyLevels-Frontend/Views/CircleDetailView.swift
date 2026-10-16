@@ -66,7 +66,7 @@ struct CircleDetailView: View {
                 Spacer()
                 Button { showShare = true } label: { Label("Share attempt", systemImage: "plus") }.buttonStyle(.slPrimary)
             }.disabled(model.isWorking || model.isRemoved)
-            Text("Share a prepared video with this circle. 3D comparison stays in your private workspace for now.").font(.footnote)
+            Text("Share a prepared video and optionally include its completed 3D motion. Your other projects stay private.").font(.footnote)
         }.padding(16).slPanel()
     }
     private var circleMenu: some View {
@@ -107,6 +107,7 @@ struct CirclePostCard: View {
                 Spacer()
                 Text(CommunityValidation.timeLabel(post.video.duration)).monospacedDigit()
             }.font(.caption)
+            if post.motion != nil { Label("Video + 3D motion", systemImage: "cube").font(.caption.weight(.semibold)) }
             if post.previousPostId != nil { Label("Another attempt", systemImage: "arrow.triangle.2.circlepath").font(.caption.weight(.semibold)) }
         }.padding(18).frame(maxWidth: .infinity, alignment: .leading).slPanel()
     }

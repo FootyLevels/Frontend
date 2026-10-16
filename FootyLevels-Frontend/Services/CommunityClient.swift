@@ -86,7 +86,7 @@ final class CommunityClient {
     }
 
     func share(circle id: String, project: CloudProject, skill: String, note: String,
-               previous: CirclePost?, idempotencyKey: String) async throws -> CirclePost {
+               previous: CirclePost?, motion: CirclePost.Motion? = nil, idempotencyKey: String) async throws -> CirclePost {
         try checkSession(); try validID(project.id)
         guard project.ownerId == account.uid, project.state == "ready", let media = project.preparedMedia,
               media.profileVersion == "media-720p30-v1" else { throw CommunityError.unavailableClip }
@@ -96,6 +96,12 @@ final class CommunityClient {
         var body: [String: Any] = ["projectId": project.id,
             "skill": try CommunityValidation.trimmed(skill, limit: 60),
             "note": try CommunityValidation.trimmed(note, limit: 500, required: false)]
+        if let motion {
+            try motion.validate(author: account.uid, projectID: project.id, video: video)
+            guard motion.reconstruction.inputRevision == project.inputRevision,
+                  motion.reconstruction.id == project.latestReconstructionId else { throw CommunityError.unavailableMotion }
+            body["reconstructionId"] = motion.reconstruction.id
+        }
         if let previous {
             try previous.validate(circle: id)
             guard previous.authorId == account.uid else { throw CommunityError.invalidInput }
@@ -104,7 +110,7 @@ final class CommunityClient {
         let item: CirclePost = try await send("POST", path: try circlePath(id) + "/posts", body: body, key: idempotencyKey)
         try item.validate(circle: id)
         guard item.authorId == account.uid, item.projectId == project.id, item.video == video,
-              item.previousPostId == previous?.id else { throw CommunityError.invalidResponse }
+              item.previousPostId == previous?.id, item.motion == motion else { throw CommunityError.invalidResponse }
         return item
     }
 
@@ -146,6 +152,41 @@ final class CommunityClient {
             }
         }
         return page
+    }
+
+    /// Only the owner can discover a candidate. Sharing always pins the exact
+    /// completed result selected here; no generation is started by this flow.
+    func shareableMotion(project: CloudProject) async throws -> (CloudProject, CirclePost.Motion?) {
+        try checkSession(); try validID(project.id)
+        let latest: CloudProject = try await send("GET", path: "/api/projects/\(project.id)")
+        guard latest.id == project.id, latest.ownerId == account.uid, latest.state == "ready",
+              latest.inputRevision == project.inputRevision, latest.preparedMedia == project.preparedMedia,
+              let media = latest.preparedMedia else { throw CommunityError.unavailableClip }
+        guard let id = latest.latestReconstructionId else { return (latest, nil) }
+        try validID(id)
+        let result: CloudReconstruction = try await send("GET", path: "/api/reconstructions/\(id)")
+        guard result.id == id else { throw CommunityError.invalidResponse }
+        try validID(result.jobId)
+        let job: CloudJob = try await send("GET", path: "/api/jobs/\(result.jobId)")
+        let motion = CirclePost.Motion(reconstruction: result, job: job)
+        let video = CirclePost.Video(duration: media.duration, width: media.width, height: media.height,
+            fps: media.fps, frameCount: media.frameCount, asset: media.video)
+        try CirclePost.validateVideo(video, author: account.uid, project: latest.id)
+        try motion.validate(author: account.uid, projectID: latest.id, video: video)
+        guard result.inputRevision == latest.inputRevision else { throw CommunityError.invalidResponse }
+        return (latest, motion)
+    }
+
+    func motionAssets(_ post: CirclePost, transport: PrivatePlaybackAssets.Transport? = nil) async throws -> PrivatePlaybackAssets {
+        guard let motion = post.motion else { throw CommunityError.unavailableMotion }
+        _ = try await self.post(circle: post.circleId, id: post.id, pinned: post)
+        try checkSession()
+        let mapping = Dictionary(uniqueKeysWithValues: motion.reconstruction.artifacts.map {
+            (String($0.objectKey.split(separator: "/").last!), $0)
+        })
+        return try PrivatePlaybackAssets(api: api, credentials: credentials, environment: environment,
+            grantPath: try postPath(post.circleId, post.id) + "/motion-assets", artifacts: mapping,
+            maximumGrantLifetime: 61, transport: transport)
     }
 
     /// Membership is revalidated before every new local file. Grant refresh itself

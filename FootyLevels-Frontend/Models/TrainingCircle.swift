@@ -45,6 +45,54 @@ struct CirclePost: Decodable, Identifiable, Hashable {
     let createdAt: String
     let previousPostId: String?
     let video: Video
+    var motion: Motion? = nil
+
+    struct Motion: Decodable, Hashable {
+        let reconstruction: CloudReconstruction
+        let job: CloudJob
+
+        var startTime: Double { Double(job.motionSegment?.startFrame ?? 0) / 30 }
+        var duration: Double { Double(reconstruction.requestedFrameCount) / 30 }
+
+        func validate(author: String, projectID: String, video: Video) throws {
+            let result = reconstruction
+            guard [result.id, result.jobId, job.id].allSatisfy(CommunityValidation.validID), result.inputRevision > 0,
+                  result.id == job.id, result.jobId == job.id, job.ownerId == author, job.projectId == projectID,
+                  job.inputRevision == result.inputRevision, job.kind == "reconstructMotion",
+                  job.status == (result.outcome == "ready" ? "succeeded" : "partial"), job.stage == result.outcome,
+                  job.reconstructionId == result.id, job.profileVersion == result.profileVersion,
+                  job.sourceAsset == video.asset, job.sourceAsset == result.sourceAsset,
+                  job.inputHash.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil,
+                  (1...5).contains(job.attemptCount), job.keyframes == nil, job.errorCode == nil,
+                  let segment = job.motionSegment, segment.startFrame >= 0, segment.endFrame <= video.frameCount,
+                  segment.endFrame > segment.startFrame,
+                  segment.endFrame - segment.startFrame == result.requestedFrameCount
+            else { throw CommunityError.invalidResponse }
+            try result.validateSharedMotion(owner: author, projectID: projectID,
+                inputRevision: job.inputRevision, video: video.asset)
+            var names = Set<String>()
+            for asset in result.artifacts {
+                let parts = asset.objectKey.split(separator: "/")
+                guard parts.count >= 2, parts[parts.count - 2] == String(job.attemptCount), let name = parts.last,
+                      names.insert(String(name)).inserted else { throw CloudPlaybackError.invalidAsset }
+                switch String(name) {
+                case "sequence.json": guard asset.contentType == "application/json" else { throw CloudPlaybackError.invalidAsset }
+                case "video.mp4": guard asset.contentType == "video/mp4" else { throw CloudPlaybackError.invalidAsset }
+                case "faces.bin": guard asset.contentType == "application/octet-stream" else { throw CloudPlaybackError.invalidAsset }
+                default:
+                    if name.range(of: "^body-[0-9]{6}\\.bin\\.gz$", options: .regularExpression) != nil {
+                        guard asset.contentType == "application/gzip" else { throw CloudPlaybackError.invalidAsset }
+                    } else if name.range(of: "^preview-[0-9]{4}\\.jpg$", options: .regularExpression) != nil {
+                        guard asset.contentType == "image/jpeg",
+                              let index = Int(name.dropFirst(8).dropLast(4)), index < result.requestedFrameCount else { throw CloudPlaybackError.invalidAsset }
+                    } else { throw CloudPlaybackError.invalidAsset }
+                }
+            }
+            let expectedChunks = Set(stride(from: 0, to: result.requestedFrameCount, by: 30).map { String(format: "body-%06d.bin.gz", $0) })
+            guard names.contains("faces.bin"), Set(names.filter { $0.hasPrefix("body-") }) == expectedChunks
+            else { throw CloudPlaybackError.invalidResult }
+        }
+    }
 
     struct Video: Decodable, Hashable {
         let duration: Double
@@ -63,9 +111,10 @@ struct CirclePost: Decodable, Identifiable, Hashable {
               previousPostId != id else { throw CommunityError.invalidResponse }
         if let pinned {
             guard id == pinned.id, circleId == pinned.circleId, authorId == pinned.authorId,
-                  projectId == pinned.projectId, video == pinned.video else { throw CommunityError.invalidResponse }
+                  projectId == pinned.projectId, video == pinned.video, motion == pinned.motion else { throw CommunityError.invalidResponse }
         }
         try Self.validateVideo(video, author: authorId, project: projectId)
+        try motion?.validate(author: authorId, projectID: projectId, video: video)
     }
 
     static func validateVideo(_ video: Video, author: String, project: String) throws {
@@ -140,11 +189,12 @@ enum CommunityValidation {
 }
 
 enum CommunityError: LocalizedError {
-    case invalidInput, invalidResponse, unavailableClip
+    case invalidInput, invalidResponse, unavailableClip, unavailableMotion
     var errorDescription: String? {
         switch self {
         case .invalidInput: return "Check the text length and any attached video time, then try again."
         case .invalidResponse: return "The circle response couldn't be verified. Please refresh."
+        case .unavailableMotion: return "The latest 3D motion isn't available for sharing. You can still share the video on its own."
         case .unavailableClip: return "Choose one of your prepared private videos. New uploads must finish preparation first."
         }
     }

@@ -29,6 +29,7 @@ final class MotionPlayerViewModel {
     /// False when the current frame has no reconstruction.
     var missingPose = false
     var waitingForChunk = false
+    var isOutsideSegment = false
     var assetWarning: String?
     var contactLabel: String?
     var stageRoot: Entity?
@@ -41,6 +42,10 @@ final class MotionPlayerViewModel {
     @ObservationIgnored let camera = OrbitCamera()
     @ObservationIgnored private let assets: any MotionAssetSource
     @ObservationIgnored private let player: AVPlayer
+    @ObservationIgnored private let playbackTimeOffset: Double
+    @ObservationIgnored private let usesCanonicalVideoClock: Bool
+    @ObservationIgnored private var lifecycle = UUID()
+    @ObservationIgnored private var isClosed = false
     @ObservationIgnored private var body: AnimatedBodyMesh?
     @ObservationIgnored private var ball: Entity?
     /// Decoded `uint16` values per chunk index.
@@ -55,11 +60,15 @@ final class MotionPlayerViewModel {
     init(projectId: String, sequencePath: String, player: AVPlayer) {
         self.projectId = projectId
         self.assets = LegacyMotionAssetSource(projectId: projectId, sequencePath: sequencePath)
-        self.player = player
+        self.player = player; self.playbackTimeOffset = 0; self.usesCanonicalVideoClock = false
     }
 
-    init(projectId: String, assets: any MotionAssetSource, player: AVPlayer) {
+    /// Omit the offset for the existing trimmed private clip. Shared playback
+    /// explicitly supplies its segment start in the full prepared video.
+    init(projectId: String, assets: any MotionAssetSource, player: AVPlayer, playbackTimeOffset: Double? = nil) {
         self.projectId = projectId; self.assets = assets; self.player = player
+        self.playbackTimeOffset = playbackTimeOffset ?? 0
+        self.usesCanonicalVideoClock = playbackTimeOffset != nil
     }
 
     var sourceTime: Double { assets.sourceTimeOffset + Double(currentFrame) / fps }
@@ -77,9 +86,12 @@ final class MotionPlayerViewModel {
     /// one 30-frame chunk — so the body appears while later seconds of the clip
     /// are still arriving.
     func load() async {
-        guard stageRoot == nil else { return }
+        guard stageRoot == nil, !isClosed else { return }
+        let scope = lifecycle
         do {
+            guard playbackTimeOffset.isFinite, playbackTimeOffset >= 0 else { throw CloudPlaybackError.invalidResult }
             let sequence = try await assets.sequence()
+            try requireActive(scope)
             guard sequence.encoding == "uint16-le-xyz-gzip" else {
                 throw MeshDecodingError.unsupportedEncoding(sequence.encoding)
             }
@@ -94,6 +106,7 @@ final class MotionPlayerViewModel {
             defer { firstChunkTask.cancel() }
 
             let indices = BinaryBuffers.array(of: UInt32.self, from: try await topologyTask)
+            try requireActive(scope)
             guard indices.count == sequence.faceCount * 3, indices.allSatisfy({ $0 < sequence.vertexCount }) else {
                 throw MeshDecodingError.chunkSizeMismatch(file: sequence.topologyFile,
                                                           expected: sequence.faceCount * 12,
@@ -103,10 +116,13 @@ final class MotionPlayerViewModel {
                                             material: StageBuilder.bodyMaterial)
             self.body = body
 
-            chunks[firstChunk] = try await firstChunkTask.value
+            let firstValues = try await firstChunkTask.value
+            try requireActive(scope)
+            chunks[firstChunk] = firstValues
             loadedChunks = 1
 
             let ball = await ballTask
+            try requireActive(scope)
             self.ball = ball
 
             // A generous floor centred on the action, in 25 cm cells like the
@@ -115,6 +131,7 @@ final class MotionPlayerViewModel {
             let floorSize = Swift.min(50, Swift.max(sequence.extent.x, sequence.extent.z) + 10)
             let stage = await StageBuilder.makeStage(content: [body.entity, ball].compactMap { $0 },
                                                      floorCenter: floorCenter, floorSize: floorSize)
+            try requireActive(scope)
             stageRoot = stage.root
 
             camera.homeDistance = 4.1
@@ -122,18 +139,21 @@ final class MotionPlayerViewModel {
             camera.show(.source)
 
             render(time: player.currentTime().seconds, force: true)
+            try requireActive(scope)
             observePlayback()
             state = .ready
 
-            backgroundLoad = Task { await self.loadRemainingChunks(after: firstChunk, sequence) }
+            backgroundLoad = Task { await self.loadRemainingChunks(after: firstChunk, sequence, scope: scope) }
         } catch {
+            guard !isClosed, scope == lifecycle else { return }
+            clearScene()
             state = .failed(error.localizedDescription)
         }
     }
 
     /// Streams the remaining chunks a few at a time, re-rendering if the
     /// current frame was waiting on one of them.
-    private func loadRemainingChunks(after first: Int, _ sequence: MotionSequence) async {
+    private func loadRemainingChunks(after first: Int, _ sequence: MotionSequence, scope: UUID) async {
         let pending = sequence.chunks.indices.filter { $0 != first }
         var iterator = pending.makeIterator()
 
@@ -144,7 +164,7 @@ final class MotionPlayerViewModel {
                 group.addTask { (index, try? await self.fetchChunk(index, sequence)) }
             }
             for await (index, values) in group {
-                if Task.isCancelled { group.cancelAll(); return }
+                do { try requireActive(scope) } catch { group.cancelAll(); return }
                 if let values {
                     chunks[index] = values
                     loadedChunks += 1
@@ -166,7 +186,7 @@ final class MotionPlayerViewModel {
         let compressed = try await assets.data(file: chunk.file)
         let strict = assets.usesPrivateContract
 
-        return try await Task.detached(priority: .userInitiated) {
+        let values = try await Task.detached(priority: .userInitiated) {
             let expected = chunk.count * sequence.vertexCount * 3 * MemoryLayout<UInt16>.size
             let raw = try strict ? Gzip.decompress(compressed, expectedByteCount: expected) : Gzip.decompress(compressed)
             guard raw.count == expected else {
@@ -174,6 +194,9 @@ final class MotionPlayerViewModel {
             }
             return BinaryBuffers.array(of: UInt16.self, from: raw)
         }.value
+        try assets.checkSession(); try Task.checkCancellation()
+        guard !isClosed else { throw CancellationError() }
+        return values
     }
 
     /// The football: SAM 3D Objects' mesh when available, else a plain sphere.
@@ -242,6 +265,7 @@ final class MotionPlayerViewModel {
     }
 
     private func render(time: Double, force: Bool = false) {
+        guard !isClosed else { return }
         do { try assets.checkSession() } catch {
             body?.entity.isEnabled = false; ball?.isEnabled = false
             teardown()
@@ -251,9 +275,22 @@ final class MotionPlayerViewModel {
             return
         }
         guard let sequence, let body, sequence.frameCount > 0 else { return }
-        let seconds = time.isFinite ? time : 0
+        guard time.isFinite, playbackTimeOffset.isFinite, playbackTimeOffset >= 0 else {
+            body.entity.isEnabled = false; ball?.isEnabled = false
+            isOutsideSegment = true; missingPose = false; waitingForChunk = false; contactLabel = nil
+            lastTime = -.infinity
+            return
+        }
+        let seconds = time - playbackTimeOffset
         guard force || seconds != lastTime else { return }
         lastTime = seconds
+        let wasOutsideSegment = isOutsideSegment
+        isOutsideSegment = usesCanonicalVideoClock && (seconds < 0 || seconds >= sequence.duration)
+        if isOutsideSegment {
+            body.entity.isEnabled = false; ball?.isEnabled = false
+            missingPose = false; waitingForChunk = false; contactLabel = nil
+            return
+        }
 
         let position = Swift.min(Double(sequence.frameCount - 1), Swift.max(0, seconds * sequence.fps + 1e-4))
         let index = Int(position)
@@ -263,7 +300,7 @@ final class MotionPlayerViewModel {
         // Never blend across a camera cut or into a missing frame.
         let blend = a.shot == b.shot && a.valid && b.valid ? Float(position - Double(index)) : 0
 
-        if index != currentFrame || force {
+        if index != currentFrame || force || wasOutsideSegment {
             currentFrame = index
             missingPose = !a.valid
             waitingForChunk = a.valid && pose(index, in: sequence) == nil
@@ -300,12 +337,27 @@ final class MotionPlayerViewModel {
         ball.isEnabled = true
     }
 
+    private func requireActive(_ scope: UUID) throws {
+        try Task.checkCancellation(); try assets.checkSession()
+        guard !isClosed, scope == lifecycle else { throw CancellationError() }
+    }
+
+    private func clearScene() {
+        body?.entity.isEnabled = false; ball?.isEnabled = false
+        stageRoot?.removeFromParent(); stageRoot = nil
+        chunks.removeAll(); chunkForFrame = []; sequence = nil; body = nil; ball = nil
+        loadedChunks = 0; missingPose = false; waitingForChunk = false; isOutsideSegment = false
+        assetWarning = nil; contactLabel = nil
+    }
+
     func teardown() {
-        backgroundLoad?.cancel()
+        isClosed = true; lifecycle = UUID()
+        backgroundLoad?.cancel(); backgroundLoad = nil
         assets.close()
         if let timeObserver {
             player.removeTimeObserver(timeObserver)
             self.timeObserver = nil
         }
+        clearScene()
     }
 }

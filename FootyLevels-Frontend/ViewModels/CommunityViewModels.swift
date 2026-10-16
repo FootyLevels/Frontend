@@ -193,6 +193,12 @@ final class CircleShareViewModel {
     var isLoading = false
     var isWorking = false
     var errorMessage: String?
+    var motionCandidate: CirclePost.Motion?
+    var includeMotion = false
+    var isLoadingMotion = false
+    var motionMessage: String?
+    private var motionProjectID: String?
+    private var selectionEpoch = UUID()
     private var requestKey = UUID().uuidString
     private var requestPayload: [String]?
     private let client: CommunityClient
@@ -205,6 +211,7 @@ final class CircleShareViewModel {
     func load(more: Bool = false) async {
         guard active, !isLoading else { return }
         isLoading = true
+        let selectedID = motionProjectID
         defer { isLoading = false }
         do {
             let page = try await client.preparedProjects(cursor: more ? nextCursor : nil)
@@ -212,24 +219,49 @@ final class CircleShareViewModel {
             try client.checkSession(); guard active else { return }
             projects = more ? projects + ready.filter { p in !projects.contains(where: { $0.id == p.id }) } : ready
             nextCursor = page.nextCursor; errorMessage = nil
+            if !more, let selectedID { await selectProject(projects.first { $0.id == selectedID }) }
         } catch { errorMessage = CommunityValidation.message(error) }
+    }
+    func selectProject(_ project: CloudProject?) async {
+        clearMotionSelection()
+        guard active, let project else { return }
+        let scope = selectionEpoch
+        motionProjectID = project.id; isLoadingMotion = true
+        defer { if scope == selectionEpoch { isLoadingMotion = false } }
+        do {
+            let (latest, candidate) = try await client.shareableMotion(project: project)
+            try client.checkSession(); guard active, scope == selectionEpoch else { return }
+            if let index = projects.firstIndex(where: { $0.id == latest.id }) { projects[index] = latest }
+            motionCandidate = candidate
+            if candidate == nil { motionMessage = "No completed 3D motion is available for this video. Share video only, or generate motion in your private project first." }
+        } catch is CancellationError {} catch {
+            guard active, scope == selectionEpoch else { return }
+            motionMessage = "3D motion isn't available for sharing right now. You can still share the prepared video on its own."
+        }
+    }
+    func clearMotionSelection() {
+        selectionEpoch = UUID(); motionProjectID = nil; motionCandidate = nil
+        includeMotion = false; isLoadingMotion = false; motionMessage = nil
     }
     func share(project: CloudProject, skill: String, note: String) async -> CirclePost? {
         guard active, !isWorking else { return nil }
         isWorking = true; errorMessage = nil
         defer { isWorking = false }
         do {
-            let payload = [project.id, skill.trimmingCharacters(in: .whitespacesAndNewlines), note.trimmingCharacters(in: .whitespacesAndNewlines)]
+            let selectedMotion = includeMotion && motionProjectID == project.id ? motionCandidate : nil
+            guard !includeMotion || selectedMotion != nil else { throw CommunityError.unavailableMotion }
+            let payload = [project.id, skill.trimmingCharacters(in: .whitespacesAndNewlines),
+                note.trimmingCharacters(in: .whitespacesAndNewlines), selectedMotion?.reconstruction.id ?? "video-only"]
             if let requestPayload, requestPayload != payload { requestKey = UUID().uuidString }
             requestPayload = payload
             let post = try await client.share(circle: circleID, project: project, skill: skill, note: note,
-                previous: previous, idempotencyKey: requestKey)
+                previous: previous, motion: selectedMotion, idempotencyKey: requestKey)
             try client.checkSession(); guard active else { return nil }
             requestKey = UUID().uuidString
             return post
         } catch { errorMessage = CommunityValidation.message(error); return nil }
     }
-    func stop() { active = false; projects = [] }
+    func stop() { active = false; projects = []; clearMotionSelection() }
 }
 
 @MainActor
@@ -240,6 +272,13 @@ final class CirclePostViewModel {
     var comments: [CircleComment] = []
     var nextCursor: String?
     var playback: PlaybackController?
+    private(set) var motion: MotionPlayerViewModel?
+    var isLoadingMotion = false
+    var motionErrorMessage: String?
+    private var motionSource: PrivateMotionAssetSource?
+    private var loadingMotionModel: MotionPlayerViewModel?
+    private var motionLoad: Task<Void, Never>?
+    private var motionEpoch = UUID()
     var errorMessage: String?
     var isLoading = false
     var isLoadingComments = false
@@ -332,6 +371,63 @@ final class CirclePostViewModel {
         } catch { if active, scope == epoch { fail(error) } }
     }
 
+    func openMotion() {
+        guard active, hasAccess, !isLoadingMotion, motion == nil, let shared = post.motion, let playback else { return }
+        let scope = epoch
+        let motionScope = UUID(); motionEpoch = motionScope
+        isLoadingMotion = true; motionErrorMessage = nil
+        motionLoad = Task { [weak self] in
+            guard let self else { return }
+            defer { if motionScope == self.motionEpoch { self.isLoadingMotion = false; self.motionLoad = nil } }
+            var source: PrivateMotionAssetSource?
+            var model: MotionPlayerViewModel?
+            do {
+                let files = try await self.client.motionAssets(self.post, transport: self.playbackTransport)
+                let loadedSource = PrivateMotionAssetSource(result: shared.reconstruction, job: shared.job, assets: files)
+                source = loadedSource
+                try self.requireActive(scope)
+                guard motionScope == self.motionEpoch, self.hasAccess else { throw CancellationError() }
+                self.motionSource = loadedSource
+                _ = try await loadedSource.sequence()
+                try self.requireActive(scope)
+                guard motionScope == self.motionEpoch, self.hasAccess else { throw CancellationError() }
+                let loadedModel = MotionPlayerViewModel(projectId: self.post.projectId, assets: loadedSource,
+                    player: playback.player, playbackTimeOffset: loadedSource.sourceTimeOffset)
+                model = loadedModel; self.loadingMotionModel = loadedModel
+                await loadedModel.load()
+                if case .failed(let message) = loadedModel.state { throw MotionLoadError(message: message) }
+                // Downloads and RealityKit scene construction may take time. Recheck
+                // the pinned shared record before exposing any model or cached bytes.
+                _ = try await self.client.post(circle: self.post.circleId, id: self.post.id, pinned: self.post)
+                try self.requireActive(scope)
+                guard motionScope == self.motionEpoch, self.hasAccess else { throw CancellationError() }
+                self.motionSource = loadedSource; self.motion = loadedModel; self.loadingMotionModel = nil
+                self.lastValidated = Date()
+            } catch {
+                model?.teardown(); source?.close()
+                if motionScope == self.motionEpoch { self.loadingMotionModel = nil; self.motionSource = nil }
+                guard self.active, scope == self.epoch, motionScope == self.motionEpoch else { return }
+                if let apiError = error as? AccountAPIError, [.notFound, .forbidden, .sessionChanged, .signInRequired].contains(apiError) {
+                    self.closePlayback(); self.fail(error)
+                } else if !(error is CancellationError) { self.motionErrorMessage = error.localizedDescription }
+            }
+        }
+    }
+    func closeMotion() {
+        motionEpoch = UUID(); motionLoad?.cancel(); motionLoad = nil
+        loadingMotionModel?.teardown(); loadingMotionModel = nil
+        motion?.teardown(); motion = nil; motionSource?.close(); motionSource = nil
+        isLoadingMotion = false; motionErrorMessage = nil
+    }
+    func seekToMotion() {
+        guard hasAccess, let shared = post.motion else { return }
+        playback?.pause(); playback?.seek(to: shared.startTime)
+    }
+    private struct MotionLoadError: LocalizedError {
+        let message: String
+        var errorDescription: String? { message }
+    }
+
     func attachCurrentTime() {
         guard let playback else { return }
         playback.pause()
@@ -375,6 +471,7 @@ final class CirclePostViewModel {
         comments = []; attachedTime = nil; commentText = ""; lastValidated = nil
     }
     private func closePlayback() {
+        closeMotion()
         playback?.teardown(); playback = nil; assets?.close(); assets = nil
         hasAccess = false; comments = []; attachedTime = nil
     }
