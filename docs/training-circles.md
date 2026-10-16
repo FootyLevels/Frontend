@@ -34,6 +34,12 @@ Motion-specific regressions cover explicit opt-in payloads, default video-only c
 
 See Backend/docs/training-circles.md for routes, Firestore schema, prototype limits and deployment requirements, and Backend/docs/training-circles-evidence.json for the independently verified real cloud/service proof. That proof uses seeded synthetic prepared media and no GPU job.
 
-## Verified checkpoint — 16 October 2026
+## Initial video-only checkpoint — 16 October 2026
 
 The standalone Development simulator app build passed. The final full simulator suite reports 93 unique tests passed, three existing opt-in live-cloud skips and zero failures. This includes all 16 new CommunityClientTests and the Community account-gate UI check. The result bundle is saved locally at `verification/2026-10-16-community/frontend-tests-final.xcresult` in the parent FootyLevels workspace; `training-circles-evidence.json` records the portable summary. The real service proof passed separately with three temporary Firebase accounts and actual private video bytes, with account/storage/metadata cleanup verified. No branch was pushed or runtime deployed.
+
+## Verified motion-sharing checkpoint — 16 October 2026
+
+Implementation `0af2e67` passed the Development application/test build and full simulator suite: **106 unique tests passed, three existing opt-in cloud skips, zero failures**. This includes 26 community client checks, 20 private playback checks and seven UI checks; 13 new tests exercise motion consent, authorization, synchronization and teardown. The authoritative result bundle is `verification/2026-10-16-community-motion/tests.xcresult` in the parent workspace. The portable evidence records these latest results.
+
+The separate real service proof passed all eight scenarios with real Firebase accounts, Firestore and private Supabase bytes, using trusted synthetic prepared video and a 30-frame motion fixture. All seven objects, scoped records and three temporary accounts were removed and verified absent. This was no new GPU inference run or deployed API release. Kunal reports testing the earlier community flow; new signed-in motion screens and physical-device acceptance remain separate checks. Backend `131d74f` implements the matching contract and `dd40957` records its verified evidence. No branch was pushed, merged into defaults or deployed.
