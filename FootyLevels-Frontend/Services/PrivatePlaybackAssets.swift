@@ -99,6 +99,7 @@ final class PrivatePlaybackAssets {
     private let grantPath: String
     private let artifacts: [String: CloudAssetReference]
     private let transport: Transport
+    private let maximumGrantLifetime: TimeInterval
     private var grant: PrivateReadGrant?
     private var refreshing: Task<PrivateReadGrant, Error>?
     private var cache: [String: Data] = [:]
@@ -107,11 +108,13 @@ final class PrivatePlaybackAssets {
     private let directory: URL
 
     init(api: AuthenticatedAPIClient, credentials: any APICredentials, environment: ApplicationEnvironment,
-         grantPath: String, artifacts: [String: CloudAssetReference], transport: Transport? = nil) throws {
+         grantPath: String, artifacts: [String: CloudAssetReference], maximumGrantLifetime: TimeInterval = 360,
+         transport: Transport? = nil) throws {
         guard let account = credentials.currentSession else { throw AccountAPIError.signInRequired }
         self.api = api; self.credentials = credentials; self.account = account
         self.host = environment.storageHost.replacingOccurrences(of: ".storage.supabase.co", with: ".supabase.co")
         self.grantPath = grantPath; self.artifacts = artifacts
+        self.maximumGrantLifetime = maximumGrantLifetime
         self.transport = transport ?? { url, limit in try await BoundedPlaybackDownload(limit: limit).get(url) }
         directory = FileManager.default.temporaryDirectory.appendingPathComponent("footylevels-playback-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false,
@@ -126,7 +129,7 @@ final class PrivatePlaybackAssets {
     }
 
     func validate(_ value: PrivateReadGrant) throws {
-        guard let expiry = value.expiry, expiry > Date(), expiry < Date().addingTimeInterval(360),
+        guard let expiry = value.expiry, expiry > Date(), expiry < Date().addingTimeInterval(maximumGrantLifetime),
               Set(value.assets.keys) == Set(artifacts.keys) else { throw CloudPlaybackError.invalidAsset }
         for (name, asset) in artifacts {
             guard let item = value.assets[name], item.sha256 == asset.sha256, item.byteSize == asset.byteSize,
