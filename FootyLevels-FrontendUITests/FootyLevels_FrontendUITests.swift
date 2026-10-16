@@ -1,43 +1,38 @@
-//
-//  FootyLevels_FrontendUITests.swift
-//  FootyLevels-FrontendUITests
-//
-//  Created by Kunal Bajaj on 2025-11-20.
-//
-
 import XCTest
 
 final class FootyLevels_FrontendUITests: XCTestCase {
-
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testIncludedExampleOpensWithoutLogin() {
         let app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(app.staticTexts["INCLUDED EXAMPLE"].waitForExistence(timeout: 10))
+        app.staticTexts["The over fake"].firstMatch.tap()
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "Included example").firstMatch.waitForExistence(timeout: 15))
+        XCTAssertFalse(app.staticTexts["Welcome to FootyLevels"].exists)
+        let stage = app.descendants(matching: .any).matching(identifier: "motion-stage").firstMatch
+        XCTAssertTrue(stage.waitForExistence(timeout: 20))
+        XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "Ready"), object: stage)], timeout: 45) == .completed,
+                      "The bundled 3D motion must finish decoding into the reused player")
     }
 
+    /// Run after the live SDK probe signs out and deletes its temporary accounts.
     @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
+    func testSignedOutEmailLoginRoute() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--require-login"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Welcome to FootyLevels"].waitForExistence(timeout: 10))
+        app.buttons["Log In with Email"].tap()
+        XCTAssertTrue(app.staticTexts["Welcome Back"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.textFields["you@example.com"].exists)
+        XCTAssertTrue(app.secureTextFields["Enter your password"].exists)
+        app.navigationBars.buttons.firstMatch.tap()
+        app.buttons["Sign Up with Email"].tap()
+        XCTAssertTrue(app.staticTexts["Create Your Account"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Sign Up"].isEnabled)
     }
 }

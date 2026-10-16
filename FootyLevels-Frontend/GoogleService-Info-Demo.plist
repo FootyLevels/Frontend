@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>554230919588-ugq5tba1geftajfhbg8sii9pgn9h4mia.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.554230919588-ugq5tba1geftajfhbg8sii9pgn9h4mia</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBGi4It1sMjr_pXi6LqzQ464dx0kAFI8Xc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>554230919588</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>ca.sheridan.FootyLevels-Frontend</string>
+	<key>PROJECT_ID</key>
+	<string>footylevels-demo-20261009</string>
+	<key>STORAGE_BUCKET</key>
+	<string>footylevels-demo-20261009.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:554230919588:ios:d6dcb9342a122579dc1131</string>
+</dict>
+</plist>

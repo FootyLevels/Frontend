@@ -17,7 +17,7 @@ struct AuthPage: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 20) {
                 
                 Spacer()
@@ -38,7 +38,6 @@ struct AuthPage: View {
                     Task {
                         do {
                             if let user = try await authVM.signInWithGoogle(){
-                                print("Signed in with Google \(user.displayName)")
                                 appState.currentUser = user
                                 appState.isLoggedIn = .loggedIn
                                 dismiss()
@@ -47,12 +46,18 @@ struct AuthPage: View {
 
                             // Optional: Add logic to dismiss the view or navigate on success
                         } catch {
-                            print("Google Sign-In Failed: \(error.localizedDescription)")
-                            // Handle error presentation here
+                            authVM.errorMessage = error.localizedDescription
                         }
                     }
                 }
                 .frame(height: 50) // Standard button height
+
+                if let message = authVM.errorMessage {
+                    Text(message)
+                        .font(.callout)
+                        .foregroundStyle(.red)
+                        .accessibilityIdentifier("signInError")
+                }
                 
                 // --- Divider ---
                 HStack {
@@ -94,9 +99,8 @@ struct AuthPage: View {
                 Spacer()
             }
             .padding(.horizontal, 30)
-            .navigationBarHidden(true) // Hide the default navigation bar for a clean look
+            .toolbar(.hidden, for: .navigationBar) // Hide the default navigation bar for a clean look
         }
-        .navigationViewStyle(.stack) // Recommended for modern SwiftUI apps
     }
 }
 

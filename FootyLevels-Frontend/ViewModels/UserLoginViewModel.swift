@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+
 @MainActor
 @Observable
 final class UserLoginViewModel{
@@ -31,16 +33,39 @@ final class UserLoginViewModel{
             let user = try await AuthManager.shared.loginWithEmail(email: email, password: password)
             return user
         } catch {
-            // 2. Capture the actual error message from Firebase
-            print("Login error: \(error.localizedDescription)")
-            if error.localizedDescription == "The email address is badly formatted." {
-                self.errorMessage = "Email format is incorrect."
-            }else if error.localizedDescription == "The supplied auth credential is malformed or has expired." {
-                self.errorMessage = "Wrong Password"
-            }
+            self.errorMessage = Self.message(for: error)
         }
-        
+
         return nil
+    }
+
+    /// Maps a Firebase error to something worth showing a person.
+    ///
+    /// Switches on `AuthErrorCode` rather than comparing
+    /// `localizedDescription` to English strings: those change between SDK
+    /// releases and are translated on a non-English device, so matching them
+    /// silently stops working. The `default` also guarantees a message —
+    /// previously an unrecognised error left this nil and the UI showed
+    /// nothing at all.
+    private static func message(for error: Error) -> String {
+        guard let code = AuthErrorCode(rawValue: (error as NSError).code) else {
+            return error.localizedDescription
+        }
+
+        switch code {
+        case .invalidEmail:
+            return "Email format is incorrect."
+        case .wrongPassword, .invalidCredential, .userNotFound:
+            return "Wrong email or password."
+        case .userDisabled:
+            return "That account has been disabled."
+        case .tooManyRequests:
+            return "Too many attempts. Try again in a moment."
+        case .networkError:
+            return "Network error. Check your connection and try again."
+        default:
+            return error.localizedDescription
+        }
     }
     
     func signInWithGoogle() async throws -> UserInfo?{

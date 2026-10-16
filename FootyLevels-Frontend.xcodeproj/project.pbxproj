@@ -444,6 +444,7 @@
 		67E2AA2D2ECF91270003F38D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FOOTYLEVELS_API_BASE_URL = "https://ranting-pesticide-thespian.ngrok-free.dev";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -474,6 +475,7 @@
 		67E2AA2E2ECF91270003F38D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FOOTYLEVELS_API_BASE_URL = "";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
