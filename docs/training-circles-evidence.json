@@ -1,0 +1,37 @@
+{
+  "ticket": "FP-69",
+  "date": "2026-10-16",
+  "branch": "codex/training-circles",
+  "frontendImplementationCommit": "6a61043",
+  "backendVerifiedHead": "54e88d7",
+  "standaloneApplicationBuild": "passed",
+  "fullSimulatorSuite": {
+    "result": "Passed",
+    "passed": 93,
+    "skipped": 3,
+    "failed": 0,
+    "totalUniqueTests": 96,
+    "source": "xcresulttool get test-results summary",
+    "scheme": "FootyLevels-Development",
+    "device": "iPhone 17 Pro simulator",
+    "osVersion": "26.4.1",
+    "skips": "Existing opt-in live cloud tests",
+    "newCommunityClientTests": 16,
+    "communityAccountGateUITest": "passed"
+  },
+  "realServiceProof": {
+    "passed": true,
+    "evidence": "Backend/docs/training-circles-evidence.json",
+    "transport": "Isolated DGX TestClient with real Firebase identities, Firestore and Supabase",
+    "seededPreparedMedia": true,
+    "temporaryAccountAndStorageCleanupVerified": true
+  },
+  "deploymentChanged": false,
+  "limitations": [
+    "Native client/player and UI-gate tests are separate from the real cloud service proof",
+    "Complete signed-in screen-by-screen community acceptance is outstanding",
+    "Physical iPhone and interactive Google sign-in were deferred",
+    "Backend runtime and default community feed indexes must be rolled out before public service use",
+    "Shared 3D comparison, scoring, a public feed and direct messages are outside this version"
+  ]
+}
