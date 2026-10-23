@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The signed-in app: the video library and the overlay comparison, on a
+/// The signed-in app: videos, overlay comparison, and private training circles, on a
 /// bottom tab bar. Each tab owns its own navigation.
 struct MainTabView: View {
     /// Nil for the Debug local-sample entry, which has no account.
@@ -16,6 +16,9 @@ struct MainTabView: View {
             }
             Tab("Overlay", systemImage: "square.2.layers.3d") {
                 OverlayDifferenceView(library: library)
+            }
+            Tab("Community", systemImage: "person.3") {
+                CommunityView(hasAccount: appState?.isLoggedIn == .loggedIn)
             }
         }
         .tint(SL.green)

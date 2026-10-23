@@ -32,6 +32,36 @@ private final class PlaybackCredentials: APICredentials {
 }
 
 @MainActor
+private final class GatedMotionSource: MotionAssetSource {
+    let usesPrivateContract = true
+    let sourceTimeOffset = 0.5
+    let value: MotionSequence
+    let files: [String: Data]
+    let blockedPhase: String
+    private(set) var isWaiting = false
+    private var closed = false
+    private var continuation: CheckedContinuation<Void, Never>?
+
+    init(sequence: MotionSequence, files: [String: Data], blockedPhase: String) {
+        value = sequence; self.files = files; self.blockedPhase = blockedPhase
+    }
+    func checkSession() throws { if closed { throw AccountAPIError.sessionChanged }; try Task.checkCancellation() }
+    func close() { closed = true }
+    func release() { continuation?.resume(); continuation = nil }
+    private func wait() async {
+        await withCheckedContinuation { continuation = $0; isWaiting = true }
+    }
+    func sequence() async throws -> MotionSequence {
+        if blockedPhase == "sequence" { await wait() }
+        try checkSession(); return value
+    }
+    func data(file: String) async throws -> Data {
+        if blockedPhase == "chunk", file.hasPrefix("body-") { await wait() }
+        try checkSession(); return try XCTUnwrap(files[file])
+    }
+}
+
+@MainActor
 private final class PlaybackFixture {
     let credentials = PlaybackCredentials()
     var files: [String: Data]
@@ -291,6 +321,59 @@ final class CloudPlaybackTests: XCTestCase {
         player.play()
         for _ in 0..<100 where model.stageRoot != nil { try await Task.sleep(for: .milliseconds(50)) }
         XCTAssertNil(model.stageRoot); XCTAssertNil(player.currentItem)
+    }
+
+    @MainActor
+    func testMotionLoadCannotRestoreSceneAfterTeardownDuringSequenceOrChunkDownload() async throws {
+        for phase in ["sequence", "chunk"] {
+            let fixture = try PlaybackFixture()
+            let sequence = try JSONDecoder().decode(MotionSequence.self, from: PlaybackFixture.encode(fixture.metadata))
+            let source = GatedMotionSource(sequence: sequence, files: fixture.files, blockedPhase: phase)
+            let player = AVPlayer()
+            let model = MotionPlayerViewModel(projectId: "project", assets: source, player: player, playbackTimeOffset: 0.5)
+            let operation = Task { await model.load() }
+            for _ in 0..<200 where !source.isWaiting { try await Task.sleep(for: .milliseconds(10)) }
+            XCTAssertTrue(source.isWaiting, "Download gate never reached: \(phase)")
+            model.teardown(); source.release(); await operation.value
+            XCTAssertNil(model.stageRoot); XCTAssertNil(model.sequence); XCTAssertEqual(model.loadedChunks, 0)
+            XCTAssertNotEqual(model.state, .ready)
+        }
+    }
+
+    @MainActor
+    func testSharedMotionAlignsCanonicalClockAndHidesOutsideSelectedSegment() async throws {
+        let fixture = try PlaybackFixture(), source = try fixture.source()
+        let sample = try XCTUnwrap(BundledSample.project)
+        let url = try XCTUnwrap(BundledSample.fileURL(forAssetPath: sample.video.url))
+        let player = AVPlayer(url: url)
+        let model = MotionPlayerViewModel(projectId: "project", assets: source, player: player, playbackTimeOffset: 0.5)
+        defer { model.teardown(); player.pause() }
+        await model.load()
+        XCTAssertEqual(model.state, .ready)
+        let body = try XCTUnwrap(model.stageRoot?.findEntity(named: "body"))
+        for (time, outside, frame, visible) in [(0.49, true, 0, false), (0.5, false, 0, true),
+            (0.5 + 7.0/30, false, 7, false), (0.49, true, 7, false), (0.5 + 7.0/30, false, 7, false),
+            (1.49, false, 29, true), (1.5, true, 29, false)] {
+            _ = await player.seek(to: CMTime(seconds: time, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
+            for _ in 0..<100 {
+                if model.isOutsideSegment == outside && (outside || model.currentFrame == frame) { break }
+                try await Task.sleep(for: .milliseconds(20))
+            }
+            XCTAssertEqual(model.isOutsideSegment, outside, "Canonical time \(time)")
+            XCTAssertEqual(body.isEnabled, visible, "Canonical time \(time)")
+            XCTAssertEqual(model.missingPose, !outside && frame == 7)
+            if !outside { XCTAssertEqual(model.currentFrame, frame) }
+        }
+    }
+
+    @MainActor
+    func testMotionRejectsNonfinitePlaybackOffsetWithoutRendering() async throws {
+        let fixture = try PlaybackFixture()
+        let model = MotionPlayerViewModel(projectId: "project", assets: try fixture.source(), player: AVPlayer(), playbackTimeOffset: Double.nan)
+        defer { model.teardown() }
+        await model.load()
+        XCTAssertNil(model.stageRoot)
+        if case .failed = model.state {} else { XCTFail("Invalid offset accepted") }
     }
 
     @MainActor

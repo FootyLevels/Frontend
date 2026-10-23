@@ -29,7 +29,7 @@ struct CloudPreparedMedia: Decodable, Hashable {
     struct Preview: Decodable, Hashable { let asset: CloudAssetReference; let timestamp: Double; let frameIndex: Int }
 }
 
-struct CloudJob: Decodable {
+struct CloudJob: Decodable, Hashable {
     let id: String
     let ownerId: String
     let projectId: String
@@ -45,7 +45,7 @@ struct CloudJob: Decodable {
     let keyframes: [CloudKeyframeSelection]?
     let reconstructionId: String?
     let errorCode: String?
-    struct Segment: Decodable { let startFrame: Int; let endFrame: Int }
+    struct Segment: Decodable, Hashable { let startFrame: Int; let endFrame: Int }
 
     var isActive: Bool { ["queued", "running", "retrying"].contains(status) }
     var statusText: String {
@@ -82,7 +82,7 @@ struct CloudJob: Decodable {
     }
 }
 
-struct CloudReconstruction: Decodable {
+struct CloudReconstruction: Decodable, Hashable {
     let schemaVersion: Int
     let id: String
     let ownerId: String
@@ -100,14 +100,14 @@ struct CloudReconstruction: Decodable {
     let reconstructedFrameCount: Int
     let missingFrameCount: Int
 
-    struct Contract: Decodable, Equatable {
+    struct Contract: Decodable, Hashable {
         let schemaVersion: Int
         let topologyVersion: String
         let coordinateSystem: String
         let units: String
         let encoding: String
     }
-    struct Engine: Decodable, Equatable {
+    struct Engine: Decodable, Hashable {
         let modelName: String
         let upstreamCommit: String
         let checkpointHash: String
@@ -122,17 +122,31 @@ struct CloudReconstruction: Decodable {
         try validate(owner: owner, project: project, keyframes: true)
     }
 
+    /// Shared results use an explicit prepared-video context. They never need an
+    /// owned project object or permission to fetch the author's private project.
+    func validateSharedMotion(owner: String, projectID: String, inputRevision: Int, video: CloudAssetReference) throws {
+        try validate(owner: owner, projectID: projectID, revision: inputRevision, video: video,
+            preparedProfile: "media-720p30-v1", preparedFPS: 30, keyframes: false)
+    }
+
     private func validate(owner: String, project: CloudProject, keyframes: Bool) throws {
-        try sourceAsset.validate(prefix: "users/\(owner)/projects/\(project.id)/media/")
+        try validate(owner: owner, projectID: project.id, revision: project.inputRevision,
+            video: project.preparedMedia?.video, preparedProfile: project.preparedMedia?.profileVersion,
+            preparedFPS: project.preparedMedia?.fps, keyframes: keyframes)
+    }
+
+    private func validate(owner: String, projectID: String, revision: Int, video: CloudAssetReference?,
+                          preparedProfile: String?, preparedFPS: Double?, keyframes: Bool) throws {
+        try sourceAsset.validate(prefix: "users/\(owner)/projects/\(projectID)/media/")
         guard schemaVersion == 1, contract.schemaVersion == 1,
               profileVersion == (keyframes ? "body-keyframes-v1" : "body-motion-30fps-v1"),
               mode == (keyframes ? "keyframes" : "motion"), contract.encoding == (keyframes ? "glb" : "motionBuffers"),
               contract.coordinateSystem == "rightHandedYUp",
               contract.units == "meters" else { throw CloudPlaybackError.unsupportedVersion }
-        guard ownerId == owner, projectId == project.id, jobId == id, inputRevision == project.inputRevision,
-              sourceAsset == project.preparedMedia?.video,
-              sourceAsset.contentType == "video/mp4", project.preparedMedia?.profileVersion == "media-720p30-v1",
-              project.preparedMedia?.fps == 30,
+        guard ownerId == owner, projectId == projectID, jobId == id, inputRevision == revision,
+              sourceAsset == video,
+              sourceAsset.contentType == "video/mp4", preparedProfile == "media-720p30-v1",
+              preparedFPS == 30,
               ["ready", "partial"].contains(outcome), (keyframes ? 1...24 : 30...300).contains(requestedFrameCount),
               reconstructedFrameCount > 0, missingFrameCount >= 0,
               reconstructedFrameCount + missingFrameCount == requestedFrameCount,
@@ -160,7 +174,7 @@ struct CloudReconstruction: Decodable {
     }
 }
 
-struct CloudKeyframeSelection: Codable, Equatable {
+struct CloudKeyframeSelection: Codable, Hashable {
     let frameIndex: Int
     let bbox: [Double]
     func validate(frameCount: Int) throws {
