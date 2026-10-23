@@ -98,7 +98,7 @@ enum SL {
 
 // MARK: - Shared pieces
 
-/// The skewed three-bar logo followed by "skill**lab**".
+/// The skewed three-bar logo followed by "footy**levels**".
 struct BrandMark: View {
     var size: CGFloat = 24
 
@@ -112,13 +112,13 @@ struct BrandMark: View {
             .frame(height: size)
             .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.36, d: 1, tx: size * 0.18, ty: 0))
 
-            (Text("skill").font(SL.display(size, .heavy))
-                + Text("lab").font(SL.display(size, .medium)))
+            (Text("footy").font(SL.display(size, .heavy))
+                + Text("levels").font(SL.display(size, .medium)))
                 .tracking(-size * 0.05)
                 .foregroundStyle(SL.ink)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Skill Lab")
+        .accessibilityLabel("FootyLevels")
     }
 
     private func bar(height: CGFloat) -> some View {

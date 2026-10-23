@@ -384,7 +384,7 @@ struct ProjectsListView: View {
 
     private var footer: some View {
         VStack(spacing: 6) {
-            Text("SKILL LAB")
+            Text("FOOTYLEVELS")
                 .font(.system(size: 11, weight: .bold))
                 .tracking(2)
                 .foregroundStyle(Color(hex: "7C8B6C"))
@@ -573,7 +573,7 @@ private struct ServerStatusCard: View {
                     }
                 } else {
                     Text(offlineReason ?? (ServerSettings.baseURL == nil
-                                           ? "Connect a Skill Lab server to import videos. The included example works offline."
+                                           ? "Connect a FootyLevels server to import videos. The included example works offline."
                                            : "Can't reach \(address)."))
                         .font(.system(size: 12))
                         .lineSpacing(2)
