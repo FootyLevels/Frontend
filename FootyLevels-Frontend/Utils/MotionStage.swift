@@ -26,6 +26,13 @@ final class AnimatedBodyMesh {
         let offset: Int
     }
 
+    /// Triangles whose three corners are all in `vertices` are drawn with
+    /// `material` instead of the body's, e.g. to colour the feet.
+    struct Highlight {
+        let vertices: Set<UInt32>
+        let material: SimpleMaterial
+    }
+
     let entity = Entity()
     /// Centre of the most recently written pose — what "Follow" tracks.
     private(set) var center: SIMD3<Float> = .zero
@@ -39,19 +46,34 @@ final class AnimatedBodyMesh {
     /// The most recently written pose, in metres — what the overlay aligns.
     private(set) var positions: [SIMD3<Float>]
     private var normals: [SIMD3<Float>]
-    private var material: SimpleMaterial
+    /// The body's material first, then one per highlight.
+    private var materials: [SimpleMaterial]
 
-    init(sequence: MotionSequence, indices: [UInt32], material: SimpleMaterial) throws {
+    init(sequence: MotionSequence, indices: [UInt32], material: SimpleMaterial,
+         highlights: [Highlight] = []) throws {
         guard let highest = indices.max(), Int(highest) < sequence.vertexCount else {
             throw MeshDecodingError.indexOutOfRange
         }
+        // Group triangles by material: the body, then each highlight. Normals
+        // don't depend on triangle order, so the reordered list serves both.
+        var groups = Array(repeating: [UInt32](), count: highlights.count + 1)
+        var t = 0
+        while t + 2 < indices.count {
+            let a = indices[t], b = indices[t + 1], c = indices[t + 2]
+            let group = highlights.firstIndex {
+                $0.vertices.contains(a) && $0.vertices.contains(b) && $0.vertices.contains(c)
+            }.map { $0 + 1 } ?? 0
+            groups[group] += [a, b, c]
+            t += 3
+        }
+        let indices = groups.flatMap { $0 }
         self.indices = indices
         self.vertexCount = sequence.vertexCount
         self.lowerBound = sequence.lowerBound
         self.step = sequence.extent / 65535
         self.positions = Array(repeating: .zero, count: sequence.vertexCount)
         self.normals = Array(repeating: .zero, count: sequence.vertexCount)
-        self.material = material
+        self.materials = [material] + highlights.map(\.material)
 
         var descriptor = LowLevelMesh.Descriptor()
         descriptor.vertexAttributes = [
@@ -70,24 +92,43 @@ final class AnimatedBodyMesh {
         }
         // The global bounds cover every frame, so they never need updating —
         // culling stays correct however the body moves.
-        mesh.parts.replaceAll([
-            LowLevelMesh.Part(indexCount: indices.count, topology: .triangle,
-                              bounds: BoundingBox(min: sequence.lowerBound, max: sequence.upperBound))
-        ])
+        let bounds = BoundingBox(min: sequence.lowerBound, max: sequence.upperBound)
+        var offset = 0
+        var parts: [LowLevelMesh.Part] = []
+        for (index, group) in groups.enumerated() where !group.isEmpty {
+            parts.append(LowLevelMesh.Part(indexOffset: offset * MemoryLayout<UInt32>.stride, indexCount: group.count,
+                                           topology: .triangle, materialIndex: index, bounds: bounds))
+            offset += group.count
+        }
+        mesh.parts.replaceAll(parts)
 
         let resource = try MeshResource(from: mesh)
         entity.name = "body"
-        entity.components.set(ModelComponent(mesh: resource, materials: [material]))
+        entity.components.set(ModelComponent(mesh: resource, materials: materials))
         entity.components.set(GroundingShadowComponent(castsShadow: true))
         // The vertex buffer is uninitialised until the first `show`, and would
         // render as garbage. The caller enables it once a real pose is written.
         entity.isEnabled = false
     }
 
+    /// Replaces the highlights' materials (same count and order as at init), e.g.
+    /// when the foot that works the ball changes between skills or frames.
+    func setHighlightMaterials(_ highlights: [SimpleMaterial]) {
+        guard highlights.count == materials.count - 1 else { return }
+        materials = [materials[0]] + highlights.map { material in
+            var m = material
+            m.triangleFillMode = wireframe ? .lines : .fill
+            return m
+        }
+        entity.components[ModelComponent.self]?.materials = materials
+    }
+
     var wireframe = false {
         didSet {
-            material.triangleFillMode = wireframe ? .lines : .fill
-            entity.components[ModelComponent.self]?.materials = [material]
+            for index in materials.indices {
+                materials[index].triangleFillMode = wireframe ? .lines : .fill
+            }
+            entity.components[ModelComponent.self]?.materials = materials
         }
     }
 

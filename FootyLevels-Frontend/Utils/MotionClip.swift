@@ -10,11 +10,27 @@ import Foundation
 final class MotionClip {
     enum LoadError: LocalizedError {
         case noFrames
+        case badPath
 
-        var errorDescription: String? { "This video's 3D motion has no frames." }
+        var errorDescription: String? {
+            switch self {
+            case .noFrames: return "This video's 3D motion has no frames."
+            case .badPath: return "The motion data refers to a file outside its folder."
+            }
+        }
     }
 
-    let projectId: String
+    /// Where the files come from: a server project, or a folder in the app bundle.
+    enum Source: Sendable {
+        case server(projectId: String)
+        case local(URL)
+    }
+
+    let source: Source
+    var projectId: String {
+        if case .server(let id) = source { return id }
+        return ""
+    }
     let sequence: MotionSequence
     /// Triangle indices shared by every frame.
     let indices: [UInt32]
@@ -25,8 +41,8 @@ final class MotionClip {
     /// Chunk index for every frame, so lookup during playback is O(1).
     private let chunkForFrame: [Int]
 
-    private init(projectId: String, sequence: MotionSequence, indices: [UInt32], chunkForFrame: [Int]) {
-        self.projectId = projectId
+    private init(source: Source, sequence: MotionSequence, indices: [UInt32], chunkForFrame: [Int]) {
+        self.source = source
         self.sequence = sequence
         self.indices = indices
         self.chunkForFrame = chunkForFrame
@@ -34,8 +50,19 @@ final class MotionClip {
 
     /// Fetches enough to show the first frame.
     static func load(projectId: String, sequencePath: String) async throws -> MotionClip {
-        let client = SkillLabClient.shared
-        let sequence = try await client.sequence(path: sequencePath)
+        let sequence = try await SkillLabClient.shared.sequence(path: sequencePath)
+        return try await load(sequence: sequence, source: .server(projectId: projectId))
+    }
+
+    /// Loads motion stored in a folder (`sequence.json`, the topology and the
+    /// chunks), such as a lesson bundle shipped inside the app.
+    static func load(directory: URL) async throws -> MotionClip {
+        let data = try Data(contentsOf: directory.appendingPathComponent("sequence.json"))
+        let sequence = try JSONDecoder().decode(MotionSequence.self, from: data)
+        return try await load(sequence: sequence, source: .local(directory))
+    }
+
+    private static func load(sequence: MotionSequence, source: Source) async throws -> MotionClip {
         guard sequence.encoding == "uint16-le-xyz-gzip" else {
             throw MeshDecodingError.unsupportedEncoding(sequence.encoding)
         }
@@ -43,8 +70,8 @@ final class MotionClip {
 
         let lookup = chunkLookup(for: sequence)
         let first = lookup.first ?? 0
-        async let topology = client.data(path: client.motionAssetPath(projectId: projectId, file: sequence.topologyFile))
-        async let firstChunk = fetchChunk(first, of: sequence, projectId: projectId)
+        async let topology = fileData(sequence.topologyFile, from: source)
+        async let firstChunk = fetchChunk(first, of: sequence, source: source)
 
         let indices = BinaryBuffers.array(of: UInt32.self, from: try await topology)
         guard indices.count == sequence.faceCount * 3 else {
@@ -53,7 +80,7 @@ final class MotionClip {
                                                       actual: indices.count * 4)
         }
 
-        let clip = MotionClip(projectId: projectId, sequence: sequence, indices: indices, chunkForFrame: lookup)
+        let clip = MotionClip(source: source, sequence: sequence, indices: indices, chunkForFrame: lookup)
         clip.chunks[first] = try await firstChunk
         clip.loadedChunks = 1
         return clip
@@ -64,14 +91,14 @@ final class MotionClip {
     /// Streams the remaining chunks, calling `onChunk` after each so the caller
     /// can redraw a frame that was waiting on it.
     func loadRemainingChunks(onChunk: @escaping @MainActor () -> Void) async {
-        let sequence = sequence, projectId = projectId
+        let sequence = sequence, source = source
         var pending = sequence.chunks.indices.filter { chunks[$0] == nil }.makeIterator()
 
         await withTaskGroup(of: (Int, [UInt16]?).self) { group in
             // Three in flight saturates a LAN link without starving playback.
             for _ in 0..<3 {
                 guard let index = pending.next() else { break }
-                group.addTask { (index, try? await Self.fetchChunk(index, of: sequence, projectId: projectId)) }
+                group.addTask { (index, try? await Self.fetchChunk(index, of: sequence, source: source)) }
             }
             for await (index, values) in group {
                 if Task.isCancelled { return }
@@ -81,7 +108,7 @@ final class MotionClip {
                     onChunk()
                 }
                 if let next = pending.next() {
-                    group.addTask { (next, try? await Self.fetchChunk(next, of: sequence, projectId: projectId)) }
+                    group.addTask { (next, try? await Self.fetchChunk(next, of: sequence, source: source)) }
                 }
             }
         }
@@ -98,10 +125,9 @@ final class MotionClip {
     /// Downloads and inflates one chunk off the main actor, checking its size
     /// against the header so a truncated file can't masquerade as a pose.
     nonisolated private static func fetchChunk(_ index: Int, of sequence: MotionSequence,
-                                               projectId: String) async throws -> [UInt16] {
+                                               source: Source) async throws -> [UInt16] {
         let chunk = sequence.chunks[index]
-        let client = SkillLabClient.shared
-        let compressed = try await client.data(path: client.motionAssetPath(projectId: projectId, file: chunk.file))
+        let compressed = try await fileData(chunk.file, from: source)
 
         return try await Task.detached(priority: .userInitiated) {
             let raw = try Gzip.decompress(compressed)
@@ -111,6 +137,19 @@ final class MotionClip {
             }
             return BinaryBuffers.array(of: UInt16.self, from: raw)
         }.value
+    }
+
+    /// One motion file, from the server or from the folder. Local names can't
+    /// climb out of their folder.
+    nonisolated private static func fileData(_ file: String, from source: Source) async throws -> Data {
+        switch source {
+        case .server(let projectId):
+            let client = SkillLabClient.shared
+            return try await client.data(path: client.motionAssetPath(projectId: projectId, file: file))
+        case .local(let directory):
+            guard !file.isEmpty, !file.contains("/"), !file.hasPrefix(".") else { throw LoadError.badPath }
+            return try Data(contentsOf: directory.appendingPathComponent(file))
+        }
     }
 
     private static func chunkLookup(for sequence: MotionSequence) -> [Int] {

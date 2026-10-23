@@ -25,7 +25,7 @@ struct PipelineSettingsView: View {
                             providerOption(provider)
                         }
                     } else {
-                        Label("Not connected to a Skill Lab server.", systemImage: "network.slash")
+                        Label("Not connected to a FootyLevels server.", systemImage: "network.slash")
                             .font(.system(size: 13))
                             .foregroundStyle(SL.errorText)
                             .padding(14)

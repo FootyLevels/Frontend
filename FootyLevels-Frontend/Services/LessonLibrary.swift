@@ -1,0 +1,38 @@
+import Foundation
+
+/// The lessons that ship inside the app: every `Lesson-*.bundle` the lesson pipeline
+/// added to `SampleData/Lessons`. Adding a lesson needs no code change.
+enum LessonLibrary {
+    struct Entry: Identifiable, Hashable {
+        let id: String
+        let title: String
+        let subtitle: String
+        let skills: [String]
+        let url: URL
+    }
+
+    private struct Summary: Decodable {
+        struct Skill: Decodable { let short: String }
+        let id: String
+        let title: String
+        let subtitle: String
+        let skills: [Skill]
+    }
+
+    /// Lesson bundles found in `bundle`, sorted by title. Unreadable ones are left out;
+    /// `LessonPackage.load` reports what is wrong with them.
+    static func lessons(in bundle: Bundle = .main) -> [Entry] {
+        guard let root = bundle.resourceURL,
+              let names = try? FileManager.default.contentsOfDirectory(atPath: root.path) else { return [] }
+        return names
+            .filter { $0.hasPrefix("Lesson-") && $0.hasSuffix(".bundle") }
+            .compactMap { name -> Entry? in
+                let url = root.appendingPathComponent(name, isDirectory: true)
+                guard let data = try? Data(contentsOf: url.appendingPathComponent("lesson.json")),
+                      let summary = try? JSONDecoder().decode(Summary.self, from: data) else { return nil }
+                return Entry(id: summary.id, title: summary.title, subtitle: summary.subtitle,
+                             skills: summary.skills.map(\.short), url: url)
+            }
+            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+    }
+}
