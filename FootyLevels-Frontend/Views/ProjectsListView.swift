@@ -80,25 +80,7 @@ struct ProjectsListView: View {
                     if hasAccount {
                         privateProjects
                     } else {
-                        section("YOUR PROJECTS") {
-                            if serverProjects.isEmpty, !viewModel.isLoading {
-                                welcome
-                            }
-                            ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
-                                let isDeleting = viewModel.deletingId == project.id
-                                NavigationLink(value: project.id) {
-                                    ProjectCard(project: project, number: index + 2, isSample: false)
-                                }
-                                .buttonStyle(.plain)
-                                .opacity(isDeleting ? 0.5 : 1)
-                                .disabled(isDeleting)
-                                .overlay(alignment: .topTrailing) { projectMenu(for: project, isDeleting: isDeleting) }
-                                .contextMenu { deleteButton(for: project) }
-                            }
-                            if !serverProjects.isEmpty {
-                                addAnother
-                            }
-                        }
+                        legacyProjects
                     }
 
                     footer
@@ -179,6 +161,32 @@ struct ProjectsListView: View {
             }
         }
         .tint(SL.green)
+    }
+
+    private var legacyProjects: some View {
+        section("YOUR PROJECTS") {
+            if serverProjects.isEmpty, !viewModel.isLoading {
+                welcome
+            }
+            ForEach(Array(serverProjects.enumerated()), id: \.element.id) { index, project in
+                serverProjectCard(project, number: index + 2)
+            }
+            if !serverProjects.isEmpty {
+                addAnother
+            }
+        }
+    }
+
+    private func serverProjectCard(_ project: SkillLabProject, number: Int) -> some View {
+        let isDeleting = viewModel.deletingId == project.id
+        return NavigationLink(value: project.id) {
+            ProjectCard(project: project, number: number, isSample: false)
+        }
+        .buttonStyle(.plain)
+        .opacity(isDeleting ? 0.5 : 1)
+        .disabled(isDeleting)
+        .overlay(alignment: .topTrailing) { projectMenu(for: project, isDeleting: isDeleting) }
+        .contextMenu { deleteButton(for: project) }
     }
 
     private var privateProjects: some View {

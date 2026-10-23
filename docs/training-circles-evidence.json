@@ -1,0 +1,42 @@
+{
+  "ticket": "FP-69",
+  "date": "2026-10-16",
+  "branch": "codex/training-circles",
+  "frontendImplementationCommit": "0af2e67",
+  "backendVerifiedHead": "dd40957",
+  "fullSimulatorSuite": {
+    "result": "Passed",
+    "passed": 106,
+    "skipped": 3,
+    "failed": 0,
+    "totalUniqueTests": 109,
+    "source": "xcresulttool get test-results summary",
+    "scheme": "FootyLevels-Development",
+    "device": "iPhone 17 Pro simulator",
+    "osVersion": "26.4.1",
+    "skips": "Existing opt-in live cloud tests",
+    "communityAccountGateUITest": "passed",
+    "communityClientTests": 26,
+    "newMotionTests": 13
+  },
+  "realServiceProof": {
+    "passed": true,
+    "evidence": "Backend/docs/training-circles-evidence.json",
+    "transport": "Isolated DGX TestClient with real Firebase identities, Firestore and Supabase",
+    "seededPreparedMedia": true,
+    "temporaryAccountAndStorageCleanupVerified": true,
+    "seededMotion": true,
+    "storageObjectsRemoved": 7,
+    "serviceScenarios": 8
+  },
+  "deploymentChanged": false,
+  "limitations": [
+    "Native client/player and UI-gate tests are separate from the real cloud service proof",
+    "New signed-in screen-by-screen motion acceptance is separate; the user reports testing the earlier community flow",
+    "Physical iPhone and interactive Google sign-in were deferred",
+    "The updated Backend runtime and app must be installed for public-service use",
+    "Shared motion comparison, keyframe sharing, scoring, a public feed and direct messages are outside this increment"
+  ],
+  "priorVideoOnlyImplementationCommit": "6a61043",
+  "applicationAndTestBuild": "passed"
+}

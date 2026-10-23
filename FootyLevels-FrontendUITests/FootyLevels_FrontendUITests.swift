@@ -56,4 +56,19 @@ final class FootyLevels_FrontendUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Create Your Account"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["Sign Up"].isEnabled)
     }
+
+    @MainActor
+    func testCommunityRequiresAnAccountAndKeepsTheSamplePrivate() {
+        let app = XCUIApplication()
+        app.launchArguments = []
+        app.launch()
+        let community = app.tabBars.buttons["Community"]
+        XCTAssertTrue(community.waitForExistence(timeout: 10))
+        community.tap()
+        XCTAssertTrue(app.staticTexts["Sign in to train together"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@",
+            "Training circles belong to your account.")).firstMatch.exists)
+        XCTAssertFalse(app.buttons["Create circle"].exists)
+        XCTAssertFalse(app.buttons["Share attempt"].exists)
+    }
 }
