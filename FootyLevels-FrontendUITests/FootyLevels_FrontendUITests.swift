@@ -19,6 +19,27 @@ final class FootyLevels_FrontendUITests: XCTestCase {
                       "The bundled 3D motion must finish decoding into the reused player")
     }
 
+    /// The Learn tab lists the bundled lessons; a pipeline lesson opens, switches skill and stage.
+    @MainActor
+    func testLearnTabPlaysABundledLesson() {
+        let app = XCUIApplication()
+        app.launch()
+        app.tabBars.buttons["Learn"].tap()
+        XCTAssertTrue(app.staticTexts["Lessons"].waitForExistence(timeout: 10))
+        let lesson = app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "Chop and Spin Lesson")).firstMatch
+        XCTAssertTrue(lesson.waitForExistence(timeout: 5))
+        lesson.tap()
+        XCTAssertTrue(app.staticTexts["Watch the Cruyff chop"].waitForExistence(timeout: 20))
+        let spin = app.buttons["Antony spin, Skill 2 · named"]
+        XCTAssertTrue(spin.waitForExistence(timeout: 20))
+        XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: spin)], timeout: 30) == .completed,
+                      "The lesson's 3D motion must load from the bundle")
+        spin.tap()
+        XCTAssertTrue(app.staticTexts["Watch the Antony spin"].waitForExistence(timeout: 5))
+        app.buttons["Stage 2: Break it down"].tap()
+        XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "START THE SPIN")).firstMatch.waitForExistence(timeout: 5))
+    }
+
     /// Run after the live SDK probe signs out and deletes its temporary accounts.
     @MainActor
     func testSignedOutEmailLoginRoute() {

@@ -18,7 +18,7 @@ struct MainTabView: View {
                 OverlayDifferenceView(library: library)
             }
             Tab("Learn", systemImage: "figure.soccer") {
-                LessonView()
+                LessonLibraryView()
             }
         }
         .tint(SL.green)

@@ -111,6 +111,18 @@ final class AnimatedBodyMesh {
         entity.isEnabled = false
     }
 
+    /// Replaces the highlights' materials (same count and order as at init), e.g.
+    /// when the foot that works the ball changes between skills or frames.
+    func setHighlightMaterials(_ highlights: [SimpleMaterial]) {
+        guard highlights.count == materials.count - 1 else { return }
+        materials = [materials[0]] + highlights.map { material in
+            var m = material
+            m.triangleFillMode = wireframe ? .lines : .fill
+            return m
+        }
+        entity.components[ModelComponent.self]?.materials = materials
+    }
+
     var wireframe = false {
         didSet {
             for index in materials.indices {

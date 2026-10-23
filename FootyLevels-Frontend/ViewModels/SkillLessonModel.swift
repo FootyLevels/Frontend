@@ -54,7 +54,7 @@ final class SkillLessonModel {
     @ObservationIgnored private var body: AnimatedBodyMesh?
     @ObservationIgnored private var ghost: AnimatedBodyMesh?
     @ObservationIgnored private let ball = Entity()
-    @ObservationIgnored private var trails: [Trail] = []
+    @ObservationIgnored private var trails: [LessonTrail] = []
     @ObservationIgnored private var footprints: [Footprint] = []
     @ObservationIgnored private let arrow = Entity()
     @ObservationIgnored private var lastFrame = -1
@@ -140,10 +140,10 @@ final class SkillLessonModel {
         ball.isEnabled = false
 
         trails = [
-            Trail(name: "trail-body", color: .white, radius: 0.02),
-            Trail(name: "trail-step", color: SL.overlaySecond, radius: 0.016),
-            Trail(name: "trail-front", color: SL.overlayFirst, radius: 0.016),
-            Trail(name: "trail-ball", color: UIColor(white: 1, alpha: 0.6), radius: 0.012),
+            LessonTrail(name: "trail-body", color: .white, radius: 0.02),
+            LessonTrail(name: "trail-step", color: SL.overlaySecond, radius: 0.016),
+            LessonTrail(name: "trail-front", color: SL.overlayFirst, radius: 0.016),
+            LessonTrail(name: "trail-ball", color: UIColor(white: 1, alpha: 0.6), radius: 0.012),
         ]
         footprints = makeFootprints()
         buildArrow()
@@ -444,9 +444,9 @@ final class SkillLessonModel {
 
 // MARK: - Scene pieces
 
-/// A breadcrumb trail: small dots, older ones smaller.
+/// A breadcrumb trail: small dots, older ones smaller. Shared by the lesson screens.
 @MainActor
-private final class Trail {
+final class LessonTrail {
     static let capacity = 46
     let entity = Entity()
     private var dots: [ModelEntity] = []

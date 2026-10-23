@@ -1,63 +1,5 @@
 import SwiftUI
 
-// MARK: - Shared pieces
-
-private struct SectionCard<Content: View>: View {
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) { content }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .slPanel(fill: SL.card, border: SL.cardBorder, radius: 10)
-    }
-}
-
-private struct SectionHeading: View {
-    let eyebrow: String
-    let title: String
-    let text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Eyebrow(text: eyebrow, color: SL.muted)
-            Text(title)
-                .font(SL.display(24, .heavy))
-                .tracking(-0.6)
-                .foregroundStyle(SL.ink)
-            Text(text)
-                .font(.system(size: 14))
-                .foregroundStyle(Color(hex: "5E6B58"))
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}
-
-private struct NumberBadge: View {
-    let text: String
-    var filled = false
-    var color: Color = SL.green
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 12, weight: .semibold).monospacedDigit())
-            .foregroundStyle(filled ? .white : SL.ink)
-            .frame(width: 26, height: 26)
-            .background(filled ? color : .clear, in: Circle())
-            .overlay(Circle().stroke(filled ? color : SL.cardBorder, lineWidth: 1.5))
-    }
-}
-
-private extension LessonConfidence {
-    var color: Color {
-        switch self {
-        case .high: return Color(hex: "3F7D4C")
-        case .medium: return Color(hex: "96713E")
-        case .low: return Color(hex: "975936")
-        }
-    }
-}
-
 private let stepColor = Color(uiColor: SL.overlaySecond)
 
 // MARK: - 1. Watch
@@ -552,35 +494,6 @@ struct TestSection: View {
                 Button("Try again") { results = []; step = .whichFoot }.buttonStyle(.slSecondary)
                 Button("Back to Break it down") { model.enter(.breakdown) }.buttonStyle(.slPrimary)
             }
-        }
-    }
-}
-
-/// Lays children out left to right, wrapping onto new rows.
-private struct FlowRow: Layout {
-    var spacing: CGFloat = 6
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? .infinity
-        var x: CGFloat = 0, y: CGFloat = 0, rowHeight: CGFloat = 0, widest: CGFloat = 0
-        for view in subviews {
-            let size = view.sizeThatFits(.unspecified)
-            if x > 0, x + size.width > width { x = 0; y += rowHeight + spacing; rowHeight = 0 }
-            x += size.width + spacing
-            widest = Swift.max(widest, x - spacing)
-            rowHeight = Swift.max(rowHeight, size.height)
-        }
-        return CGSize(width: proposal.width ?? widest, height: y + rowHeight)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX, y = bounds.minY, rowHeight: CGFloat = 0
-        for view in subviews {
-            let size = view.sizeThatFits(.unspecified)
-            if x > bounds.minX, x + size.width > bounds.maxX { x = bounds.minX; y += rowHeight + spacing; rowHeight = 0 }
-            view.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
-            x += size.width + spacing
-            rowHeight = Swift.max(rowHeight, size.height)
         }
     }
 }

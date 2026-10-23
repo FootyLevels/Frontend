@@ -1,33 +1,26 @@
 import SwiftUI
 
-/// The "Learn" tab: the Over Fake lesson, from watching the move to doing it.
+/// The Over Fake lesson, from watching the move to doing it.
 /// It plays from the app bundle, so it works offline and without an account.
 struct LessonView: View {
     @State private var model: SkillLessonModel?
     @State private var loadError: String?
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if let model {
-                    LessonScreen(model: model)
-                } else if let loadError {
-                    ContentUnavailableView("Lesson unavailable", systemImage: "exclamationmark.triangle",
-                                           description: Text(loadError))
-                } else {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-            }
-            .background(SL.page)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    BrandMark(size: 20)
-                }
+        Group {
+            if let model {
+                LessonScreen(model: model)
+            } else if let loadError {
+                ContentUnavailableView("Lesson unavailable", systemImage: "exclamationmark.triangle",
+                                       description: Text(loadError))
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .tint(SL.green)
+        .background(SL.page)
+        .navigationTitle("The over fake")
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             guard model == nil, loadError == nil else { return }
             do {
@@ -39,7 +32,7 @@ struct LessonView: View {
                 loadError = error.localizedDescription
             }
         }
-        // Switching tabs only pauses; coming back carries on from the same moment.
+        // Leaving the lesson only pauses; coming back carries on from the same moment.
         .onDisappear { model?.pause() }
     }
 }
@@ -53,9 +46,9 @@ private struct LessonScreen: View {
             VStack(alignment: .leading, spacing: 14) {
                 header
                 StagePicker(model: model)
-                LessonStageView(model: model)
+                LessonStageView(model: model, shotLabel: shotLabel, cue: cue)
                 LessonInfoBar(model: model)
-                LessonTransport(model: model)
+                LessonTransport(model: model) { LessonTimeline(model: model) }
                 switch model.stage {
                 case .watch: WatchSection(model: model)
                 case .breakdown: BreakdownSection(model: model)
@@ -73,6 +66,16 @@ private struct LessonScreen: View {
         .scrollDismissesKeyboard(.immediately)
     }
 
+    private var shotLabel: String {
+        if model.phase.shot == 0 { return "Full-speed demo" }
+        return model.phase.start < 6 ? "Tutorial · step 1" : "Tutorial · step 2"
+    }
+
+    private var cue: (name: String, text: String) {
+        let content = OverFakeLessonContent.phase(model.phase.id)
+        return (content.name, content.cue)
+    }
+
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             Eyebrow(text: "LEARN A SKILL", rule: true)
@@ -85,150 +88,6 @@ private struct LessonScreen: View {
                 .foregroundStyle(Color(hex: "77816F"))
         }
         .padding(.top, 8)
-    }
-}
-
-// MARK: - Stage picker
-
-/// Watch · Break it down · Practise · Test yourself: a real sequence, so numbered.
-private struct StagePicker: View {
-    let model: SkillLessonModel
-
-    var body: some View {
-        HStack(spacing: 3) {
-            ForEach(LessonStage.allCases) { stage in
-                let selected = model.stage == stage
-                Button {
-                    model.enter(stage)
-                } label: {
-                    VStack(spacing: 2) {
-                        Text("\(stage.number)")
-                            .font(.system(size: 11, weight: .semibold).monospacedDigit())
-                        Text(stage.rawValue)
-                            .font(.system(size: 12, weight: selected ? .semibold : .regular))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                    }
-                    .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.modeText)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 7)
-                    .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 5))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Stage \(stage.number): \(stage.rawValue)")
-                .accessibilityAddTraits(selected ? .isSelected : [])
-            }
-        }
-        .padding(4)
-        .slPanel(fill: SL.modeTrack, border: SL.modeBorder, radius: 8)
-        .disabled(model.state != .ready)
-    }
-}
-
-// MARK: - Video + 3D
-
-private struct LessonStageView: View {
-    let model: SkillLessonModel
-
-    /// The video is 9:16; it takes this share of the width and sets the height.
-    private let videoShare: CGFloat = 0.44
-
-    var body: some View {
-        VStack(spacing: 0) {
-            GeometryReader { geo in
-                let videoWidth = geo.size.width * videoShare
-                HStack(spacing: 6) {
-                    videoTile.frame(width: videoWidth)
-                    stageTile
-                }
-            }
-            .aspectRatio(1 / (videoShare * 16 / 9), contentMode: .fit)
-            .padding(6)
-            .background(SL.videoPanel)
-
-            PresetToolbar(selection: model.angle, enabled: model.state == .ready) { model.show($0) }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "2B3B32")))
-    }
-
-    private var videoTile: some View {
-        ZStack {
-            SL.videoStage
-            VideoSurface(player: model.playback.player)
-                .scaleEffect(x: model.mirror ? -1 : 1, y: 1)
-                .onTapGesture { model.togglePlayback() }
-                .accessibilityAddTraits(.isButton)
-                .accessibilityLabel("Original video. Tap to play or pause.")
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(alignment: .topLeading) {
-            Text(shotLabel)
-                .font(.system(size: 9, weight: .medium))
-                .tracking(0.8)
-                .foregroundStyle(Color(hex: "F4F6DF"))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 4)
-                .background(Color(hex: "0E261C").opacity(0.85), in: RoundedRectangle(cornerRadius: 3))
-                .padding(6)
-                .allowsHitTesting(false)
-        }
-        .overlay(alignment: .bottom) {
-            PhaseCue(model: model)
-                .padding(6)
-                .allowsHitTesting(false)
-        }
-    }
-
-    private var shotLabel: String {
-        if model.phase.shot == 0 { return "FULL-SPEED DEMO" }
-        return model.phase.start < 6 ? "TUTORIAL · STEP 1" : "TUTORIAL · STEP 2"
-    }
-
-    private var stageTile: some View {
-        ZStack {
-            ModelStageView(root: model.stageRoot, camera: model.camera)
-            switch model.state {
-            case .loading(let message): StageMessage(message: message, isLoading: true)
-            case .failed(let message): StageMessage(message: message, isLoading: false)
-            case .ready: EmptyView()
-            }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(alignment: .topLeading) {
-            if model.mirror {
-                Text("MIRRORED")
-                    .font(.system(size: 9, weight: .semibold))
-                    .tracking(0.8)
-                    .foregroundStyle(SL.ink)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 4)
-                    .background(SL.lime, in: RoundedRectangle(cornerRadius: 3))
-                    .padding(6)
-            }
-        }
-    }
-}
-
-/// The current phase's name and cue, over the video.
-private struct PhaseCue: View {
-    let model: SkillLessonModel
-
-    var body: some View {
-        let content = OverFakeLessonContent.phase(model.phase.id)
-        VStack(alignment: .leading, spacing: 2) {
-            Text(content.name.uppercased())
-                .font(SL.display(15, .heavy))
-                .foregroundStyle(Color(hex: "F4F7F2"))
-            Text(content.cue)
-                .font(.system(size: 11))
-                .foregroundStyle(Color(hex: "D6E2D0"))
-                .lineLimit(2)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(8)
-        .background(Color(hex: "0E1F17").opacity(0.85), in: RoundedRectangle(cornerRadius: 6))
-        .accessibilityElement(children: .combine)
     }
 }
 
@@ -332,111 +191,6 @@ private struct LessonInfoBar: View {
     }
 }
 
-// MARK: - Transport
-
-private struct LessonTransport: View {
-    @Bindable var model: SkillLessonModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
-                PlayButton(playback: model.playback) { model.togglePlayback() }
-                iconButton("chevron.left", label: "Back one frame") { model.step(frames: -1) }
-                iconButton("chevron.right", label: "Forward one frame") { model.step(frames: 1) }
-                Menu {
-                    Picker("Playback speed", selection: Binding(get: { model.playback.speed }, set: { model.playback.speed = $0 })) {
-                        ForEach(PlaybackController.speeds, id: \.self) { Text("\($0.formatted())× speed").tag($0) }
-                    }
-                } label: {
-                    Text("\(model.playback.speed.formatted())×")
-                        .font(.system(size: 12, weight: .semibold).monospacedDigit())
-                        .frame(minWidth: 34, minHeight: 32)
-                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
-                }
-                .accessibilityLabel("Playback speed")
-                toggle("Loop", on: model.loop != nil) { model.toggleLoop() }
-                toggle("Mirror", on: model.mirror) { model.mirror.toggle() }
-                Spacer(minLength: 0)
-                TimeLabel(playback: model.playback)
-            }
-            .foregroundStyle(SL.ink)
-
-            LessonTimeline(model: model)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 14) {
-                    Toggle("Footprints", isOn: $model.overlays.footprints)
-                    Toggle("Paths", isOn: $model.overlays.paths)
-                    Toggle("Ghost of last step", isOn: $model.overlays.ghost)
-                    Toggle("Direction", isOn: $model.overlays.direction)
-                    Toggle("Follow", isOn: $model.overlays.follow)
-                }
-                .toggleStyle(CheckToggleStyle())
-                .font(.system(size: 12))
-                .foregroundStyle(Color(hex: "6F7B66"))
-                .padding(.vertical, 2)
-            }
-        }
-        .padding(12)
-        .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 10)
-        .disabled(model.state != .ready)
-    }
-
-    private func iconButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .frame(width: 32, height: 32)
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-    }
-
-    private func toggle(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 12, weight: .semibold))
-                .padding(.horizontal, 9)
-                .frame(minHeight: 32)
-                .foregroundStyle(on ? Color(hex: "F1F6E9") : SL.ink)
-                .background(on ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 7))
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(on ? SL.greenActive : Color(hex: "BFC9B9")))
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(on ? .isSelected : [])
-    }
-}
-
-/// Reads the playing state in its own view, so only this button redraws.
-private struct PlayButton: View {
-    let playback: PlaybackController
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 32)
-                .background(SL.green, in: RoundedRectangle(cornerRadius: 7))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(playback.isPlaying ? "Pause" : "Play")
-    }
-}
-
-/// Reads the 60 Hz clock in its own view.
-private struct TimeLabel: View {
-    let playback: PlaybackController
-
-    var body: some View {
-        Text(String(format: "%.2f s", playback.currentTime))
-            .font(.system(size: 12).monospacedDigit())
-            .foregroundStyle(SL.muted)
-    }
-}
-
 // MARK: - Timeline
 
 /// Both shots, the lesson's phases and their key moments, with a playhead.
@@ -478,7 +232,7 @@ private struct LessonTimeline: View {
                         .frame(width: Swift.max(x(loop.upperBound - loop.lowerBound), 4), height: 22)
                         .offset(x: x(loop.lowerBound), y: 12)
                 }
-                Playhead(playback: model.playback, duration: model.lesson.duration, width: width)
+                Playhead(playback: model.playback, range: 0...model.lesson.duration, width: width)
             }
             .contentShape(Rectangle())
             .gesture(
@@ -494,19 +248,5 @@ private struct LessonTimeline: View {
         .accessibilityLabel("Lesson timeline")
         .accessibilityValue("\(model.phase.id == "pause" ? "Tutorial pause" : OverFakeLessonContent.phase(model.phase.id).name), \(String(format: "%.1f", model.playback.currentTime)) seconds")
         .accessibilityAdjustableAction { direction in model.step(frames: direction == .increment ? 5 : -5) }
-    }
-}
-
-private struct Playhead: View {
-    let playback: PlaybackController
-    let duration: Double
-    let width: CGFloat
-
-    var body: some View {
-        Rectangle()
-            .fill(SL.ink)
-            .frame(width: 2, height: 30)
-            .offset(x: width * CGFloat(Swift.min(Swift.max(playback.currentTime / duration, 0), 1)) - 1, y: 10)
-            .allowsHitTesting(false)
     }
 }
