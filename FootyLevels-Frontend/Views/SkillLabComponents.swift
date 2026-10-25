@@ -1,6 +1,58 @@
 import RealityKit
 import SwiftUI
 
+/// A small indeterminate animation. Reduced Motion uses a static waiting symbol.
+struct SLActivityIndicator: View {
+    var size: CGFloat = 18
+    var color: Color = SL.green
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var rotating = false
+
+    var body: some View {
+        Group {
+            if reduceMotion {
+                Image(systemName: "hourglass")
+                    .font(.system(size: size * 0.8, weight: .medium))
+            } else {
+                ZStack {
+                    Circle().stroke(color.opacity(0.16), lineWidth: 2)
+                    Circle().trim(from: 0.08, to: 0.75)
+                        .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                        .rotationEffect(.degrees(rotating ? 360 : 0))
+                        .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: rotating)
+                }
+                .onAppear { rotating = true }
+                .onDisappear { rotating = false }
+            }
+        }
+        .foregroundStyle(color)
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Honest waiting feedback for requests without a measurable progress value.
+struct SLLoadingState: View {
+    let title: String
+    var detail: String? = nil
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 14) {
+            SLActivityIndicator(size: 22)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(SL.ink)
+                if let detail {
+                    Text(detail).font(.footnote).foregroundStyle(SL.muted)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .slPanel(fill: SL.iconTile)
+        .accessibilityElement(children: .combine)
+    }
+}
+
 /// Hosts a prepared stage with an app-driven orbit camera.
 ///
 /// The root is attached once and then left alone: animation writes straight
@@ -108,11 +160,11 @@ struct StageStatusOverlay: View {
                     .font(.largeTitle)
                     .foregroundStyle(AppTheme.errorColor)
             } else {
-                ProgressView().controlSize(.large)
+                SLActivityIndicator(size: 28)
             }
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SL.muted)
                 .multilineTextAlignment(.center)
         }
         .padding(24)

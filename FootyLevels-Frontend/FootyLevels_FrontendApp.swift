@@ -30,6 +30,8 @@ struct FootyLevels_FrontendApp: App {
                 CheckUser()
                 #endif
             }
+                .preferredColorScheme(.light)
+                .tint(SL.green)
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }

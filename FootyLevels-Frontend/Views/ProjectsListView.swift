@@ -23,6 +23,10 @@ struct ProjectsListView: View {
     @State private var pendingDelete: SkillLabProject?
     @State private var deletionTarget: CloudProject?
 
+    private var isWatchingPrivateProjects: Bool {
+        hasAccount && scenePhase == .active
+    }
+
     /// Server projects, minus the example — that one always opens from the
     /// bundle, so it isn't listed twice when the server has it too.
     private var serverProjects: [SkillLabProject] {
@@ -90,6 +94,7 @@ struct ProjectsListView: View {
                 .padding(.bottom, 28)
             }
             .background(SL.page)
+            .slScreen()
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: String.self) { projectId in
                 ProjectDetailView(projectId: projectId, projectNumber: number(for: projectId))
@@ -149,6 +154,9 @@ struct ProjectsListView: View {
                     await viewModel.refresh()
                 }
             }
+            .task(id: isWatchingPrivateProjects) {
+                await watchPreparingProjects()
+            }
             .onChange(of: pickedVideo) { _, item in
                 guard let item else { return }
                 pickedVideo = nil
@@ -161,6 +169,18 @@ struct ProjectsListView: View {
             }
         }
         .tint(SL.green)
+    }
+
+    private func watchPreparingProjects() async {
+        guard isWatchingPrivateProjects else { return }
+        while !Task.isCancelled {
+            do { try await Task.sleep(for: .seconds(12)) }
+            catch { return }
+            guard !Task.isCancelled else { return }
+            if showCamera || requestingCamera { continue }
+            if cloud.pending != nil { continue }
+            await cloud.refreshPreparingProjects()
+        }
     }
 
     private var legacyProjects: some View {
@@ -198,7 +218,15 @@ struct ProjectsListView: View {
                 Text("Private uploads need the account API connection. The included example is available on this page.")
                     .font(.callout).foregroundStyle(SL.muted)
             }
-            if cloud.isLoading { ProgressView("Loading your projects…") }
+            if cloud.isLoading && cloud.projects.isEmpty && cloud.drafts.isEmpty {
+                SLLoadingState(title: "Loading your videos…", detail: "Finding the clips saved to your account.")
+            }
+            if !cloud.isLoading && cloud.projects.isEmpty && cloud.drafts.isEmpty && cloud.errorMessage == nil {
+                Label("Your next attempt starts here", systemImage: "video.badge.plus")
+                    .font(.headline).foregroundStyle(SL.ink)
+                Text("Import or record a clip. Your videos are private until you choose to share them.")
+                    .font(.callout).foregroundStyle(SL.muted)
+            }
             ForEach(cloud.drafts) { draft in
                 VStack(alignment: .leading, spacing: 10) {
                     Text(draft.title).font(.headline)
@@ -211,27 +239,10 @@ struct ProjectsListView: View {
                         }
                     }.disabled(cloud.isBusy || cloud.isLoading)
                 }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(SL.page, in: RoundedRectangle(cornerRadius: 12))
+                    .slPanel()
             }
             ForEach(cloud.projects.filter { project in !cloud.drafts.contains(where: { $0.projectId == project.id }) }) { project in
-                HStack {
-                NavigationLink(value: project) {
-                    HStack(spacing: 14) {
-                        Image(systemName: "lock.fill").foregroundStyle(SL.green)
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(project.title).font(SL.display(17, .bold)).foregroundStyle(SL.ink)
-                            Text(project.statusText).font(.caption).foregroundStyle(SL.muted)
-                            if let label = project.label { Text(label).font(.caption).foregroundStyle(SL.muted) }
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right").foregroundStyle(SL.muted)
-                    }.padding(16).background(SL.page, in: RoundedRectangle(cornerRadius: 12))
-                }.buttonStyle(.plain)
-                Button(role: .destructive) { deletionTarget = project } label: {
-                    Image(systemName: "trash").padding(10)
-                }.accessibilityLabel("Delete \(project.title)")
-                    .disabled(cloud.isBusy || cloud.isLoading)
-                }
+                privateProjectCard(project)
             }
             if !cloud.deletions.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
@@ -246,7 +257,7 @@ struct ProjectsListView: View {
             }
             if cloud.hasMore { Button("Load more projects") { Task { await cloud.refresh(more: true) } }.disabled(cloud.isBusy || cloud.isLoading) }
             importPicker { Label(cloud.projects.isEmpty ? "Import a video" : "Import another video", systemImage: "photo.on.rectangle") }
-                .buttonStyle(.slPrimary)
+                .buttonStyle(.slPrimaryWide)
             Button {
                 requestingCamera = true
                 Task {
@@ -254,9 +265,48 @@ struct ProjectsListView: View {
                     cameraError = await VideoRecordingPicker.permissionError()
                     if cameraError == nil { showCamera = true }
                 }
-            } label: { Label("Record a video", systemImage: "video") }
+            } label: {
+                HStack {
+                    if requestingCamera { SLActivityIndicator() }
+                    Label(requestingCamera ? "Opening camera…" : "Record a video", systemImage: "video")
+                }.frame(maxWidth: .infinity)
+            }
+                .buttonStyle(.slSecondary)
                 .disabled(!canImport).accessibilityIdentifier("recordPrivateVideo")
         }
+    }
+
+    private func privateProjectCard(_ project: CloudProject) -> some View {
+        HStack(spacing: 8) {
+            NavigationLink(value: project) {
+                HStack(spacing: 14) {
+                    Group {
+                        if project.state == "preparing" { SLActivityIndicator(size: 22) }
+                        else { Image(systemName: "lock.fill").foregroundStyle(SL.green) }
+                    }
+                    .frame(width: 42, height: 48)
+                    .background(SL.iconTile, in: RoundedRectangle(cornerRadius: 10))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(project.title).font(.headline).foregroundStyle(SL.ink)
+                        Text(project.state == "preparing" ? "Preparing your video…" : project.statusText)
+                            .font(.subheadline).foregroundStyle(project.state == "rejected" ? SL.errorText : SL.muted)
+                        if project.state == "preparing" {
+                            Text("Upload complete. Playback and key frames are next.")
+                                .font(.caption).foregroundStyle(SL.muted)
+                        }
+                        if let label = project.label { Text(label).font(.caption).foregroundStyle(SL.muted) }
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(SL.muted)
+                }.contentShape(Rectangle())
+            }.buttonStyle(.plain)
+            Button(role: .destructive) { deletionTarget = project } label: {
+                Image(systemName: "trash").frame(width: 44, height: 44)
+            }
+            .tint(SL.errorText)
+            .accessibilityLabel("Delete \(project.title)")
+            .disabled(cloud.isBusy || cloud.isLoading)
+        }.padding(14).slPanel()
     }
 
     private func number(for projectId: String) -> Int {
@@ -281,7 +331,7 @@ struct ProjectsListView: View {
             Text("Slow it down. Find the key moments.\nExplore the body position from every angle.")
                 .font(.system(size: 14))
                 .lineSpacing(5)
-                .foregroundStyle(Color(hex: "77816F"))
+                .foregroundStyle(SL.muted)
         }
         .padding(.top, 12)
     }
@@ -302,7 +352,7 @@ struct ProjectsListView: View {
                 .foregroundStyle(Color(hex: "35502D"))
             Text("Import a short skill video — up to 60 seconds — to select frames and build your breakdown.")
                 .font(.system(size: 13))
-                .foregroundStyle(Color(hex: "89967B"))
+                .foregroundStyle(SL.muted)
                 .multilineTextAlignment(.center)
             importPicker {
                 HStack(spacing: 8) {
@@ -312,7 +362,7 @@ struct ProjectsListView: View {
             }
             .buttonStyle(.slPrimary)
         }
-        .foregroundStyle(Color(hex: "738B5C"))
+        .foregroundStyle(SL.green)
         .padding(.vertical, 40)
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity)
@@ -330,7 +380,7 @@ struct ProjectsListView: View {
                 Text("Import another video")
             }
             .font(.system(size: 14, weight: .semibold))
-            .foregroundStyle(Color(hex: "738B5C"))
+            .foregroundStyle(SL.green)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
             .overlay(RoundedRectangle(cornerRadius: 12)
@@ -362,7 +412,7 @@ struct ProjectsListView: View {
         } label: {
             Group {
                 if isDeleting {
-                    ProgressView()
+                    SLActivityIndicator()
                 } else {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 15, weight: .semibold))
@@ -395,14 +445,14 @@ struct ProjectsListView: View {
             Text("FOOTYLEVELS")
                 .font(.system(size: 11, weight: .bold))
                 .tracking(2)
-                .foregroundStyle(Color(hex: "7C8B6C"))
+                .foregroundStyle(SL.muted)
             Text("Watch closely. Move with intention.")
                 .font(.system(size: 11))
             Text("POWERED BY META SAM 3D BODY")
                 .font(.system(size: 9))
                 .tracking(0.8)
         }
-        .foregroundStyle(Color(hex: "98A08C"))
+        .foregroundStyle(SL.muted)
         .frame(maxWidth: .infinity)
         .padding(.top, 20)
         .overlay(alignment: .top) { Rectangle().fill(SL.line).frame(height: 1) }
@@ -442,15 +492,24 @@ struct ProjectsListView: View {
     @ViewBuilder
     private var uploadOverlay: some View {
         if hasAccount, let phase = cloud.phase {
-            VStack(spacing: 14) {
-                Text(phase)
+            VStack(spacing: 18) {
+                SLActivityIndicator(size: 28)
+                Text(phase).font(.headline).multilineTextAlignment(.center)
                 if let progress = cloud.progress {
-                    ProgressView(value: progress).frame(width: 180)
-                    Text("\(Int(progress * 100))%")
-                } else { ProgressView() }
-                Button("Pause") { cloud.pause() }.accessibilityIdentifier("pausePrivateUpload")
+                    ProgressView(value: progress).tint(SL.green)
+                    Text("\(Int(progress * 100))%").font(.subheadline.monospacedDigit())
+                }
+                if cloud.progress != nil {
+                    Text("Your draft is saved. You can pause this upload and resume it later.")
+                        .font(.footnote).foregroundStyle(SL.muted).multilineTextAlignment(.center)
+                    Button("Pause upload") { cloud.pause() }.buttonStyle(.slSecondary).accessibilityIdentifier("pausePrivateUpload")
+                } else {
+                    Text("Please keep the app open while this step completes.")
+                        .font(.footnote).foregroundStyle(SL.muted).multilineTextAlignment(.center)
+                }
             }
-            .padding(24).background(SL.page, in: RoundedRectangle(cornerRadius: 12)).shadow(radius: 16)
+            .padding(24).frame(maxWidth: 300).slPanel(fill: SL.header, radius: 20)
+            .shadow(color: SL.green.opacity(0.16), radius: 24, y: 8)
         } else {
             UploadProgressOverlay(phase: viewModel.uploadPhase)
         }
@@ -479,7 +538,7 @@ private struct ProjectCard: View {
                         Text("OFFLINE")
                             .font(.system(size: 8, weight: .bold))
                             .tracking(1)
-                            .foregroundStyle(Color(hex: "63814A"))
+                            .foregroundStyle(SL.green)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
                             .background(Color(hex: "E0EDCD"), in: RoundedRectangle(cornerRadius: 3))
@@ -493,7 +552,7 @@ private struct ProjectCard: View {
                 Text(String(format: "%.1f SEC  ·  %d KEY FRAMES", project.video.duration, project.frames.count))
                     .font(.system(size: 10, weight: .medium))
                     .tracking(1)
-                    .foregroundStyle(Color(hex: "7C8578"))
+                    .foregroundStyle(SL.muted)
                 StatusDot(text: motionText, ready: project.motion?.isPlayable == true)
             }
             Spacer(minLength: 0)
@@ -556,7 +615,7 @@ private struct ServerStatusCard: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
-                    Eyebrow(text: title, color: Color(hex: "81916F"))
+                    Eyebrow(text: title, color: SL.muted)
                     Spacer()
                     if let mode = health?.network?.mode {
                         Text(mode.uppercased())
@@ -585,7 +644,7 @@ private struct ServerStatusCard: View {
                                            : "Can't reach \(address)."))
                         .font(.system(size: 12))
                         .lineSpacing(2)
-                        .foregroundStyle(Color(hex: "7A8370"))
+                        .foregroundStyle(SL.muted)
                     Text("Tap to set the server address.")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(SL.green)

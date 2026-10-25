@@ -8,7 +8,9 @@ final class FootyLevels_FrontendUITests: XCTestCase {
     @MainActor
     func testIncludedExampleOpensWithoutLogin() {
         let app = XCUIApplication()
+        app.launchArguments = []
         app.launch()
+        app.tabBars.buttons["Videos"].tap()
         XCTAssertTrue(app.staticTexts["INCLUDED EXAMPLE"].waitForExistence(timeout: 10))
         app.staticTexts["The over fake"].firstMatch.tap()
         XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "Included example").firstMatch.waitForExistence(timeout: 15))
@@ -19,10 +21,30 @@ final class FootyLevels_FrontendUITests: XCTestCase {
                       "The bundled 3D motion must finish decoding into the reused player")
     }
 
+    @MainActor
+    func testLearnIsHomeAndTabsOpenInRequestedOrder() {
+        let app = XCUIApplication()
+        app.launchArguments = []
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Lessons"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.tabBars.buttons.allElementsBoundByIndex.map(\.label),
+                       ["Learn", "Overlay", "Community", "Videos"])
+        XCTAssertTrue(app.tabBars.buttons["Learn"].isSelected)
+        for tab in ["Learn", "Overlay", "Community", "Videos"] {
+            app.tabBars.buttons[tab].tap()
+            XCTAssertTrue(app.tabBars.buttons[tab].isSelected)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Workspace-\(tab)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+        }
+    }
+
     /// The Learn tab lists the bundled lessons; a pipeline lesson opens, switches skill and stage.
     @MainActor
     func testLearnTabPlaysABundledLesson() {
         let app = XCUIApplication()
+        app.launchArguments = []
         app.launch()
         app.tabBars.buttons["Learn"].tap()
         XCTAssertTrue(app.staticTexts["Lessons"].waitForExistence(timeout: 10))

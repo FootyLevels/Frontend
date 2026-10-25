@@ -19,12 +19,17 @@ struct OverlayDifferenceView: View {
                     intro
 
                     if let error = viewModel.errorMessage {
-                        Text(error)
-                            .font(.system(size: 13))
-                            .foregroundStyle(SL.errorText)
-                            .padding(14)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(SL.errorFill, in: RoundedRectangle(cornerRadius: 6))
+                        Label {
+                            Text(error)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } icon: {
+                            Image(systemName: "exclamationmark.circle.fill")
+                        }
+                        .font(.system(size: 13))
+                        .foregroundStyle(SL.errorText)
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(SL.errorFill, in: RoundedRectangle(cornerRadius: 9))
                     }
 
                     VStack(spacing: 12) {
@@ -46,11 +51,10 @@ struct OverlayDifferenceView: View {
                         .buttonStyle(.slPrimaryWide)
                         .disabled(!viewModel.canCompare)
 
-                        Text(viewModel.canCompare
-                             ? "Opens as an overlay, with B moved onto your center of mass. Switch to side by side on the next screen."
-                             : "Choose two videos with 3D motion. The same video can fill both slots.")
-                            .font(.system(size: 12))
-                            .foregroundStyle(SL.muted)
+                        Text(comparisonGuidance)
+                            .font(.system(size: 13))
+                            .lineSpacing(3)
+                            .foregroundStyle(SL.panelToplineText)
                     }
                 }
                 .padding(.horizontal, 18)
@@ -58,6 +62,7 @@ struct OverlayDifferenceView: View {
                 .padding(.bottom, 28)
             }
             .background(SL.page)
+            .slScreen()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -87,21 +92,38 @@ struct OverlayDifferenceView: View {
 
     private var intro: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Eyebrow(text: "OVERLAY DIFFERENCE", rule: true)
-            (Text("Two attempts.\n") + Text("One body space.").foregroundColor(SL.headlineSoft))
+            Eyebrow(text: "COMPARE YOUR MOVEMENT", rule: true)
+            (Text("Two attempts.\n") + Text("See what changes.").foregroundColor(SL.headlineSoft))
                 .font(SL.display(32, .semibold))
                 .tracking(-1.4)
                 .foregroundStyle(SL.ink)
-            Text("Lay one 3D model over another, centered on the same point, to see exactly where the movements differ.")
+            Text("Choose your attempt and a reference. See their 3D movements together, then explore where they differ.")
                 .font(.system(size: 14))
                 .lineSpacing(4)
-                .foregroundStyle(Color(hex: "77816F"))
+                .foregroundStyle(SL.panelToplineText)
         }
         .padding(.top, 12)
     }
 
     private var isComparing: Binding<Bool> {
         Binding(get: { comparison != nil }, set: { if !$0 { closeComparison() } })
+    }
+
+    private var comparisonGuidance: String {
+        if viewModel.canCompare {
+            return "Both videos are ready. Start with the bodies overlaid, or switch to side by side in the comparison."
+        }
+        let missing = OverlaySlot.allCases.filter { viewModel.project(in: $0) == nil }
+        if missing.count == 2 {
+            return "Choose a video for A and B to get started. You can use the same video in both slots."
+        }
+        if let slot = missing.first {
+            return "Choose video \(slot.rawValue) next, then prepare any 3D motion that is missing."
+        }
+        if viewModel.startingId != nil || OverlaySlot.allCases.contains(where: { viewModel.project(in: $0)?.isBusy == true }) {
+            return "Preparing 3D motion. Your comparison will be ready when both videos finish."
+        }
+        return "Build the missing 3D motion above to open your comparison."
     }
 
     private func openComparison() {
@@ -131,7 +153,7 @@ struct OverlaySlotBadge: View {
     var body: some View {
         Text(slot.rawValue)
             .font(.system(size: size * 0.43, weight: .bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(slot == .first ? Color.white : SL.videoStage)
             .frame(width: size, height: size)
             .background(slot.color, in: Circle())
             .accessibilityHidden(true)
@@ -153,12 +175,12 @@ private struct OverlaySlotCard: View {
             HStack(spacing: 12) {
                 OverlaySlotBadge(slot: slot)
                 VStack(alignment: .leading, spacing: 4) {
-                    Eyebrow(text: "\(slot.rawValue) · \(slot.role.uppercased())", color: SL.muted)
-                    Text(project?.title ?? "No video chosen")
+                    Eyebrow(text: "\(slot.rawValue) · \(slot.role.uppercased())", color: SL.panelToplineText)
+                    Text(project?.title ?? (slot == .first ? "Your attempt" : "Reference video"))
                         .font(SL.display(17, .heavy))
                         .tracking(-0.5)
-                        .foregroundStyle(project == nil ? SL.muted : SL.ink)
-                        .lineLimit(1)
+                        .foregroundStyle(SL.ink)
+                        .lineLimit(2)
                 }
                 Spacer(minLength: 8)
                 Button(project == nil ? "Choose" : "Change", action: onChoose)
@@ -167,30 +189,49 @@ private struct OverlaySlotCard: View {
             }
 
             if let project {
-                HStack(spacing: 10) {
-                    StatusDot(text: motionText(project), ready: project.motion?.isPlayable == true)
-                    Spacer()
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .top, spacing: 8) {
+                        if isStarting || project.isBusy {
+                            SLActivityIndicator(size: 16)
+                        } else {
+                            Image(systemName: project.motion?.isPlayable == true ? "checkmark.circle.fill" : "circle.dashed")
+                                .foregroundStyle(project.motion?.isPlayable == true ? SL.readyDot : SL.panelToplineText)
+                                .accessibilityHidden(true)
+                        }
+                        Text(isStarting ? "Starting 3D motion…" : motionText(project))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(project.motion?.status == "failed" ? SL.errorText : SL.panelToplineText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     if isStarting || project.isBusy {
-                        ProgressView().controlSize(.small)
+                        Text("Your video stays selected while its 3D motion is prepared.")
+                            .font(.system(size: 12))
+                            .foregroundStyle(SL.panelToplineText)
                     } else if canBuild {
                         Button(action: onBuild) {
-                            Label("Build 3D motion", systemImage: "waveform.path.ecg")
+                            Label(project.motion?.status == "failed" ? "Try 3D motion again" : "Build 3D motion", systemImage: "waveform.path.ecg")
                         }
                         .buttonStyle(.slPrimary)
                     }
                 }
+            } else {
+                Text("Choose a video from your library or import a new attempt.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(SL.panelToplineText)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(14)
+        .padding(16)
         .slPanel(fill: SL.card, border: SL.cardBorder, radius: 9)
     }
 
     private func motionText(_ project: SkillLabProject) -> String {
-        guard let motion = project.motion else { return "No 3D motion yet" }
+        guard let motion = project.motion else { return project.isBusy ? "Preparing 3D…" : "3D motion needs to be built" }
         switch motion.status {
         case "complete": return "3D motion ready"
         case "partial": return "3D motion ready · some frames missing"
-        case "queued", "running": return motion.stage ?? "Building 3D motion…"
+        case "queued": return "3D motion is queued"
+        case "running": return "Building 3D motion…"
         case "failed": return motion.error ?? "3D motion failed"
         default: return "3D motion \(motion.status)"
         }
@@ -220,15 +261,35 @@ private struct OverlayVideoPicker: View {
                 Section {
                     PhotosPicker(selection: $pickedVideo, matching: .videos) {
                         Label("Import a new video", systemImage: "plus")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(SL.green)
                     }
                     .disabled(!canImport)
+                    .listRowBackground(SL.card)
                 } footer: {
-                    if library.health == nil {
+                    if library.health == nil, !library.isLoading {
                         Text("Connect to the server on the Videos tab to import. The included example works offline.")
+                            .foregroundStyle(SL.panelToplineText)
                     }
                 }
 
                 Section("Your videos") {
+                    if library.isLoading {
+                        SLLoadingState(title: "Loading your library",
+                                       detail: BundledSample.project == nil ? nil : "You can choose the included example while your videos load.")
+                            .listRowBackground(SL.card)
+                    } else if videos.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("No videos yet", systemImage: "video")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(SL.ink)
+                            Text(canImport ? "Import a clip above to choose your first attempt." : "Connect on the Videos tab to import your first clip.")
+                                .font(.system(size: 13))
+                                .foregroundStyle(SL.panelToplineText)
+                        }
+                        .padding(.vertical, 8)
+                        .listRowBackground(SL.card)
+                    }
                     ForEach(videos) { project in
                         Button {
                             onPick(project)
@@ -237,9 +298,13 @@ private struct OverlayVideoPicker: View {
                             OverlayVideoRow(project: project)
                         }
                         .buttonStyle(.plain)
+                        .listRowBackground(SL.card)
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(SL.page)
+            .slScreen()
             .navigationTitle("Video \(slot.rawValue) · \(slot.role)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -273,16 +338,25 @@ private struct OverlayVideoRow: View {
                 Text(project.title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(SL.ink)
-                    .lineLimit(1)
+                    .lineLimit(2)
                 Text(String(format: "%.1f SEC", project.video.duration)
                      + (BundledSample.isSample(project.id) ? "  ·  INCLUDED EXAMPLE" : ""))
                     .font(.system(size: 10, weight: .medium))
                     .tracking(1)
-                    .foregroundStyle(Color(hex: "7C8578"))
+                    .foregroundStyle(SL.panelToplineText)
             }
             Spacer()
-            StatusDot(text: project.motion?.isPlayable == true ? "3D motion" : "No 3D motion",
-                      ready: project.motion?.isPlayable == true)
+            HStack(spacing: 6) {
+                if project.isBusy {
+                    SLActivityIndicator(size: 12)
+                }
+                Text(project.motion?.isPlayable == true ? "3D ready" : (project.isBusy ? "Preparing" : "Needs 3D"))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(SL.presetActiveText)
+            }
+            .padding(.horizontal, 9)
+            .padding(.vertical, 6)
+            .background(SL.iconTile, in: Capsule())
         }
         .contentShape(Rectangle())
     }

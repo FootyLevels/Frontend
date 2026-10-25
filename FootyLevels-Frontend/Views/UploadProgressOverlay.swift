@@ -1,35 +1,37 @@
 import SwiftUI
 
-/// The dark card shown over a screen while a picked video is prepared and
-/// uploaded. Shared by every tab that can import a video.
+/// Shared waiting card for the legacy import workflow. Only upload bytes have
+/// measurable progress; preparation keeps an indeterminate indicator.
 struct UploadProgressOverlay: View {
     let phase: ProjectsListViewModel.UploadPhase?
 
     var body: some View {
         if let phase {
-            VStack(spacing: 14) {
+            VStack(spacing: 16) {
+                SLActivityIndicator(size: 28)
                 switch phase {
                 case .importing:
-                    ProgressView().tint(Color(hex: "EEF5E2"))
-                    Text("Preparing video…")
+                    Text("Preparing video…").font(.headline)
+                    Text("Getting your clip ready to upload.")
+                        .font(.footnote).foregroundStyle(SL.muted)
                 case .uploading(let fraction):
-                    ProgressView(value: fraction)
-                        .tint(SL.lime)
-                        .frame(width: 180)
-                    Text("Uploading \(Int(fraction * 100))%")
+                    Text("Uploading your video").font(.headline)
+                    ProgressView(value: fraction).tint(SL.green)
+                    Text("\(Int(fraction * 100))%")
+                        .font(.subheadline.monospacedDigit())
                 case .processing:
-                    ProgressView().tint(Color(hex: "EEF5E2"))
-                    Text("Transcoding and picking key frames…")
-                    Text("This runs on the server and can take a minute.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(hex: "B9C9B0"))
+                    Text("Preparing playback…").font(.headline)
+                    Text("Your upload is complete. The server is preparing your video and key frames.")
+                        .font(.footnote).foregroundStyle(SL.muted)
                 }
             }
-            .font(.system(size: 13))
-            .foregroundStyle(Color(hex: "EEF5E2"))
+            .multilineTextAlignment(.center)
+            .foregroundStyle(SL.ink)
             .padding(24)
-            .background(Color(hex: "183D2C"), in: RoundedRectangle(cornerRadius: 12))
-            .shadow(color: Color(hex: "183D2C").opacity(0.3), radius: 20, y: 6)
+            .frame(maxWidth: 300)
+            .slPanel(fill: SL.header, radius: 20)
+            .shadow(color: SL.green.opacity(0.16), radius: 24, y: 8)
+            .accessibilityElement(children: .combine)
         }
     }
 }

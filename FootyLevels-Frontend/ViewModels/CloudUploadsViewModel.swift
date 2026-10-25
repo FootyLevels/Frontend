@@ -27,8 +27,15 @@ final class CloudUploadsViewModel {
     var hasMore: Bool { nextCursor != nil }
     private var coordinator: CloudUploadCoordinator?
     private var task: Task<Void, Never>?
+    private var projectRefreshGeneration: UInt64 = 0
+    private var isRefreshingPreparing = false
+
+    init(coordinator: CloudUploadCoordinator? = nil) {
+        self.coordinator = coordinator
+    }
 
     func configure() {
+        projectRefreshGeneration &+= 1
         do {
             guard let url = ApplicationEnvironment.apiBaseURL else { throw AccountAPIError.notConfigured }
             coordinator = try CloudUploadCoordinator(apiURL: url, environment: .current, credentials: FirebaseAPICredentials.shared)
@@ -38,17 +45,61 @@ final class CloudUploadsViewModel {
 
     func refresh(more: Bool = false, afterMutation: Bool = false) async {
         guard !isLoading, afterMutation || !isBusy, let coordinator else { return }
+        projectRefreshGeneration &+= 1
+        let generation = projectRefreshGeneration
         isLoading = true
         defer { isLoading = false }
         do {
             let page = try await coordinator.list(cursor: more ? nextCursor : nil)
+            let loadedDrafts = try coordinator.store.load()
+            let loadedDeletions = try await coordinator.deletions()
+            try coordinator.checkSession()
+            guard generation == projectRefreshGeneration, coordinator === self.coordinator else { return }
             if more { projects += page.items.filter { p in !projects.contains(where: { $0.id == p.id }) } }
             else { projects = page.items }
             nextCursor = page.nextCursor
-            drafts = try coordinator.store.load()
-            deletions = try await coordinator.deletions()
+            drafts = loadedDrafts
+            deletions = loadedDeletions
             errorMessage = nil
-        } catch { errorMessage = error.localizedDescription }
+        } catch {
+            guard !isCancelledRefresh(error), generation == projectRefreshGeneration,
+                  coordinator === self.coordinator else { return }
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Media preparation finishes after upload. Poll only those loaded records,
+    /// retaining their order, every other loaded page and the pagination cursor.
+    func refreshPreparingProjects() async {
+        guard !isLoading, !isBusy, !isRefreshingPreparing, let coordinator else { return }
+        let preparing = projects.filter { $0.state == "preparing" }
+        guard !preparing.isEmpty else { return }
+        let generation = projectRefreshGeneration
+        isRefreshingPreparing = true
+        defer { isRefreshingPreparing = false }
+        do {
+            var replacements: [String: CloudProject] = [:]
+            for project in preparing {
+                let latest = try await coordinator.project(project)
+                guard generation == projectRefreshGeneration, !isLoading, !isBusy,
+                      coordinator === self.coordinator else { return }
+                replacements[project.id] = latest
+            }
+            try coordinator.checkSession()
+            let originals = Dictionary(preparing.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            projects = projects.map { current in
+                guard current == originals[current.id], let latest = replacements[current.id] else { return current }
+                return latest
+            }
+        } catch {
+            guard !isCancelledRefresh(error), generation == projectRefreshGeneration,
+                  !isLoading, !isBusy, coordinator === self.coordinator else { return }
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func isCancelledRefresh(_ error: Error) -> Bool {
+        Task.isCancelled || error is CancellationError || (error as? URLError)?.code == .cancelled
     }
 
     func importGallery(_ item: PhotosPickerItem) {
@@ -155,6 +206,7 @@ final class CloudUploadsViewModel {
 
     private func startTask(_ label: String, operation: @escaping @MainActor () async throws -> Void) {
         guard task == nil else { return }
+        projectRefreshGeneration &+= 1
         phase = label
         progress = nil
         errorMessage = nil

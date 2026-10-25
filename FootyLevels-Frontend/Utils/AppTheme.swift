@@ -10,44 +10,44 @@ struct AppTheme {
 
     struct Colors {
         // Primary Brand Colors
-        static let primary = Color(hex: "2ECC71")        // Emerald Green - main action color
-        static let primaryDark = Color(hex: "27AE60")    // Darker green for pressed states
-        static let primaryLight = Color(hex: "A8E6CF")   // Light green for backgrounds
+        static let primary = SL.green        // Forest green - main action color
+        static let primaryDark = SL.greenActive    // Pressed green
+        static let primaryLight = SL.iconTile   // Light green for backgrounds
 
         // Secondary Colors
-        static let secondary = Color(hex: "2C3E50")      // Dark Blue/Slate - text, headers
-        static let secondaryLight = Color(hex: "34495E") // Lighter slate
+        static let secondary = SL.ink      // Main text
+        static let secondaryLight = SL.muted // Supporting text
 
         // Accent Colors
-        static let accent = Color(hex: "F1C40F")         // Sunflower Yellow - highlights
-        static let accentDark = Color(hex: "F39C12")     // Orange - warnings, legends
+        static let accent = SL.lime         // Lime highlights
+        static let accentDark = SL.noticeText     // Amber warnings
 
         // Semantic Colors
-        static let success = Color(hex: "2ECC71")        // Green
-        static let warning = Color(hex: "F39C12")        // Orange
-        static let error = Color(hex: "E74C3C")          // Red
-        static let info = Color(hex: "3498DB")           // Blue
+        static let success = SL.green        // Green
+        static let warning = SL.noticeText        // Amber
+        static let error = SL.errorText          // Red
+        static let info = Color(hex: "2C6381")           // Blue
 
         // Difficulty Colors
-        static let beginner = Color(hex: "2ECC71")       // Green
-        static let intermediate = Color(hex: "F1C40F")   // Yellow
-        static let advanced = Color(hex: "E74C3C")       // Red
+        static let beginner = SL.green       // Green
+        static let intermediate = SL.noticeText   // Amber
+        static let advanced = SL.errorText       // Red
 
         // Background Colors
-        static let background = Color(hex: "F5F6FA")     // Light gray background
-        static let surface = Color.white                  // Card/surface background
+        static let background = SL.page     // Warm cream background
+        static let surface = SL.panel                  // Card/surface background
         static let surfaceElevated = Color(hex: "FFFFFF") // Elevated surfaces
 
         // Text Colors
-        static let textPrimary = Color(hex: "2C3E50")    // Main text
-        static let textSecondary = Color(hex: "7F8C8D")  // Secondary text
-        static let textTertiary = Color(hex: "BDC3C7")   // Disabled/placeholder
+        static let textPrimary = SL.ink    // Main text
+        static let textSecondary = SL.muted  // Secondary text
+        static let textTertiary = SL.muted   // Disabled/placeholder
         static let textOnPrimary = Color.white           // Text on primary color
         static let textOnDark = Color.white              // Text on dark backgrounds
 
         // Border & Divider
-        static let border = Color(hex: "E0E0E0")
-        static let divider = Color(hex: "EEEEEE")
+        static let border = SL.panelBorder
+        static let divider = SL.line
 
         // Shadow
         static let shadow = Color.black.opacity(0.05)
@@ -64,7 +64,7 @@ struct AppTheme {
         )
 
         static let legend = LinearGradient(
-            colors: [Color(hex: "F1C40F"), Color(hex: "F39C12")],
+            colors: [SL.lime, SL.noticeText],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -256,10 +256,10 @@ extension AppTheme {
     /// Get hex string for difficulty level
     static func difficultyColorHex(_ difficulty: String) -> String {
         switch difficulty.lowercased() {
-        case "beginner": return "2ECC71"
-        case "intermediate": return "F1C40F"
-        case "advanced": return "E74C3C"
-        default: return "2C3E50"
+        case "beginner": return "173F31"
+        case "intermediate": return "79551F"
+        case "advanced": return "923E28"
+        default: return "233C30"
         }
     }
 

@@ -15,7 +15,7 @@ struct CommunityView: View {
                     else { signInMessage }
                 }.padding(20)
             }
-            .background(SL.page).foregroundStyle(SL.ink)
+            .background(SL.page).slScreen()
             .navigationTitle("Community")
             .refreshable { if hasAccount { await model.refresh() } }
             .task(id: scenePhase) { if hasAccount && scenePhase == .active { await model.watch() } }
@@ -30,7 +30,7 @@ struct CommunityView: View {
             Eyebrow(text: "TRAIN TOGETHER", rule: true)
             Text("Your people.\nYour next attempt.").font(SL.display(30, .bold)).tracking(-0.6)
             Text("Create a private training circle, share an attempt, and help each other improve with feedback at the right moment.")
-                .font(.callout).foregroundStyle(SL.ink)
+                .font(.callout).foregroundStyle(SL.muted)
         }.accessibilityIdentifier("community-introduction")
     }
 
@@ -38,7 +38,7 @@ struct CommunityView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Sign in to train together", systemImage: "person.crop.circle.badge.checkmark").font(.headline)
             Text("Training circles belong to your account. Sign in from the app's account screen to create or join a circle. The local example stays on this device and can't be shared.")
-                .font(.callout)
+                .font(.callout).foregroundStyle(SL.muted)
         }.padding(18).slPanel().accessibilityIdentifier("community-sign-in-required")
     }
 
@@ -49,7 +49,9 @@ struct CommunityView: View {
                 Button { form = .join } label: { Label("Join", systemImage: "person.badge.plus") }.buttonStyle(.slSecondary)
             }.disabled(model.client == nil || model.isWorking)
             if let error = model.errorMessage { CommunityNotice(message: error) }
-            if model.isLoading { ProgressView("Loading your circles…") }
+            if model.isLoading && model.circles.isEmpty {
+                SLLoadingState(title: "Loading your circles…", detail: "Checking the private groups linked to your account.")
+            }
             if !model.isLoading && model.circles.isEmpty && model.errorMessage == nil {
                 CommunityEmpty(title: "Start with your training partners", text: "Create a circle for friends or teammates, or enter an invite code from someone you know.", icon: "person.3")
             }
@@ -60,9 +62,14 @@ struct CommunityView: View {
                     } label: { CircleCard(circle: circle) }.buttonStyle(.plain)
                 }
             }
-            Button("Refresh circles") { Task { await model.refresh() } }.font(.callout).disabled(model.isLoading || model.client == nil)
+            Button { Task { await model.refresh() } } label: {
+                HStack(spacing: 8) {
+                    if model.isLoading { SLActivityIndicator(size: 16) }
+                    Label(model.isLoading ? "Refreshing circles…" : "Refresh circles", systemImage: "arrow.clockwise")
+                }
+            }.font(.callout.weight(.semibold)).disabled(model.isLoading || model.isWorking || model.client == nil)
             Text("Only circle members can view shared attempts. Your other videos stay private.")
-                .font(.footnote).foregroundStyle(SL.ink)
+                .font(.footnote).foregroundStyle(SL.muted)
         }
     }
 }
@@ -73,21 +80,27 @@ private struct CircleCard: View {
         HStack(spacing: 14) {
             Image(systemName: "person.3.fill").font(.title3).foregroundStyle(SL.green).frame(width: 44, height: 44).background(SL.iconTile, in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 5) {
-                Text(circle.name).font(.headline)
-                Text("\(circle.memberCount) \(circle.memberCount == 1 ? "member" : "members") · Private circle").font(.caption).foregroundStyle(SL.ink)
-                if !circle.description.isEmpty { Text(circle.description).font(.callout).lineLimit(2) }
+                Text(circle.name).font(.headline).foregroundStyle(SL.ink)
+                Text("\(circle.memberCount) \(circle.memberCount == 1 ? "member" : "members") · Private circle").font(.caption).foregroundStyle(SL.muted)
+                if !circle.description.isEmpty { Text(circle.description).font(.callout).foregroundStyle(SL.muted).lineLimit(2) }
             }
             Spacer(minLength: 0)
-            Image(systemName: "chevron.right").font(.caption)
+            Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(SL.green).accessibilityHidden(true)
         }.padding(16).slPanel()
+            .accessibilityElement(children: .combine)
     }
 }
 
 struct CommunityNotice: View {
     let message: String
     var body: some View {
-        Text(message).font(.callout).foregroundStyle(SL.errorText).frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14).background(SL.errorFill, in: RoundedRectangle(cornerRadius: 8))
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.circle.fill").font(.body.weight(.semibold)).accessibilityHidden(true)
+            Text(message).font(.callout).fixedSize(horizontal: false, vertical: true)
+        }
+            .foregroundStyle(SL.errorText).frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16).background(SL.errorFill, in: RoundedRectangle(cornerRadius: 12))
+            .accessibilityElement(children: .combine)
             .accessibilityIdentifier("community-error")
     }
 }
@@ -98,9 +111,9 @@ struct CommunityEmpty: View {
     let icon: String
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon).font(.title2).foregroundStyle(SL.green)
-            Text(title).font(.headline)
-            Text(text).font(.callout)
+            Image(systemName: icon).font(.title2).foregroundStyle(SL.green).accessibilityHidden(true)
+            Text(title).font(.headline).foregroundStyle(SL.ink).accessibilityAddTraits(.isHeader)
+            Text(text).font(.callout).foregroundStyle(SL.muted).fixedSize(horizontal: false, vertical: true)
         }.frame(maxWidth: .infinity, alignment: .leading).padding(20).slPanel()
     }
 }
@@ -122,15 +135,15 @@ private struct CircleEntryForm: View {
             Form {
                 if kind == .create {
                     Section("Your training circle") {
-                        TextField("Circle name", text: $name).accessibilityIdentifier("circle-name")
-                        TextField("What are you working on? (optional)", text: $description, axis: .vertical).lineLimit(3...5)
-                        Text("Name: \(name.count)/80 · Description: \(description.count)/240").font(.caption)
+                        TextField("Circle name", text: $name).accessibilityIdentifier("circle-name").disabled(model.isWorking)
+                        TextField("What are you working on? (optional)", text: $description, axis: .vertical).lineLimit(3...5).disabled(model.isWorking)
+                        Text("Name: \(name.count)/80 · Description: \(description.count)/240").font(.caption).foregroundStyle(SL.muted)
                     }
-                    Section { Text("Your circle starts with you. Generate an invite code inside the circle when you're ready to add people.") }
+                    Section { Text("Your circle starts with you. Generate an invite code inside the circle when you're ready to add people.").foregroundStyle(SL.muted) }
                 } else {
                     Section("Invite code") {
-                        TextField("Enter the code", text: $code).textInputAutocapitalization(.never).autocorrectionDisabled().accessibilityIdentifier("circle-invite-code")
-                        Text("Ask the circle owner for a current invite code. By joining, you can see shared attempts and your name appears to other members.")
+                        TextField("Enter the code", text: $code).textInputAutocapitalization(.never).autocorrectionDisabled().accessibilityIdentifier("circle-invite-code").disabled(model.isWorking)
+                        Text("Ask the circle owner for a current invite code. By joining, you can see shared attempts and your name appears to other members.").foregroundStyle(SL.muted)
                     }
                 }
                 if let error = model.errorMessage { Section { CommunityNotice(message: error) } }
@@ -141,11 +154,14 @@ private struct CircleEntryForm: View {
                             if saved { dismiss() }
                         }
                     } label: {
-                        if model.isWorking { ProgressView("Saving…") }
-                        else { Text(kind == .create ? "Create private circle" : "Join circle") }
-                    }.disabled(!valid || model.isWorking)
+                        HStack(spacing: 8) {
+                            if model.isWorking { SLActivityIndicator(size: 16) }
+                            Text(model.isWorking ? (kind == .create ? "Creating circle…" : "Joining circle…") : (kind == .create ? "Create private circle" : "Join circle"))
+                        }
+                    }.buttonStyle(.slPrimary).disabled(!valid || model.isWorking)
                 }
             }
+            .scrollContentBackground(.hidden).background(SL.page).slScreen()
             .navigationTitle(kind == .create ? "Create circle" : "Join circle").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(model.isWorking) } }
             .interactiveDismissDisabled(model.isWorking)

@@ -33,7 +33,7 @@ struct CirclePostView: View {
                 }
             }.padding(20)
         }
-        .background(SL.page).foregroundStyle(SL.ink)
+        .background(SL.page).slScreen()
         .navigationTitle(model.hasAccess ? model.post.skill : "Shared attempt").navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if model.hasAccess && canRemove { ToolbarItem(placement: .topBarTrailing) { Button("Remove", role: .destructive) { confirmRemove = true }.disabled(model.isWorking) } }
@@ -60,9 +60,9 @@ struct CirclePostView: View {
 
     private var postHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("SHARED WITH \(circle.name.uppercased())", systemImage: "lock.shield").font(.caption.weight(.semibold))
+            Label("SHARED WITH \(circle.name.uppercased())", systemImage: "lock.shield").font(.caption.weight(.semibold)).foregroundStyle(SL.green)
             Text(model.post.projectTitle).font(SL.display(24, .bold))
-            Text("By \(model.post.authorName.isEmpty ? "a circle member" : model.post.authorName)").font(.callout)
+            Text("By \(model.post.authorName.isEmpty ? "a circle member" : model.post.authorName)").font(.callout).foregroundStyle(SL.muted)
             if !model.post.note.isEmpty { Text(model.post.note).font(.callout) }
         }
     }
@@ -75,31 +75,47 @@ struct CirclePostView: View {
                 Picker("Playback speed", selection: Binding(get: { playback.speed }, set: { playback.speed = $0 })) {
                     ForEach(PlaybackController.speeds, id: \.self) { Text("\($0.formatted())×").tag($0) }
                 }.pickerStyle(.segmented)
-            } else if model.isLoading { ProgressView("Verifying and loading shared video…").frame(maxWidth: .infinity, minHeight: 160) }
+            } else if model.isLoading {
+                SLLoadingState(title: "Loading shared video…", detail: "Verifying circle access and preparing secure playback.")
+                    .frame(maxWidth: .infinity, minHeight: 160)
+            }
             else {
-                Button("Reload shared video") { Task { await model.refresh() } }.buttonStyle(.slSecondary)
+                Button { Task { await model.refresh() } } label: {
+                    Label("Reload shared video", systemImage: "arrow.clockwise")
+                }.buttonStyle(.slSecondary).disabled(model.isWorking)
             }
         }
     }
     private var motionPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("SHARED 3D MOTION", systemImage: "cube").font(.caption.weight(.semibold))
+            Label("SHARED 3D MOTION", systemImage: "cube").font(.caption.weight(.semibold)).foregroundStyle(SL.green)
             if let motion = model.motion {
                 ZStack {
                     ModelStageView(root: motion.stageRoot, camera: motion.camera).id(ObjectIdentifier(motion))
                         .accessibilityIdentifier("circle-shared-motion").accessibilityValue(motion.accessibilityStatus)
                     switch motion.state {
-                    case .loading(let message): ProgressView(message)
-                    case .failed(let message): Text(message).font(.callout).foregroundStyle(SL.errorText).padding()
+                    case .loading(let message): SLLoadingState(title: message).padding(16)
+                    case .failed(let message): CommunityNotice(message: message).padding(16)
                     case .ready: EmptyView()
                     }
-                    if motion.isOutsideSegment { Text("Play the selected motion segment to see its 3D pose.").font(.callout).padding() }
+                    if motion.isOutsideSegment {
+                        Text("Play the selected motion segment to see its 3D pose.").font(.callout).foregroundStyle(SL.ink)
+                            .padding(16).background(SL.panel, in: RoundedRectangle(cornerRadius: 10)).padding(16)
+                    }
                 }.frame(height: 320).clipped().background(SL.stage)
-                if motion.missingPose && !motion.isOutsideSegment { Text("Player not reconstructed in this frame").font(.callout).foregroundStyle(SL.noticeText) }
-                if motion.waitingForChunk { Text("Loading this frame’s 3D data…").font(.callout).foregroundStyle(SL.muted) }
-                if let warning = motion.assetWarning { Text(warning).font(.callout).foregroundStyle(SL.errorText) }
+                if motion.missingPose && !motion.isOutsideSegment {
+                    Label("Player not reconstructed in this frame", systemImage: "exclamationmark.circle")
+                        .font(.callout).foregroundStyle(SL.noticeText)
+                }
+                if motion.waitingForChunk {
+                    HStack(spacing: 8) {
+                        SLActivityIndicator(size: 16)
+                        Text("Loading this frame’s 3D data…").font(.callout).foregroundStyle(SL.muted)
+                    }.accessibilityElement(children: .combine)
+                }
+                if let warning = motion.assetWarning { CommunityNotice(message: warning) }
                 ScrollView(.horizontal) {
-                    HStack { ForEach(CameraAngle.allCases) { angle in Button(angle.rawValue) { motion.show(angle) } } }.font(.callout)
+                    HStack(spacing: 8) { ForEach(CameraAngle.allCases) { angle in Button(angle.rawValue) { motion.show(angle) }.buttonStyle(.slSecondary) } }.font(.callout)
                 }
                 HStack {
                     Toggle("Follow", isOn: Binding(get: { motion.follow }, set: { motion.follow = $0 }))
@@ -110,7 +126,7 @@ struct CirclePostView: View {
                 Button { model.openMotion() } label: { Label("Open shared 3D motion", systemImage: "cube.transparent") }
                     .buttonStyle(.slSecondary).disabled(model.isLoadingMotion || model.playback == nil)
             }
-            if model.isLoadingMotion { ProgressView("Verifying and loading shared 3D motion…") }
+            if model.isLoadingMotion { SLLoadingState(title: "Loading shared 3D motion…", detail: "Verifying the selected motion and downloading its model data.") }
             if let error = model.motionErrorMessage { CommunityNotice(message: error) }
             if let shared = model.post.motion {
                 Button("Jump to motion segment · \(CommunityValidation.timeLabel(shared.startTime))–\(CommunityValidation.timeLabel(shared.startTime + shared.duration))") { model.seekToMotion() }
@@ -138,29 +154,38 @@ struct CirclePostView: View {
             Text("Help with the next attempt").font(.headline)
             TextField("Add specific, encouraging feedback", text: $model.commentText, axis: .vertical)
                 .lineLimit(3...6).padding(12).background(SL.card, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(SL.cardBorder))
+                .disabled(model.isWorking)
                 .accessibilityIdentifier("circle-comment-text")
             HStack {
                 if let time = model.attachedTime {
-                    Button { model.attachedTime = nil } label: { Label("\(CommunityValidation.timeLabel(time)) · Remove time", systemImage: "xmark.circle") }.font(.caption.monospacedDigit())
+                    Button { model.attachedTime = nil } label: { Label("\(CommunityValidation.timeLabel(time)) · Remove time", systemImage: "xmark.circle") }.font(.caption.monospacedDigit()).disabled(model.isWorking)
                 } else {
-                    Button { model.attachCurrentTime() } label: { Label("Attach current video time", systemImage: "clock.badge.plus") }.font(.callout).disabled(model.playback == nil)
+                    Button { model.attachCurrentTime() } label: { Label("Attach current video time", systemImage: "clock.badge.plus") }.font(.callout).disabled(model.playback == nil || model.isWorking)
                 }
                 Spacer()
-                Text("\(model.commentText.count)/500").font(.caption)
+                Text("\(model.commentText.count)/500").font(.caption).foregroundStyle(model.commentText.count > 500 ? SL.errorText : SL.muted)
             }
             Button {
                 Task { _ = await model.sendComment() }
-            } label: { if model.isWorking { ProgressView("Saving…") } else { Text("Post feedback") } }
+            } label: {
+                HStack(spacing: 8) {
+                    if model.isWorking { SLActivityIndicator(size: 16) }
+                    Text(model.isWorking ? "Saving…" : "Post feedback")
+                }
+            }
                 .buttonStyle(.slPrimary).disabled(model.isWorking || model.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.commentText.count > 500)
         }.padding(16).slPanel()
     }
     private var comments: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Feedback").font(.headline)
-            if model.isLoadingComments { ProgressView("Loading feedback…") }
-            if model.comments.isEmpty && !model.isLoadingComments { Text("No feedback yet. Start with one thing that could help the next attempt.").font(.callout) }
+            Text("Feedback").font(.headline).accessibilityAddTraits(.isHeader)
+            if model.isLoadingComments { SLLoadingState(title: "Loading feedback…") }
+            if model.comments.isEmpty && !model.isLoadingComments {
+                CommunityEmpty(title: "Start the conversation", text: "Share one specific, encouraging tip that could help the next attempt.", icon: "bubble.left.and.bubble.right")
+            }
             ForEach(model.comments) { comment in commentRow(comment) }
-            if model.nextCursor != nil { Button("Load more feedback") { Task { await model.loadComments(more: true) } }.disabled(model.isLoadingComments) }
+            if model.nextCursor != nil { Button("Load more feedback") { Task { await model.loadComments(more: true) } }.buttonStyle(.slSecondary).disabled(model.isLoadingComments || model.isWorking) }
         }
     }
     private func commentRow(_ comment: CircleComment) -> some View {
@@ -171,10 +196,14 @@ struct CirclePostView: View {
                 if let time = comment.timestamp {
                     Button(CommunityValidation.timeLabel(time)) { model.seek(comment: comment) }
                         .font(.caption.monospacedDigit()).disabled(model.playback == nil)
+                        .frame(minWidth: 44, minHeight: 44)
                         .accessibilityLabel("Jump to \(CommunityValidation.timeLabel(time))")
                 }
                 if comment.authorId == model.client.account.uid || circle.ownerId == model.client.account.uid {
-                    Button { removingComment = comment } label: { Image(systemName: "trash").accessibilityLabel("Remove comment") }.disabled(model.isWorking)
+                    Button { removingComment = comment } label: {
+                        Image(systemName: "trash").frame(minWidth: 44, minHeight: 44).contentShape(Rectangle())
+                            .accessibilityLabel("Remove comment")
+                    }.disabled(model.isWorking)
                 }
             }
             Text(comment.text).font(.callout)
@@ -192,9 +221,10 @@ private struct PreviousCircleAttemptView: View {
     var body: some View {
         Group {
             if let post { CirclePostView(post: post, circle: circle, client: client, onShared: onShared, onRemoved: {}) }
-            else if let error { CommunityNotice(message: error).padding() }
-            else { ProgressView("Loading previous attempt…") }
-        }.task {
+            else if let error { CommunityNotice(message: error).padding(20) }
+            else { SLLoadingState(title: "Loading previous attempt…", detail: "Checking that this attempt is still shared with your circle.").padding(20) }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity).background(SL.page).slScreen()
+        .task {
             do {
                 let item = try await client.post(circle: circle.id, id: id)
                 try client.checkSession(); guard !Task.isCancelled else { return }; post = item

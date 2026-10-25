@@ -8,16 +8,20 @@ struct LessonLibraryView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                         Eyebrow(text: "LEARN A SKILL", rule: true)
                         Text("Lessons")
                             .font(SL.display(32, .heavy))
                             .tracking(-1.2)
                             .foregroundStyle(SL.ink)
-                        Text("Each lesson is built from one video and the 3D body reconstructed from it: watch the move, break it down, practise it, then test yourself.")
+                        Text("Watch the move, explore it in 3D, then practise one step at a time.")
                             .font(.system(size: 14))
-                            .foregroundStyle(Color(hex: "77816F"))
+                            .lineSpacing(4)
+                            .foregroundStyle(SL.panelToplineText)
+                        Label("\(lessons.count + 1) \(lessons.count == 0 ? "lesson" : "lessons") · Available offline", systemImage: "checkmark.circle")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(SL.presetActiveText)
                     }
                     .padding(.top, 8)
                     .padding(.bottom, 6)
@@ -26,20 +30,23 @@ struct LessonLibraryView: View {
                         LessonView()
                     } label: {
                         LessonRow(title: "The over fake", subtitle: "Shape one way, step across the ball, then take it the other way.",
-                                  skills: ["Over fake"])
+                                  skills: ["Over fake"], isStartingLesson: true)
                     }
+                    .buttonStyle(.plain)
                     ForEach(lessons) { lesson in
                         NavigationLink {
                             PackageLessonView(entry: lesson)
                         } label: {
                             LessonRow(title: lesson.title, subtitle: lesson.subtitle, skills: lesson.skills)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
             .background(SL.page)
+            .slScreen()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -55,36 +62,43 @@ private struct LessonRow: View {
     let title: String
     let subtitle: String
     let skills: [String]
+    var isStartingLesson = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 6) {
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                if isStartingLesson {
+                    Eyebrow(text: "START HERE", color: SL.presetActiveText)
+                }
                 Text(title)
                     .font(SL.display(20, .heavy))
                     .foregroundStyle(SL.ink)
                 Text(subtitle)
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color(hex: "5E6B58"))
+                    .font(.system(size: 14))
+                    .lineSpacing(3)
+                    .foregroundStyle(SL.panelToplineText)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                 FlowRow(spacing: 5) {
                     ForEach(Array(skills.enumerated()), id: \.offset) { _, skill in
                         Text(skill)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(SL.ink)
+                            .foregroundStyle(SL.presetActiveText)
                             .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .overlay(Capsule().stroke(SL.cardBorder))
+                            .padding(.vertical, 5)
+                            .background(SL.iconTile, in: Capsule())
                     }
                 }
             }
             Spacer(minLength: 0)
             Image(systemName: "chevron.right")
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(SL.muted)
-                .padding(.top, 4)
+                .foregroundStyle(SL.green)
+                .frame(width: 30, height: 30)
+                .background(SL.iconTile, in: Circle())
+                .accessibilityHidden(true)
         }
-        .padding(14)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .slPanel(fill: SL.card, border: SL.cardBorder, radius: 10)
         .contentShape(RoundedRectangle(cornerRadius: 10))

@@ -17,11 +17,16 @@ struct CloudProjectStatusView: View {
                 Label("PRIVATE PROJECT", systemImage: "lock.shield").font(.caption).foregroundStyle(SL.muted)
                 Text(model.project.title).font(SL.display(28, .bold))
                 if let label = model.project.label { Text(label).foregroundStyle(SL.muted) }
-                Text(model.project.statusText).font(.headline)
+                if model.project.state == "preparing" {
+                    SLLoadingState(title: "Preparing your video…",
+                                   detail: "Your upload is complete. Playback and key frames will appear here when ready. You can leave this screen and return later.")
+                } else {
+                    Text(model.project.statusText).font(.headline)
+                }
                 if let message = model.errorMessage ?? model.playbackError {
                     Text(message).font(.callout).foregroundStyle(SL.errorText)
                 }
-                if let message = model.loadingMessage { ProgressView(message).font(.callout) }
+                if let message = model.loadingMessage { SLLoadingState(title: message) }
                 if let prepared = model.preparedPlayback {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("YOUR VIDEO").font(.caption).foregroundStyle(SL.muted)
@@ -42,7 +47,10 @@ struct CloudProjectStatusView: View {
                 }
                 if let job = model.job {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(job.statusText).font(.headline)
+                        HStack(spacing: 10) {
+                            if job.isActive { SLActivityIndicator() }
+                            Text(job.statusText).font(.headline)
+                        }
                         if job.isActive {
                             Text("You can leave this screen and return later. Generation continues on the team server.")
                                 .font(.callout).foregroundStyle(SL.muted)
@@ -62,7 +70,7 @@ struct CloudProjectStatusView: View {
                 Text("The included example remains available offline in the library.").font(.footnote).foregroundStyle(SL.muted)
             }.padding(22)
         }
-        .background(SL.page).navigationTitle("Private project").navigationBarTitleDisplayMode(.inline)
+        .background(SL.page).slScreen().navigationTitle("Private project").navigationBarTitleDisplayMode(.inline)
         .task { await model.watch() }
         .onDisappear { model.stop() }
         .onChange(of: scenePhase) { _, phase in
@@ -87,7 +95,7 @@ struct CloudProjectStatusView: View {
                 ModelStageView(root: pose.stageRoot,camera: pose.camera).id(ObjectIdentifier(pose))
                     .accessibilityIdentifier("private-pose-stage")
                     .accessibilityValue(pose.isLoading ? "Loading" : pose.missingPose ? "Missing pose" : pose.stageRoot == nil ? "Unavailable" : "Ready")
-                if pose.isLoading { ProgressView("Loading selected pose…") }
+                if pose.isLoading { SLLoadingState(title: "Loading selected pose…").padding(20) }
                 if pose.missingPose { Text("Player not reconstructed at this moment").font(.callout) }
                 if let error = pose.errorMessage { Text(error).foregroundStyle(SL.errorText).font(.callout).padding() }
             }.frame(height: 340).clipped().background(SL.stage)
@@ -141,7 +149,7 @@ struct CloudProjectStatusView: View {
                 ModelStageView(root: motion.stageRoot, camera: motion.camera).id(ObjectIdentifier(motion))
                     .accessibilityIdentifier("private-motion-stage").accessibilityValue(motion.accessibilityStatus)
                 switch motion.state {
-                case .loading(let message): ProgressView(message)
+                case .loading(let message): SLLoadingState(title: message).padding(20)
                 case .failed(let message): Text(message).font(.callout).foregroundStyle(SL.errorText).padding()
                 case .ready: EmptyView()
                 }

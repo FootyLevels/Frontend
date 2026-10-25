@@ -36,6 +36,22 @@ final class CloudUploadCoordinator {
         return page
     }
 
+    /// Refresh a known owned recording without replacing the library's pages.
+    func project(_ project: CloudProject) async throws -> CloudProject {
+        try checkSession()
+        guard project.ownerId == account.uid, Self.validID(project.id) else {
+            throw AccountAPIError.sessionChanged
+        }
+        let latest = try JSONDecoder().decode(CloudProject.self,
+            from: await api.request("GET", path: "/api/projects/\(project.id)"))
+        try checkSession()
+        guard latest.ownerId == account.uid else { throw AccountAPIError.sessionChanged }
+        guard latest.id == project.id, latest.inputRevision >= project.inputRevision else {
+            throw AccountAPIError.unavailable
+        }
+        return latest
+    }
+
     func deletions() async throws -> [CloudDeletion] {
         struct Page: Decodable { let items: [CloudDeletion] }
         try checkSession()

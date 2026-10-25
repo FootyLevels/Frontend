@@ -19,17 +19,25 @@ struct CircleDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 if model.hasAccess { header }
                 if let error = model.errorMessage { CommunityNotice(message: error) }
-                if model.isLoading { ProgressView("Loading circle…") }
+                if model.isLoading {
+                    SLLoadingState(title: "Loading circle…", detail: "Checking membership and shared attempts.")
+                }
+                if model.isWorking {
+                    HStack(spacing: 8) {
+                        SLActivityIndicator(size: 16)
+                        Text("Updating your circle…").font(.callout).foregroundStyle(SL.muted)
+                    }.accessibilityElement(children: .combine)
+                }
                 if model.posts.isEmpty && !model.isLoading && model.errorMessage == nil {
                     CommunityEmpty(title: "Make the first attempt", text: "Share a prepared video and tell your circle what you're working on. Your teammates can add feedback at a specific moment.", icon: "video.badge.plus")
                 }
                 ForEach(model.posts) { post in postRow(post) }
                 if model.nextCursor != nil {
-                    Button("Load more attempts") { Task { await model.refresh(more: true) } }.buttonStyle(.slSecondary).disabled(model.isLoading)
+                    Button("Load more attempts") { Task { await model.refresh(more: true) } }.buttonStyle(.slSecondary).disabled(model.isLoading || model.isWorking)
                 }
             }.padding(20)
         }
-        .background(SL.page).foregroundStyle(SL.ink)
+        .background(SL.page).slScreen()
         .navigationTitle(model.circle.name).navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { circleMenu } }
         .refreshable { await model.refresh() }
@@ -59,14 +67,16 @@ struct CircleDetailView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("PRIVATE TRAINING CIRCLE", systemImage: "lock.shield").font(.caption.weight(.semibold))
+            Label("PRIVATE TRAINING CIRCLE", systemImage: "lock.shield").font(.caption.weight(.semibold)).foregroundStyle(SL.green)
             if !model.circle.description.isEmpty { Text(model.circle.description).font(.callout) }
             HStack {
-                Button("\(model.circle.memberCount) members") { showMembers = true }.font(.callout)
+                Button { showMembers = true } label: {
+                    Label("\(model.circle.memberCount) members", systemImage: "person.2")
+                }.font(.callout.weight(.semibold))
                 Spacer()
                 Button { showShare = true } label: { Label("Share attempt", systemImage: "plus") }.buttonStyle(.slPrimary)
             }.disabled(model.isWorking || model.isRemoved)
-            Text("Share a prepared video and optionally include its completed 3D motion. Your other projects stay private.").font(.footnote)
+            Text("Share a prepared video and optionally include its completed 3D motion. Your other projects stay private.").font(.footnote).foregroundStyle(SL.muted)
         }.padding(16).slPanel()
     }
     private var circleMenu: some View {
@@ -85,7 +95,7 @@ struct CircleDetailView: View {
             .buttonStyle(.plain)
             .contextMenu {
                 if post.authorId == model.client.account.uid || model.isOwner {
-                    Button("Remove shared attempt…", role: .destructive) { pendingPost = post }
+                    Button("Remove shared attempt…", role: .destructive) { pendingPost = post }.disabled(model.isWorking)
                 }
             }
     }
@@ -96,20 +106,21 @@ struct CirclePostCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label(post.skill, systemImage: "figure.soccer").font(.headline)
+                Label(post.skill, systemImage: "figure.soccer").font(.headline).foregroundStyle(SL.ink)
                 Spacer()
                 Image(systemName: "play.circle.fill").font(.title2).foregroundStyle(SL.green)
             }
-            Text(post.projectTitle).font(.callout.weight(.semibold))
-            if !post.note.isEmpty { Text(post.note).font(.callout).lineLimit(4) }
+            Text(post.projectTitle).font(.callout.weight(.semibold)).foregroundStyle(SL.ink)
+            if !post.note.isEmpty { Text(post.note).font(.callout).foregroundStyle(SL.muted).lineLimit(4) }
             HStack {
                 Text(post.authorName.isEmpty ? "Circle member" : post.authorName)
                 Spacer()
                 Text(CommunityValidation.timeLabel(post.video.duration)).monospacedDigit()
-            }.font(.caption)
-            if post.motion != nil { Label("Video + 3D motion", systemImage: "cube").font(.caption.weight(.semibold)) }
-            if post.previousPostId != nil { Label("Another attempt", systemImage: "arrow.triangle.2.circlepath").font(.caption.weight(.semibold)) }
+            }.font(.caption).foregroundStyle(SL.muted)
+            if post.motion != nil { Label("Video + 3D motion", systemImage: "cube").font(.caption.weight(.semibold)).foregroundStyle(SL.green) }
+            if post.previousPostId != nil { Label("Another attempt", systemImage: "arrow.triangle.2.circlepath").font(.caption.weight(.semibold)).foregroundStyle(SL.green) }
         }.padding(18).frame(maxWidth: .infinity, alignment: .leading).slPanel()
+            .accessibilityElement(children: .combine)
     }
 }
 
@@ -121,12 +132,13 @@ private struct CircleMembersView: View {
         NavigationStack {
             List {
                 if let error = model.errorMessage { CommunityNotice(message: error) }
+                if model.isWorking { SLLoadingState(title: "Updating members…") }
                 ForEach(model.circle.members) { member in
                     HStack {
                         VStack(alignment: .leading, spacing: 5) {
-                            Text(member.displayName.isEmpty ? "Circle member" : member.displayName)
-                            if member.uid == model.circle.ownerId { Text("Circle owner").font(.caption) }
-                            else if member.uid == model.client.account.uid { Text("You").font(.caption) }
+                            Text(member.displayName.isEmpty ? "Circle member" : member.displayName).foregroundStyle(SL.ink)
+                            if member.uid == model.circle.ownerId { Text("Circle owner").font(.caption).foregroundStyle(SL.muted) }
+                            else if member.uid == model.client.account.uid { Text("You").font(.caption).foregroundStyle(SL.muted) }
                         }
                         Spacer()
                         if model.isOwner && member.uid != model.circle.ownerId {
@@ -135,8 +147,10 @@ private struct CircleMembersView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden).background(SL.page).slScreen()
             .navigationTitle("Members").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.disabled(model.isWorking) } }
+            .interactiveDismissDisabled(model.isWorking)
             .confirmationDialog("Remove this member?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }), titleVisibility: .visible) {
                 if let member = removing { Button("Remove member", role: .destructive) { Task { await model.removeMember(member); removing = nil } } }
             } message: { Text("They will lose circle access, and their shared attempts and feedback will be removed. The existing invite code will stop working. Their private videos are kept.") }
@@ -154,22 +168,27 @@ private struct CircleInviteView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     CommunityEmpty(title: "Invite your training partners", text: "Anyone with this code can join the circle and see its shared attempts. Share it only with people you want in the group. The code expires after seven days.", icon: "person.badge.plus")
                     if let invite = model.invite {
-                        Text(invite.code).font(.system(.title3, design: .monospaced, weight: .bold)).textSelection(.enabled).accessibilityIdentifier("generated-circle-code")
+                        Text(invite.code).font(.system(.body, design: .monospaced, weight: .semibold))
+                            .fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading).padding(16)
+                            .background(SL.card, in: RoundedRectangle(cornerRadius: 10))
+                            .accessibilityIdentifier("generated-circle-code")
                         ShareLink(item: "Join my FootyLevels training circle ‘\(model.circle.name)’ with invite code: \(invite.code)") {
                             Label("Share invite", systemImage: "square.and.arrow.up")
-                        }.buttonStyle(.slPrimary)
-                        Text("Expires \(invite.expiresAt)").font(.caption)
+                        }.buttonStyle(.slPrimary).disabled(model.isWorking)
+                        Text("Expires \(invite.expiresAt)").font(.caption).foregroundStyle(SL.muted)
                     }
                     if let error = model.errorMessage { CommunityNotice(message: error) }
                     Button(model.invite == nil ? "Generate invite code" : "Replace invite code…") {
                         if model.invite == nil { Task { await model.generateInvite() } }
                         else { rotate = true }
                     }.buttonStyle(.slSecondary).disabled(model.isWorking)
-                    if model.isWorking { ProgressView("Generating invite…") }
+                    if model.isWorking { SLLoadingState(title: "Generating invite…", detail: "Creating a private code for your training circle.") }
                 }.padding(20)
-            }.background(SL.page).foregroundStyle(SL.ink)
+            }.background(SL.page).slScreen()
                 .navigationTitle("Invite people").navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.disabled(model.isWorking) } }
+                .interactiveDismissDisabled(model.isWorking)
                 .confirmationDialog("Replace the current invite code?", isPresented: $rotate, titleVisibility: .visible) {
                     Button("Replace code") { Task { await model.generateInvite() } }
                 } message: { Text("The previous code will stop working. Existing members keep their access.") }

@@ -16,8 +16,10 @@ struct CheckUser: View {
         Group {
             switch appState.isLoggedIn {
             case .loading:
-                ProgressView()
-                    .scaleEffect(1.5) // Make it a bit bigger
+                SLLoadingState(title: "Opening FootyLevels…", detail: "Connecting your account securely.")
+                    .padding(24)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(SL.page)
                     .transition(.opacity)
                 
             case .loggedIn:

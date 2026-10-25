@@ -9,13 +9,13 @@ enum SL {
     static let page = Color(hex: "F8F8F2")
     static let header = Color(hex: "FAFAF5")
     static let ink = Color(hex: "233C30")
-    static let muted = Color(hex: "798278")
+    static let muted = Color(hex: "58665B")
     static let line = Color(hex: "DFE3D9")
     static let green = Color(hex: "173F31")
     static let greenActive = Color(hex: "244C36")
     static let lime = Color(hex: "D9EF8B")
     static let accentLine = Color(hex: "719554")
-    static let headlineSoft = Color(hex: "829073")
+    static let headlineSoft = Color(hex: "526B53")
 
     // Video panel
     static let videoPanel = Color(hex: "142C22")
@@ -37,14 +37,14 @@ enum SL {
     static let presetActive = Color(hex: "E4ECD6")
     static let presetActiveBorder = Color(hex: "D1DFBE")
     static let presetActiveText = Color(hex: "355338")
-    static let presetText = Color(hex: "89967C")
+    static let presetText = Color(hex: "586C4E")
     static let readyDot = Color(hex: "558552")
     static let idleDot = Color(hex: "B4BF98")
 
     // Cards
     static let insight = Color(hex: "F5F6EF")
     static let iconTile = Color(hex: "E9EFDE")
-    static let iconTileText = Color(hex: "738759")
+    static let iconTileText = Color(hex: "4E663C")
     static let card = Color(hex: "F4F5ED")
     static let cardBorder = Color(hex: "DCE3D3")
     static let cardSelected = Color(hex: "486539")
@@ -56,11 +56,11 @@ enum SL {
     static let pipelineIcon = Color(hex: "E0EBCE")
     static let modeTrack = Color(hex: "E9EFDF")
     static let modeBorder = Color(hex: "D5DFC8")
-    static let modeText = Color(hex: "7A886C")
-    static let errorFill = Color(hex: "F6E8DD")
-    static let errorText = Color(hex: "975936")
+    static let modeText = Color(hex: "526546")
+    static let errorFill = Color(hex: "F8E9E3")
+    static let errorText = Color(hex: "923E28")
     static let noticeFill = Color(hex: "F5E9D8")
-    static let noticeText = Color(hex: "96713E")
+    static let noticeText = Color(hex: "79551F")
 
     // Status dots on key frames
     static func frameDot(_ status: String) -> Color {
@@ -180,24 +180,27 @@ struct StatusDot: View {
             Circle().fill(ready ? SL.readyDot : SL.idleDot).frame(width: 6, height: 6)
             Text(text).font(.system(size: 10))
         }
-        .foregroundStyle(Color(hex: "819074"))
+        .foregroundStyle(SL.muted)
     }
 }
 
 struct SLPrimaryButtonStyle: ButtonStyle {
     var fullWidth = false
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(.white)
+            .font(.subheadline.weight(.semibold))
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: fullWidth ? .infinity : nil)
-            .background(configuration.isPressed ? Color(hex: "2A5941") : SL.green,
-                        in: RoundedRectangle(cornerRadius: 7))
-            .opacity(isEnabled ? 1 : 0.4)
+            .frame(minHeight: 44)
+            .background(isEnabled ? (configuration.isPressed ? SL.greenActive : SL.green) : SL.line,
+                        in: RoundedRectangle(cornerRadius: 12))
+            .foregroundStyle(isEnabled ? Color.white : SL.muted)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
@@ -206,14 +209,14 @@ struct SLSecondaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(SL.ink)
+            .font(.subheadline.weight(.semibold))
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(configuration.isPressed ? Color(hex: "EDF1E5") : .clear,
-                        in: RoundedRectangle(cornerRadius: 7))
-            .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
-            .opacity(isEnabled ? 1 : 0.4)
+            .frame(minHeight: 44)
+            .background(configuration.isPressed ? SL.iconTile : SL.panel,
+                        in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SL.panelBorder))
+            .foregroundStyle(isEnabled ? SL.ink : SL.muted)
     }
 }
 
@@ -227,6 +230,14 @@ extension ButtonStyle where Self == SLSecondaryButtonStyle {
 }
 
 extension View {
+    /// The workspace uses a light canvas, including its navigation chrome.
+    func slScreen() -> some View {
+        self.foregroundStyle(SL.ink)
+            .toolbarBackground(SL.header, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
+    }
+
     /// Rounded panel with the hairline border used across the workspace.
     func slPanel(fill: Color = SL.panel, border: Color = SL.panelBorder, radius: CGFloat = 10) -> some View {
         background(fill, in: RoundedRectangle(cornerRadius: radius))
