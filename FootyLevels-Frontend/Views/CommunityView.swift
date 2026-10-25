@@ -17,6 +17,10 @@ struct CommunityView: View {
             }
             .background(SL.page).slScreen()
             .navigationTitle("Community")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) { BrandMark(size: 20) }
+            }
             .refreshable { if hasAccount { await model.refresh() } }
             .task(id: scenePhase) { if hasAccount && scenePhase == .active { await model.watch() } }
             .onChange(of: scenePhase) { _, phase in if phase != .active { model.stop() } }

@@ -24,3 +24,13 @@ instructions appear only during actual upload progress, including verification.
 This frontend work does not change server queue timing or GPU processing.
 Simulator build, regression/navigation checks and visual review are recorded in
 the local `verification/2026-10-25-frontend-ux` directory in the parent workspace.
+
+## Verified
+
+The Development Debug simulator build/test run passed 135 unique checks with
+three existing opt-in live-cloud skips and zero failures. All six new preparing-
+project cases passed. Four UI checks covered default/tab order, bundled lesson
+playback, the Community account gate and included-example 3D playback. After the
+Community header adjustment, both affected UI checks passed again. All four
+root tabs were captured and reviewed with the simulator in dark appearance.
+See [portable evidence](ui-polish-evidence.json).

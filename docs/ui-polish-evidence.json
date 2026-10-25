@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-25",
+  "baseCommit": "7477d7b",
+  "implementationCheckpoint": "f868b2e",
+  "scheme": "FootyLevels-Development",
+  "configuration": "Debug",
+  "device": "iPhone 17 Pro simulator",
+  "iOS": "26.4.1",
+  "deviceAppearance": "dark",
+  "appAppearance": "light",
+  "defaultTab": "Learn",
+  "tabOrder": [
+    "Learn",
+    "Overlay",
+    "Community",
+    "Videos"
+  ],
+  "regressionTests": {
+    "uniquePassed": 135,
+    "skippedExistingOptInLiveCloud": 3,
+    "failed": 0,
+    "newPreparingProjectCases": 6
+  },
+  "finalHeaderUIRecheck": {
+    "passed": 2,
+    "failed": 0,
+    "changes": "Community uses compact inline branded header"
+  },
+  "visualReview": {
+    "fourTabsCaptured": true,
+    "communityHeaderRecaptured": true,
+    "readableColorsAndNoHeaderClipping": true
+  },
+  "sharedColorContrastRatios": {
+    "secondaryText": 5.68,
+    "softHeadline": 5.49,
+    "primaryButton": 11.72,
+    "errorNotice": 6.04,
+    "warningNotice": 5.6,
+    "disabledButton": 4.65
+  },
+  "preparingProjectRefresh": {
+    "foregroundIntervalSeconds": 12,
+    "exactOwnedRecordsOnly": true,
+    "preservesPagesOrderAndCursor": true,
+    "ignoresCancellation": true,
+    "rejectsStaleAndCrossAccountResponses": true
+  },
+  "loading": {
+    "indeterminateForUnmeasuredWork": true,
+    "determinateForUploadedBytesOnly": true,
+    "reduceMotionUsesStaticHourglass": true
+  },
+  "backendRuntimeChanged": false,
+  "limitations": [
+    "Simulator rendering and bundled flows; live signed-in mutation screens were not retested end to end by this increment",
+    "Three existing real-cloud probes were not opted in",
+    "No backend queue or inference performance change; UI status freshness is improved"
+  ]
+}
