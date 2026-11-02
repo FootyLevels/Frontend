@@ -65,7 +65,7 @@ private struct PackageLessonScreen: View {
                 // A new skill starts its sections afresh.
                 .id(model.skill.id)
                 Text("Built from \(document.sourceNote) Measurements are estimates from a single camera; nothing here rates the player.")
-                    .font(.system(size: 11))
+                    .font(.system(.caption2))
                     .foregroundStyle(SL.muted)
             }
             .padding(.horizontal, 16)
@@ -83,11 +83,11 @@ private struct PackageLessonScreen: View {
         VStack(alignment: .leading, spacing: 8) {
             Eyebrow(text: "LEARN A SKILL", rule: true)
             title
-                .font(SL.display(32, .heavy))
+                .font(SL.display(.largeTitle, .heavy))
                 .tracking(-1.2)
                 .foregroundStyle(SL.ink)
             Text(document.subtitle)
-                .font(.system(size: 14))
+                .font(.system(.subheadline))
                 .foregroundStyle(Color(hex: "77816F"))
         }
         .padding(.top, 8)
@@ -98,9 +98,8 @@ private struct PackageLessonScreen: View {
         guard let accent = document.accent, let range = document.title.range(of: accent) else {
             return Text(document.title)
         }
-        return Text(document.title[..<range.lowerBound])
-            + Text(document.title[range]).foregroundColor(Color(uiColor: SL.overlaySecond))
-            + Text(document.title[range.upperBound...])
+        let accented = Text(document.title[range]).foregroundStyle(Color(uiColor: SL.overlaySecond))
+        return Text("\(String(document.title[..<range.lowerBound]))\(accented)\(String(document.title[range.upperBound...]))")
     }
 }
 
@@ -111,7 +110,7 @@ private struct SkillPicker: View {
     let model: PackageLessonModel
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 6) {
                 ForEach(model.package.document.skills) { skill in
                     let selected = model.skill.id == skill.id
@@ -120,11 +119,11 @@ private struct SkillPicker: View {
                     } label: {
                         VStack(alignment: .leading, spacing: 1) {
                             Text(skill.tab.uppercased())
-                                .font(.system(size: 9, weight: .medium))
+                                .font(.system(.caption2, weight: .medium))
                                 .tracking(0.6)
                                 .foregroundStyle(selected ? Color(hex: "D6E2D0") : SL.muted)
                             Text(skill.short)
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(.footnote, weight: .semibold))
                                 .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.ink)
                         }
                         .lineLimit(1)
@@ -132,6 +131,7 @@ private struct SkillPicker: View {
                         .padding(.vertical, 6)
                         .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 7))
                         .overlay(RoundedRectangle(cornerRadius: 7).stroke(selected ? SL.greenActive : SL.cardBorder))
+                        .minimumTapArea()
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(skill.name), \(skill.tab)")
@@ -140,6 +140,7 @@ private struct SkillPicker: View {
             }
             .padding(.vertical, 1)
         }
+        .scrollIndicators(.hidden)
         .disabled(!model.isReady)
     }
 }
@@ -176,7 +177,7 @@ private struct PackageInfoBar: View {
             }
             if !model.hasBody {
                 Text("No 3D body in this frame: the tracker lost the player.")
-                    .font(.system(size: 11))
+                    .font(.system(.caption2))
                     .foregroundStyle(SL.muted)
             }
         }
@@ -193,7 +194,7 @@ private struct PackageInfoBar: View {
                 Spacer()
                 Text("Ball foot ▶")
             }
-            .font(.system(size: 10, weight: .medium))
+            .font(.system(.caption2, weight: .medium))
             .foregroundStyle(SL.muted)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -225,7 +226,7 @@ private struct PackageInfoBar: View {
                 .frame(width: 9, height: 9)
             Text(text)
         }
-        .font(.system(size: 12, weight: .medium))
+        .font(.system(.caption, weight: .medium))
         .foregroundStyle(on ? color : SL.muted)
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
@@ -234,8 +235,8 @@ private struct PackageInfoBar: View {
     }
 
     private func reading(_ label: String, _ value: String) -> some View {
-        (Text(label + " ").foregroundColor(SL.muted) + Text(value).foregroundColor(SL.ink).fontWeight(.semibold))
-            .font(.system(size: 12).monospacedDigit())
+        Text("\(Text("\(label) ").foregroundStyle(SL.muted))\(Text(value).foregroundStyle(SL.ink).fontWeight(.semibold))")
+            .font(.system(.caption).monospacedDigit())
     }
 
     private func focusRing(_ on: Bool) -> some View {
@@ -261,7 +262,7 @@ private struct PackageTimeline: View {
             ZStack(alignment: .topLeading) {
                 ForEach(Array(shots.enumerated()), id: \.offset) { _, shot in
                     Text(shot.label.uppercased())
-                        .font(.system(size: 9, weight: .medium))
+                        .font(.system(.caption2, weight: .medium))
                         .tracking(0.8)
                         .foregroundStyle(SL.muted)
                         .lineLimit(1)
@@ -297,7 +298,9 @@ private struct PackageTimeline: View {
                     }
             )
         }
-        .frame(height: 42)
+        .frame(height: 44)
+        // Shot labels sit at fixed offsets above the phase bars, so they keep their drawn size.
+        .dynamicTypeSize(...DynamicTypeSize.large)
         .accessibilityElement()
         .accessibilityLabel("Skill timeline")
         .accessibilityValue("\(model.phase?.name ?? model.skill.short), \(String(format: "%.1f", model.playback.currentTime)) seconds")

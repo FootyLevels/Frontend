@@ -26,7 +26,7 @@ struct CropEditorView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Drag a box around the full body, including hands and feet. Leave a small margin and exclude other players.")
-                        .font(.system(size: 13))
+                        .font(.system(.footnote))
                         .lineSpacing(3)
                         .foregroundStyle(Color(hex: "7B886D"))
 
@@ -38,7 +38,7 @@ struct CropEditorView: View {
 
                     if frame.isReady {
                         Text("Saving a new box discards this frame’s current model.")
-                            .font(.system(size: 11))
+                            .font(.system(.caption2))
                             .foregroundStyle(SL.noticeText)
                     }
 
@@ -93,14 +93,14 @@ struct CropEditorView: View {
             ForEach(Array(["Left", "Top", "Right", "Bottom"].enumerated()), id: \.offset) { index, label in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(label)
-                        .font(.system(size: 10))
+                        .font(.system(.caption2))
                         .foregroundStyle(Color(hex: "79876C"))
                     TextField(label, value: Binding(
                         get: { Int((box[index] * 100).rounded()) },
                         set: { box[index] = Double(Swift.min(Swift.max($0, 0), 100)) / 100 }
                     ), format: .number)
                     .keyboardType(.numberPad)
-                    .font(.system(size: 13))
+                    .font(.system(.footnote))
                     .padding(6)
                     .background(.white, in: RoundedRectangle(cornerRadius: 4))
                     .overlay(RoundedRectangle(cornerRadius: 4).stroke(SL.line))

@@ -12,15 +12,15 @@ struct LessonLibraryView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Eyebrow(text: "LEARN A SKILL", rule: true)
                         Text("Lessons")
-                            .font(SL.display(32, .heavy))
+                            .font(SL.display(.largeTitle, .heavy))
                             .tracking(-1.2)
                             .foregroundStyle(SL.ink)
                         Text("Watch the move, explore it in 3D, then practise one step at a time.")
-                            .font(.system(size: 14))
+                            .font(.system(.subheadline))
                             .lineSpacing(4)
                             .foregroundStyle(SL.panelToplineText)
                         Label("\(lessons.count + 1) \(lessons.count == 0 ? "lesson" : "lessons") · Available offline", systemImage: "checkmark.circle")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.system(.caption, weight: .medium))
                             .foregroundStyle(SL.presetActiveText)
                     }
                     .padding(.top, 8)
@@ -71,10 +71,10 @@ private struct LessonRow: View {
                     Eyebrow(text: "START HERE", color: SL.presetActiveText)
                 }
                 Text(title)
-                    .font(SL.display(20, .heavy))
+                    .font(SL.display(.title3, .heavy))
                     .foregroundStyle(SL.ink)
                 Text(subtitle)
-                    .font(.system(size: 14))
+                    .font(.system(.subheadline))
                     .lineSpacing(3)
                     .foregroundStyle(SL.panelToplineText)
                     .multilineTextAlignment(.leading)
@@ -82,7 +82,7 @@ private struct LessonRow: View {
                 FlowRow(spacing: 5) {
                     ForEach(Array(skills.enumerated()), id: \.offset) { _, skill in
                         Text(skill)
-                            .font(.system(size: 11, weight: .medium))
+                            .font(.system(.caption2, weight: .medium))
                             .foregroundStyle(SL.presetActiveText)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 5)
@@ -92,9 +92,9 @@ private struct LessonRow: View {
             }
             Spacer(minLength: 0)
             Image(systemName: "chevron.right")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(.footnote, weight: .semibold))
                 .foregroundStyle(SL.green)
-                .frame(width: 30, height: 30)
+                .scaledFrame(width: 30, relativeTo: .footnote)
                 .background(SL.iconTile, in: Circle())
                 .accessibilityHidden(true)
         }

@@ -9,8 +9,9 @@ import SwiftUI
 
 struct CheckUser: View {
     
-    @State var appState = AppStateViewModel()
-    
+    @State private var appState = AppStateViewModel()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         // 1. Wrap everything in a Group so we can animate the changes
         Group {
@@ -33,13 +34,13 @@ struct CheckUser: View {
                 
             case .notLoggedIn:
                 ZStack {
-                    Color.gray.opacity(0.1)
-                        .edgesIgnoringSafeArea(.all)
-                    
+                    SL.page
+                        .ignoresSafeArea()
+
                     AuthPage(appState: $appState)
                 }
-                // 3. You can combine transitions (e.g., Fade + Slide Up)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                // 3. Fade + slide up, or just a fade when Reduce Motion is on
+                .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
             }
         }
         // 4. The Magic Line: Animate whenever 'isLoggedIn' changes

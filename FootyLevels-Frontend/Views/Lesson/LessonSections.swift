@@ -21,11 +21,11 @@ struct WatchSection: View {
                     } label: {
                         HStack(alignment: .top, spacing: 10) {
                             Text(String(format: "%.2f s", moment.time))
-                                .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                                .font(.system(.caption, weight: .semibold).monospacedDigit())
                                 .foregroundStyle(stepColor)
-                                .frame(width: 52, alignment: .leading)
-                            (Text(content.name + ". ").fontWeight(.semibold) + Text(watchText(moment.phase, content)))
-                                .font(.system(size: 13))
+                                .frame(minWidth: 52, alignment: .leading)
+                            Text("\(Text("\(content.name). ").fontWeight(.semibold))\(watchText(moment.phase, content))")
+                                .font(.system(.footnote))
                                 .foregroundStyle(SL.ink)
                                 .multilineTextAlignment(.leading)
                             Spacer(minLength: 0)
@@ -47,10 +47,10 @@ struct WatchSection: View {
         SectionCard {
             Eyebrow(text: "WHY THE 3D HELPS", color: SL.muted)
             Text("The 3D body is reconstructed from this video. Turn the camera, see which foot carries the weight, and follow the feet and the ball. Orange is the stepping foot, blue the front foot.")
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(SL.ink)
             Text("The defender isn't reconstructed, and this fast section is the least precise part of the 3D.")
-                .font(.system(size: 12))
+                .font(.system(.caption))
                 .foregroundStyle(SL.muted)
         }
     }
@@ -105,15 +105,15 @@ struct BreakdownSection: View {
                     NumberBadge(text: number.map(String.init) ?? "–", filled: live, color: stepColor)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(content.name.uppercased())
-                            .font(SL.display(17, .heavy))
+                            .font(SL.display(.body, .heavy))
                             .foregroundStyle(number == nil ? SL.muted : SL.ink)
                         Text(String(format: "%.2f–%.2f s", phase.start, phase.end))
-                            .font(.system(size: 11).monospacedDigit())
+                            .font(.system(.caption2).monospacedDigit())
                             .foregroundStyle(SL.muted)
                     }
                     Spacer(minLength: 0)
                     Image(systemName: isOpen ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(.caption, weight: .semibold))
                         .foregroundStyle(SL.muted)
                 }
                 .padding(12)
@@ -125,21 +125,21 @@ struct BreakdownSection: View {
             if isOpen {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(content.cue.uppercased())
-                        .font(SL.display(17, .bold))
+                        .font(SL.display(.body, .bold))
                         .foregroundStyle(stepColor)
                     fact("In the 3D", content.shows(model.lesson))
                     fact("In the video", content.watch)
                     if let confidence = content.confidence {
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text(confidence.label.uppercased())
-                                .font(.system(size: 9, weight: .semibold))
+                                .font(.system(.caption2, weight: .semibold))
                                 .tracking(0.8)
                                 .foregroundStyle(confidence.color)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 3)
                                 .background(confidence.color.opacity(0.12), in: RoundedRectangle(cornerRadius: 4))
                             Text(content.confidenceWhy)
-                                .font(.system(size: 12))
+                                .font(.system(.caption))
                                 .foregroundStyle(SL.muted)
                         }
                     }
@@ -160,11 +160,11 @@ struct BreakdownSection: View {
     private func fact(_ label: String, _ text: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label.uppercased())
-                .font(.system(size: 9, weight: .semibold))
+                .font(.system(.caption2, weight: .semibold))
                 .tracking(0.8)
                 .foregroundStyle(SL.muted)
             Text(text)
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(SL.ink)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -199,11 +199,11 @@ struct PractiseSection: View {
                 NumberBadge(text: done ? "✓" : "\(number)", filled: done, color: Color(hex: "3F7D4C"))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(drill.level.uppercased())
-                        .font(.system(size: 9, weight: .semibold))
+                        .font(.system(.caption2, weight: .semibold))
                         .tracking(0.8)
                         .foregroundStyle(SL.muted)
                     Text(drill.title)
-                        .font(SL.display(18, .heavy))
+                        .font(SL.display(.title3, .heavy))
                         .foregroundStyle(SL.ink)
                 }
                 Spacer(minLength: 0)
@@ -216,7 +216,7 @@ struct PractiseSection: View {
                 .accessibilityLabel("Play the model for \(drill.title)")
             }
             Text(drill.how)
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(SL.ink)
                 .fixedSize(horizontal: false, vertical: true)
             VStack(alignment: .leading, spacing: 6) {
@@ -224,7 +224,7 @@ struct PractiseSection: View {
                     let on = index < progress.checks.count && progress.checks[index]
                     Toggle(check, isOn: Binding(get: { on }, set: { value in store.update(drill.id) { $0.setCheck(index, value) } }))
                         .toggleStyle(CheckToggleStyle())
-                        .font(.system(size: 13))
+                        .font(.system(.footnote))
                         .foregroundStyle(SL.ink)
                 }
             }
@@ -232,7 +232,7 @@ struct PractiseSection: View {
                 Button("+1 rep") { store.update(drill.id) { $0.reps += 1 } }
                     .buttonStyle(.slSecondary)
                 Text("\(Swift.min(progress.reps, drill.reps)) / \(drill.reps)")
-                    .font(.system(size: 12).monospacedDigit())
+                    .font(.system(.caption).monospacedDigit())
                     .foregroundStyle(SL.muted)
                 HStack(spacing: 3) {
                     ForEach(0..<drill.reps, id: \.self) { rep in
@@ -245,7 +245,7 @@ struct PractiseSection: View {
                 .accessibilityHidden(true)
                 Spacer(minLength: 0)
                 Button("Reset") { store.reset(drill.id) }
-                    .font(.system(size: 12))
+                    .font(.system(.caption))
                     .foregroundStyle(SL.muted)
             }
         }
@@ -338,7 +338,7 @@ struct TestSection: View {
             answer = id
         } label: {
             Text(text)
-                .font(.system(size: 14))
+                .font(.system(.subheadline))
                 .foregroundStyle(SL.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
@@ -352,7 +352,7 @@ struct TestSection: View {
 
     private func feedback(_ good: Bool, _ text: String) -> some View {
         Text(text)
-            .font(.system(size: 13))
+            .font(.system(.footnote))
             .foregroundStyle(SL.ink)
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -445,7 +445,7 @@ struct TestSection: View {
                 ForEach(Array(picked.enumerated()), id: \.offset) { index, id in
                     let right = index < correct.count && correct[index] == id
                     Text("\(index + 1). \(OverFakeLessonContent.phase(id).name)")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(.caption, weight: .semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
@@ -456,7 +456,7 @@ struct TestSection: View {
             FlowRow(spacing: 6) {
                 ForEach(shuffled, id: \.self) { id in
                     Button(OverFakeLessonContent.phase(id).name) { picked.append(id) }
-                        .font(.system(size: 13))
+                        .font(.system(.footnote))
                         .foregroundStyle(SL.ink)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
@@ -483,11 +483,11 @@ struct TestSection: View {
                            text: got == results.count ? "You know the shape of the move. Take it to the pitch with drills 4 and 5."
                                                       : "Revisit the moments you missed in Break it down, then try again.")
             Text("\(got) / \(results.count)")
-                .font(SL.display(40, .heavy))
+                .font(SL.display(.largeTitle, .heavy))
                 .foregroundStyle(SL.ink)
             ForEach(Array(results.enumerated()), id: \.offset) { _, result in
                 Label(result.name, systemImage: result.correct ? "checkmark.circle.fill" : "xmark.circle")
-                    .font(.system(size: 13))
+                    .font(.system(.footnote))
                     .foregroundStyle(result.correct ? Color(hex: "3F7D4C") : Color(hex: "975936"))
             }
             HStack(spacing: 8) {

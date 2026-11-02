@@ -63,9 +63,9 @@ struct StagePicker<Model: LessonPlayer>: View {
                 } label: {
                     VStack(spacing: 2) {
                         Text("\(stage.number)")
-                            .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                            .font(.system(.caption2, weight: .semibold).monospacedDigit())
                         Text(stage.rawValue)
-                            .font(.system(size: 12, weight: selected ? .semibold : .regular))
+                            .font(.system(.caption, weight: selected ? .semibold : .regular))
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
@@ -73,6 +73,7 @@ struct StagePicker<Model: LessonPlayer>: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 7)
                     .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 5))
+                    .minimumTapArea()
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Stage \(stage.number): \(stage.rawValue)")
@@ -130,7 +131,7 @@ struct LessonStageView<Model: LessonPlayer>: View {
         .overlay(alignment: .topLeading) {
             if !shotLabel.isEmpty {
                 Text(shotLabel.uppercased())
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(.caption2, weight: .medium))
                     .tracking(0.8)
                     .foregroundStyle(Color(hex: "F4F6DF"))
                     .lineLimit(1)
@@ -148,6 +149,8 @@ struct LessonStageView<Model: LessonPlayer>: View {
                     .allowsHitTesting(false)
             }
         }
+        // Labels over the picture stop growing at the largest standard size, so they never hide it.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private var stageTile: some View {
@@ -161,7 +164,7 @@ struct LessonStageView<Model: LessonPlayer>: View {
         .overlay(alignment: .topLeading) {
             if model.mirror {
                 Text("MIRRORED")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(.caption2, weight: .semibold))
                     .tracking(0.8)
                     .foregroundStyle(SL.ink)
                     .padding(.horizontal, 6)
@@ -170,6 +173,7 @@ struct LessonStageView<Model: LessonPlayer>: View {
                     .padding(6)
             }
         }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 }
 
@@ -181,10 +185,10 @@ private struct PhaseCue: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(name.uppercased())
-                .font(SL.display(15, .heavy))
+                .font(SL.display(.subheadline, .heavy))
                 .foregroundStyle(Color(hex: "F4F7F2"))
             Text(text)
-                .font(.system(size: 11))
+                .font(.system(.caption2))
                 .foregroundStyle(Color(hex: "D6E2D0"))
                 .lineLimit(2)
         }
@@ -204,7 +208,7 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
+            FlowRow(spacing: 6) {
                 PlayButton(playback: model.playback) { model.togglePlayback() }
                 iconButton("chevron.left", label: "Back one frame") { model.step(frames: -1) }
                 iconButton("chevron.right", label: "Forward one frame") { model.step(frames: 1) }
@@ -214,21 +218,22 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
                     }
                 } label: {
                     Text("\(model.playback.speed.formatted())×")
-                        .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                        .font(.system(.caption, weight: .semibold).monospacedDigit())
                         .frame(minWidth: 34, minHeight: 32)
                         .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
+                        .minimumTapArea()
                 }
                 .accessibilityLabel("Playback speed")
                 toggle("Loop", on: model.loop != nil) { model.toggleLoop() }
                 toggle("Mirror", on: model.mirror) { model.mirror.toggle() }
-                Spacer(minLength: 0)
                 TimeLabel(playback: model.playback)
+                    .frame(minHeight: 44)
             }
             .foregroundStyle(SL.ink)
 
             timeline
 
-            ScrollView(.horizontal, showsIndicators: false) {
+            ScrollView(.horizontal) {
                 HStack(spacing: 14) {
                     Toggle("Footprints", isOn: $model.overlays.footprints)
                     Toggle("Paths", isOn: $model.overlays.paths)
@@ -237,10 +242,11 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
                     Toggle("Follow", isOn: $model.overlays.follow)
                 }
                 .toggleStyle(CheckToggleStyle())
-                .font(.system(size: 12))
-                .foregroundStyle(Color(hex: "6F7B66"))
+                .font(.system(.caption))
+                .foregroundStyle(SL.muted)
                 .padding(.vertical, 2)
             }
+            .scrollIndicators(.hidden)
         }
         .padding(12)
         .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 10)
@@ -250,9 +256,10 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
     private func iconButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .frame(width: 32, height: 32)
+                .font(.system(.caption, weight: .semibold))
+                .scaledFrame(width: 32, relativeTo: .caption)
                 .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
@@ -261,12 +268,13 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
     private func toggle(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(.caption, weight: .semibold))
                 .padding(.horizontal, 9)
                 .frame(minHeight: 32)
                 .foregroundStyle(on ? Color(hex: "F1F6E9") : SL.ink)
                 .background(on ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 7))
                 .overlay(RoundedRectangle(cornerRadius: 7).stroke(on ? SL.greenActive : Color(hex: "BFC9B9")))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(on ? .isSelected : [])
@@ -281,10 +289,11 @@ struct PlayButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(.footnote, weight: .semibold))
                 .foregroundStyle(.white)
-                .frame(width: 40, height: 32)
+                .scaledFrame(width: 40, height: 32, relativeTo: .footnote)
                 .background(SL.green, in: RoundedRectangle(cornerRadius: 7))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(playback.isPlaying ? "Pause" : "Play")
@@ -297,7 +306,7 @@ struct TimeLabel: View {
 
     var body: some View {
         Text(String(format: "%.2f s", playback.currentTime))
-            .font(.system(size: 12).monospacedDigit())
+            .font(.system(.caption).monospacedDigit())
             .foregroundStyle(SL.muted)
     }
 }
@@ -341,11 +350,11 @@ struct SectionHeading: View {
         VStack(alignment: .leading, spacing: 6) {
             Eyebrow(text: eyebrow, color: SL.muted)
             Text(title)
-                .font(SL.display(24, .heavy))
+                .font(SL.display(.title2, .heavy))
                 .tracking(-0.6)
                 .foregroundStyle(SL.ink)
             Text(text)
-                .font(.system(size: 14))
+                .font(.system(.subheadline))
                 .foregroundStyle(Color(hex: "5E6B58"))
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -359,9 +368,9 @@ struct NumberBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 12, weight: .semibold).monospacedDigit())
+            .font(.system(.caption, weight: .semibold).monospacedDigit())
             .foregroundStyle(filled ? .white : SL.ink)
-            .frame(width: 26, height: 26)
+            .scaledFrame(width: 26, relativeTo: .caption)
             .background(filled ? color : .clear, in: Circle())
             .overlay(Circle().stroke(filled ? color : SL.cardBorder, lineWidth: 1.5))
     }

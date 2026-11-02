@@ -66,14 +66,14 @@ struct MotionInspectorPanel: View {
     private var emptyState: some View {
         VStack(spacing: 10) {
             Image(systemName: "waveform.path.ecg")
-                .font(.system(size: 34, weight: .light))
+                .font(.system(.largeTitle, weight: .light))
                 .foregroundStyle(Color(hex: "83936A"))
             Text("See the move in motion.")
-                .font(SL.display(22, .semibold))
+                .font(SL.display(.title2, .semibold))
                 .tracking(-0.8)
                 .foregroundStyle(SL.ink)
             Text(emptyMessage)
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(Color(hex: "748069"))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 290)
@@ -93,7 +93,7 @@ struct MotionInspectorPanel: View {
             .padding(.top, 6)
             if !canGenerate, motion?.isActive != true, let blocker {
                 Text(blocker)
-                    .font(.system(size: 11))
+                    .font(.system(.caption2))
                     .foregroundStyle(Color(hex: "88947F"))
                     .multilineTextAlignment(.center)
             }
@@ -130,7 +130,7 @@ private struct MotionStageOverlays: View {
             VStack(alignment: .leading, spacing: 8) {
                 if let contact = model.contactLabel, model.state == .ready {
                     Text(contact)
-                        .font(.system(size: 11))
+                        .font(.system(.caption2))
                         .foregroundStyle(Color(hex: "5B7250"))
                         .padding(.horizontal, 9)
                         .padding(.vertical, 6)
@@ -139,7 +139,7 @@ private struct MotionStageOverlays: View {
                 }
                 if model.missingPose {
                     Text("Player not reconstructed in this frame")
-                        .font(.system(size: 11))
+                        .font(.system(.caption2))
                         .foregroundStyle(SL.noticeText)
                         .padding(8)
                         .background(SL.noticeFill, in: RoundedRectangle(cornerRadius: 4))
@@ -154,7 +154,7 @@ private struct MotionStageOverlays: View {
         .overlay(alignment: .topTrailing) {
             if let sequence = model.sequence, model.loadedChunks < sequence.chunks.count, model.state == .ready {
                 Label("\(model.loadedChunks)/\(sequence.chunks.count)", systemImage: "arrow.down.circle")
-                    .font(.system(size: 10).monospacedDigit())
+                    .font(.system(.caption2).monospacedDigit())
                     .foregroundStyle(SL.presetText)
                     .padding(12)
                     .allowsHitTesting(false)
@@ -203,7 +203,7 @@ struct PoseInspectorPanel: View {
                         Text("↑ Y")
                         Text("→ X")
                     }
-                    .font(.system(size: 10))
+                    .font(.system(.caption2))
                     .foregroundStyle(Color(hex: "8A9C7B"))
                     .padding(16)
                     .allowsHitTesting(false)
@@ -239,19 +239,19 @@ struct PoseInspectorPanel: View {
                     .frame(width: 83, height: 29)
                     .rotationEffect(.degrees(-30))
                 Image(systemName: "cube")
-                    .font(.system(size: 34, weight: .ultraLight))
+                    .font(.system(.largeTitle, weight: .ultraLight))
                     .foregroundStyle(Color(hex: "83936A"))
             }
             .frame(height: 64)
             Eyebrow(text: "A NEW PERSPECTIVE", color: Color(hex: "829173"))
             Text(pending ? "Building this pose…" : "Turn a moment into 3D.")
-                .font(SL.display(22, .semibold))
+                .font(SL.display(.title2, .semibold))
                 .tracking(-0.8)
                 .foregroundStyle(SL.ink)
             Text(pending
                  ? "SAM 3D Body is reconstructing the selected person. This view will update when the mesh is ready."
                  : frame.error ?? "Reconstruct this key frame to explore the player’s body position from every angle.")
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(Color(hex: "748069"))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 290)
@@ -266,7 +266,7 @@ struct PoseInspectorPanel: View {
                 .padding(.top, 6)
                 if !canGenerate, let blocker {
                     Text(blocker)
-                        .font(.system(size: 11))
+                        .font(.system(.caption2))
                         .foregroundStyle(Color(hex: "88947F"))
                         .multilineTextAlignment(.center)
                 }
@@ -286,11 +286,11 @@ private struct StageFrameLabel: View {
     var body: some View {
         HStack(spacing: 10) {
             Text(String(format: "%03d", frame))
-                .font(SL.display(20, .medium).monospacedDigit())
+                .font(SL.display(.title3, .medium).monospacedDigit())
                 .tracking(-0.5)
                 .foregroundStyle(Color(hex: "839574"))
             Text("FRAME /\n\(String(format: "%.2f", seconds))s")
-                .font(.system(size: 8, weight: .medium))
+                .font(.system(.caption2, weight: .medium))
                 .tracking(1)
                 .foregroundStyle(Color(hex: "8D9A82"))
         }
@@ -314,7 +314,7 @@ struct StageMessage: View {
             Text(message)
                 .multilineTextAlignment(.center)
         }
-        .font(.system(size: 13))
+        .font(.system(.footnote))
         .foregroundStyle(isLoading ? SL.ink : SL.errorText)
         .padding(25)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -351,24 +351,29 @@ struct PresetToolbar: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(CameraAngle.allCases) { angle in
-                Button(angle.rawValue) { onSelect(angle) }
-                    .font(.system(size: 12))
-                    .foregroundStyle(selection == angle ? SL.presetActiveText : SL.presetText)
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 6)
-                    .background(selection == angle ? SL.presetActive : .clear, in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4)
-                        .stroke(selection == angle ? SL.presetActiveBorder : .clear))
-                    .buttonStyle(.plain)
+                Button { onSelect(angle) } label: {
+                    Text(angle.rawValue)
+                        .font(.system(.caption))
+                        .foregroundStyle(selection == angle ? SL.presetActiveText : SL.presetText)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 6)
+                        .background(selection == angle ? SL.presetActive : .clear, in: RoundedRectangle(cornerRadius: 4))
+                        .overlay(RoundedRectangle(cornerRadius: 4)
+                            .stroke(selection == angle ? SL.presetActiveBorder : .clear))
+                        .minimumTapArea()
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selection == angle ? .isSelected : [])
             }
             Spacer(minLength: 0)
             Button {
                 onSelect(.source)
             } label: {
                 Image(systemName: "arrow.counterclockwise")
-                    .font(.system(size: 14))
+                    .font(.system(.subheadline))
                     .foregroundStyle(SL.ink)
-                    .frame(width: 30, height: 30)
+                    .scaledFrame(width: 30, relativeTo: .subheadline)
+                    .minimumTapArea()
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Reset camera")
@@ -396,7 +401,7 @@ private struct OptionsRow<Toggles: View>: View {
             HStack(spacing: 12) { toggles }
                 .toggleStyle(CheckToggleStyle())
         }
-        .font(.system(size: 11))
+        .font(.system(.caption2))
         .foregroundStyle(Color(hex: "8A9481"))
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

@@ -15,7 +15,7 @@ struct CloudProjectStatusView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 Label("PRIVATE PROJECT", systemImage: "lock.shield").font(.caption).foregroundStyle(SL.muted)
-                Text(model.project.title).font(SL.display(28, .bold))
+                Text(model.project.title).font(SL.display(.title, .bold))
                 if let label = model.project.label { Text(label).foregroundStyle(SL.muted) }
                 if model.project.state == "preparing" {
                     SLLoadingState(title: "Preparing your video…",

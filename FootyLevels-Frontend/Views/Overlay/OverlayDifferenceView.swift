@@ -25,7 +25,7 @@ struct OverlayDifferenceView: View {
                         } icon: {
                             Image(systemName: "exclamationmark.circle.fill")
                         }
-                        .font(.system(size: 13))
+                        .font(.system(.footnote))
                         .foregroundStyle(SL.errorText)
                         .padding(14)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -52,7 +52,7 @@ struct OverlayDifferenceView: View {
                         .disabled(!viewModel.canCompare)
 
                         Text(comparisonGuidance)
-                            .font(.system(size: 13))
+                            .font(.system(.footnote))
                             .lineSpacing(3)
                             .foregroundStyle(SL.panelToplineText)
                     }
@@ -93,12 +93,12 @@ struct OverlayDifferenceView: View {
     private var intro: some View {
         VStack(alignment: .leading, spacing: 14) {
             Eyebrow(text: "COMPARE YOUR MOVEMENT", rule: true)
-            (Text("Two attempts.\n") + Text("See what changes.").foregroundColor(SL.headlineSoft))
-                .font(SL.display(32, .semibold))
+            Text("Two attempts.\n\(Text("See what changes.").foregroundStyle(SL.headlineSoft))")
+                .font(SL.display(.largeTitle, .semibold))
                 .tracking(-1.4)
                 .foregroundStyle(SL.ink)
             Text("Choose your attempt and a reference. See their 3D movements together, then explore where they differ.")
-                .font(.system(size: 14))
+                .font(.system(.subheadline))
                 .lineSpacing(4)
                 .foregroundStyle(SL.panelToplineText)
         }
@@ -177,7 +177,7 @@ private struct OverlaySlotCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Eyebrow(text: "\(slot.rawValue) · \(slot.role.uppercased())", color: SL.panelToplineText)
                     Text(project?.title ?? (slot == .first ? "Your attempt" : "Reference video"))
-                        .font(SL.display(17, .heavy))
+                        .font(SL.display(.body, .heavy))
                         .tracking(-0.5)
                         .foregroundStyle(SL.ink)
                         .lineLimit(2)
@@ -199,13 +199,13 @@ private struct OverlaySlotCard: View {
                                 .accessibilityHidden(true)
                         }
                         Text(isStarting ? "Starting 3D motion…" : motionText(project))
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.system(.footnote, weight: .medium))
                             .foregroundStyle(project.motion?.status == "failed" ? SL.errorText : SL.panelToplineText)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     if isStarting || project.isBusy {
                         Text("Your video stays selected while its 3D motion is prepared.")
-                            .font(.system(size: 12))
+                            .font(.system(.caption))
                             .foregroundStyle(SL.panelToplineText)
                     } else if canBuild {
                         Button(action: onBuild) {
@@ -216,7 +216,7 @@ private struct OverlaySlotCard: View {
                 }
             } else {
                 Text("Choose a video from your library or import a new attempt.")
-                    .font(.system(size: 13))
+                    .font(.system(.footnote))
                     .foregroundStyle(SL.panelToplineText)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -261,7 +261,7 @@ private struct OverlayVideoPicker: View {
                 Section {
                     PhotosPicker(selection: $pickedVideo, matching: .videos) {
                         Label("Import a new video", systemImage: "plus")
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.system(.subheadline, weight: .semibold))
                             .foregroundStyle(SL.green)
                     }
                     .disabled(!canImport)
@@ -281,10 +281,10 @@ private struct OverlayVideoPicker: View {
                     } else if videos.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Label("No videos yet", systemImage: "video")
-                                .font(.system(size: 15, weight: .semibold))
+                                .font(.system(.subheadline, weight: .semibold))
                                 .foregroundStyle(SL.ink)
                             Text(canImport ? "Import a clip above to choose your first attempt." : "Connect on the Videos tab to import your first clip.")
-                                .font(.system(size: 13))
+                                .font(.system(.footnote))
                                 .foregroundStyle(SL.panelToplineText)
                         }
                         .padding(.vertical, 8)
@@ -336,12 +336,12 @@ private struct OverlayVideoRow: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(project.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(.subheadline, weight: .semibold))
                     .foregroundStyle(SL.ink)
                     .lineLimit(2)
                 Text(String(format: "%.1f SEC", project.video.duration)
                      + (BundledSample.isSample(project.id) ? "  ·  INCLUDED EXAMPLE" : ""))
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(.caption2, weight: .medium))
                     .tracking(1)
                     .foregroundStyle(SL.panelToplineText)
             }
@@ -351,7 +351,7 @@ private struct OverlayVideoRow: View {
                     SLActivityIndicator(size: 12)
                 }
                 Text(project.motion?.isPlayable == true ? "3D ready" : (project.isBusy ? "Preparing" : "Needs 3D"))
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(.caption2, weight: .semibold))
                     .foregroundStyle(SL.presetActiveText)
             }
             .padding(.horizontal, 9)

@@ -30,7 +30,7 @@ struct ProjectDetailView: View {
                 VStack(spacing: 12) {
                     ProgressView()
                     Text("Opening your workspace…")
-                        .font(.system(size: 13))
+                        .font(.system(.footnote))
                         .foregroundStyle(SL.muted)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -150,7 +150,7 @@ struct ProjectDetailView: View {
         .overlay(alignment: .bottom) {
             if viewModel.isSubmitting {
                 Label("Working on your video…", systemImage: "hourglass")
-                    .font(.system(size: 13))
+                    .font(.system(.footnote))
                     .foregroundStyle(Color(hex: "EEF5E2"))
                     .padding(.horizontal, 20)
                     .padding(.vertical, 13)
@@ -164,27 +164,27 @@ struct ProjectDetailView: View {
     private func heading(_ project: SkillLabProject) -> some View {
         HStack(spacing: 12) {
             Text(String(format: "%02d", projectNumber))
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(.caption, weight: .semibold))
                 .foregroundStyle(SL.ink)
-                .frame(width: 38, height: 38)
+                .scaledFrame(width: 38, relativeTo: .caption)
                 .background(Color(hex: "EAF0DF"), in: Circle())
                 .overlay(Circle().stroke(Color(hex: "DCE5CD")))
             VStack(alignment: .leading, spacing: 4) {
                 Text(project.title)
-                    .font(SL.display(19, .heavy))
+                    .font(SL.display(.title3, .heavy))
                     .tracking(-0.5)
                     .foregroundStyle(SL.ink)
                     .lineLimit(1)
                 Text(String(format: "%.1f SEC  ·  %.0f FPS  ·  %d KEY FRAMES",
                             project.video.duration, project.video.fps, project.frames.count))
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(.caption2, weight: .medium))
                     .tracking(1.1)
                     .foregroundStyle(Color(hex: "7C8578"))
             }
             Spacer()
             Label(viewModel.isSample ? "Included example" : "Saved on server",
                   systemImage: viewModel.isSample ? "shippingbox" : "checkmark.circle")
-                .font(.system(size: 11))
+                .font(.system(.caption2))
                 .foregroundStyle(Color(hex: "809073"))
                 .labelStyle(.iconOnly)
                 .accessibilityLabel(viewModel.isSample ? "Included example" : "Saved on server")
@@ -204,7 +204,7 @@ struct ProjectDetailView: View {
             }
             .accessibilityLabel("Dismiss error")
         }
-        .font(.system(size: 13))
+        .font(.system(.footnote))
         .foregroundStyle(SL.errorText)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -219,7 +219,7 @@ struct ProjectDetailView: View {
                         viewModel.mode = mode
                     } label: {
                         Text(mode.rawValue)
-                            .font(.system(size: 13, weight: viewModel.mode == mode ? .semibold : .regular))
+                            .font(.system(.footnote, weight: viewModel.mode == mode ? .semibold : .regular))
                             .foregroundStyle(viewModel.mode == mode ? Color(hex: "F1F6E9") : SL.modeText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
@@ -237,7 +237,7 @@ struct ProjectDetailView: View {
 
             Text(viewModel.mode == .motion ? "Player + football · synchronized playback"
                                            : "Freeze a moment. Explore every angle.")
-                .font(.system(size: 11))
+                .font(.system(.caption2))
                 .foregroundStyle(Color(hex: "819174"))
         }
     }

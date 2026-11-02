@@ -19,7 +19,7 @@ struct WorkspaceVideoPanel: View {
                     Text("\(project.video.width) × \(project.video.height)")
                     Circle().fill(Color(hex: "D5EC95")).frame(width: 5, height: 5)
                 }
-                .font(.system(size: 10))
+                .font(.system(.caption2))
                 .foregroundStyle(Color(hex: "A0B29E"))
             }
 
@@ -52,7 +52,7 @@ struct WorkspaceVideoPanel: View {
         .frame(height: 360)
         .overlay(alignment: .topLeading) {
             Text(BundledSample.isSample(project.id) ? "THE OVER FAKE TUTORIAL" : "SKILL BREAKDOWN")
-                .font(.system(size: 9, weight: .medium))
+                .font(.system(.caption2, weight: .medium))
                 .tracking(1)
                 .foregroundStyle(Color(hex: "F4F6DF"))
                 .padding(.horizontal, 8)
@@ -67,7 +67,7 @@ struct WorkspaceVideoPanel: View {
                     onCapture(Swift.min(playback.currentTime, project.video.duration - 0.04))
                 } label: {
                     Label("Capture this moment", systemImage: "plus")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(.caption, weight: .semibold))
                         .foregroundStyle(SL.ink)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 9)
@@ -89,7 +89,7 @@ struct WorkspaceVideoPanel: View {
                     playback.togglePlayback()
                 } label: {
                     Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 18))
+                        .font(.system(.title3))
                         .foregroundStyle(Color(hex: "EAF5D9"))
                         .frame(width: 28, height: 28)
                 }
@@ -108,9 +108,9 @@ struct WorkspaceVideoPanel: View {
                 } label: {
                     HStack(spacing: 4) {
                         Text("\(playback.speed.formatted())× speed")
-                        Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
+                        Image(systemName: "chevron.down").font(.system(.caption2, weight: .bold)).imageScale(.small)
                     }
-                    .font(.system(size: 11))
+                    .font(.system(.caption2))
                     .foregroundStyle(Color(hex: "D5E4C9"))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
@@ -122,7 +122,7 @@ struct WorkspaceVideoPanel: View {
                     playback.isMuted.toggle()
                 } label: {
                     Image(systemName: playback.isMuted ? "speaker.slash" : "speaker.wave.2")
-                        .font(.system(size: 15))
+                        .font(.system(.subheadline))
                         .foregroundStyle(SL.videoText)
                         .frame(width: 28, height: 28)
                 }
@@ -140,7 +140,7 @@ struct WorkspaceVideoPanel: View {
                 Spacer()
                 Text("Take your time. Notice the details.")
             }
-            .font(.system(size: 10))
+            .font(.system(.caption2))
             .foregroundStyle(Color(hex: "95AA92"))
         }
         .padding(.horizontal, 16)
@@ -154,9 +154,8 @@ private struct Timecode: View {
     let playback: PlaybackController
 
     var body: some View {
-        (Text(String(format: "%.2f", playback.currentTime))
-            + Text(String(format: "  / %.2f", playback.duration)).foregroundColor(SL.videoMuted))
-            .font(.system(size: 12).monospacedDigit())
+        Text("\(String(format: "%.2f", playback.currentTime))\(Text(String(format: "  / %.2f", playback.duration)).foregroundStyle(SL.videoMuted))")
+            .font(.system(.caption).monospacedDigit())
             .foregroundStyle(SL.videoText)
     }
 }
@@ -271,14 +270,15 @@ struct CheckToggleStyle: ToggleStyle {
                     .overlay {
                         if configuration.isOn {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 8, weight: .heavy))
+                                .font(.system(.caption2, weight: .heavy))
+                                .imageScale(.small)
                                 .foregroundStyle(dark ? SL.videoPanel : .white)
                         }
                     }
-                    .frame(width: 13, height: 13)
+                    .scaledFrame(width: 13, relativeTo: .caption)
                 configuration.label
             }
-            .contentShape(Rectangle())
+            .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityValue(configuration.isOn ? "On" : "Off")

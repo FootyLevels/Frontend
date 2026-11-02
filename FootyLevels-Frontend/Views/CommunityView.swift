@@ -32,7 +32,7 @@ struct CommunityView: View {
     private var introduction: some View {
         VStack(alignment: .leading, spacing: 10) {
             Eyebrow(text: "TRAIN TOGETHER", rule: true)
-            Text("Your people.\nYour next attempt.").font(SL.display(30, .bold)).tracking(-0.6)
+            Text("Your people.\nYour next attempt.").font(SL.display(.title, .bold)).tracking(-0.6)
             Text("Create a private training circle, share an attempt, and help each other improve with feedback at the right moment.")
                 .font(.callout).foregroundStyle(SL.muted)
         }.accessibilityIdentifier("community-introduction")

@@ -90,9 +90,10 @@ enum SL {
     static let overlaySecond = UIColor(red: 0xE0 / 255, green: 0x7B / 255, blue: 0x39 / 255, alpha: 1)
 
     // Type — Manrope for display, DM Sans for text in the web app. The system
-    // face with tightened tracking gets close without bundling fonts.
-    static func display(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
-        .system(size: size, weight: weight)
+    // face with tightened tracking gets close without bundling fonts. A text
+    // style rather than a point size, so headings follow the person's text size.
+    static func display(_ style: Font.TextStyle, _ weight: Font.Weight = .bold) -> Font {
+        .system(style, weight: weight)
     }
 }
 
@@ -112,8 +113,8 @@ struct BrandMark: View {
             .frame(height: size)
             .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.36, d: 1, tx: size * 0.18, ty: 0))
 
-            (Text("footy").font(SL.display(size, .heavy))
-                + Text("levels").font(SL.display(size, .medium)))
+            // The wordmark is a logo, so it keeps its drawn size instead of scaling with text.
+            Text("\(Text("footy").font(.system(size: size, weight: .heavy)))\(Text("levels").font(.system(size: size, weight: .medium)))")
                 .tracking(-size * 0.05)
                 .foregroundStyle(SL.ink)
         }
@@ -140,7 +141,7 @@ struct Eyebrow: View {
                 Rectangle().fill(SL.accentLine).frame(width: 21, height: 2)
             }
             Text(text)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(.caption2, weight: .bold))
                 .tracking(1.6)
                 .foregroundStyle(color)
         }
@@ -157,14 +158,14 @@ struct PanelTopline<Trailing: View>: View {
     var body: some View {
         HStack {
             Label(title, systemImage: icon)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(.caption2, weight: .semibold))
                 .tracking(1.3)
             Spacer()
             trailing
         }
         .labelStyle(.titleAndIcon)
         .padding(.horizontal, 14)
-        .frame(height: 40)
+        .frame(minHeight: 40)
         .foregroundStyle(dark ? Color(hex: "D5DFCF") : SL.panelToplineText)
         .background(dark ? SL.videoTopline : SL.panelTopline)
     }
@@ -178,7 +179,7 @@ struct StatusDot: View {
     var body: some View {
         HStack(spacing: 6) {
             Circle().fill(ready ? SL.readyDot : SL.idleDot).frame(width: 6, height: 6)
-            Text(text).font(.system(size: 10))
+            Text(text).font(.system(.caption2))
         }
         .foregroundStyle(SL.muted)
     }
@@ -243,5 +244,39 @@ extension View {
         background(fill, in: RoundedRectangle(cornerRadius: radius))
             .clipShape(RoundedRectangle(cornerRadius: radius))
             .overlay(RoundedRectangle(cornerRadius: radius).stroke(border))
+    }
+
+    /// A form field on the light canvas: a white well with a border that stays
+    /// visible against the page (3.4:1).
+    func slField() -> some View {
+        padding(14)
+            .frame(minHeight: 44)
+            .background(Color.white, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(SL.mark))
+    }
+
+    /// A fixed-size box, such as a number badge or icon tile, that grows with
+    /// the person's text size so the text inside it never clips.
+    func scaledFrame(width: CGFloat, height: CGFloat? = nil, relativeTo style: Font.TextStyle = .body) -> some View {
+        modifier(ScaledFrame(width: width, height: height ?? width, style: style))
+    }
+
+    /// Keeps a small control's look but gives it Apple's 44-point minimum tap area.
+    func minimumTapArea() -> some View {
+        frame(minWidth: 44, minHeight: 44).contentShape(.rect)
+    }
+}
+
+private struct ScaledFrame: ViewModifier {
+    @ScaledMetric private var width: CGFloat
+    @ScaledMetric private var height: CGFloat
+
+    init(width: CGFloat, height: CGFloat, style: Font.TextStyle) {
+        _width = ScaledMetric(wrappedValue: width, relativeTo: style)
+        _height = ScaledMetric(wrappedValue: height, relativeTo: style)
+    }
+
+    func body(content: Content) -> some View {
+        content.frame(width: width, height: height)
     }
 }

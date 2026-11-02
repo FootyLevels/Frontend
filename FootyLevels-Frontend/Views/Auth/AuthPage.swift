@@ -9,97 +9,95 @@ import SwiftUI
 import GoogleSignInSwift
 import FirebaseAuth
 
+/// The two email screens reachable from the sign-in page.
+private enum AuthRoute: Hashable {
+    case signUp, logIn
+}
+
 struct AuthPage: View {
-    
+
     // Use the environment object or state object for your service
     @State private var authVM = UserLoginViewModel()
     @Binding var appState:AppStateViewModel
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                
-                Spacer()
-                
-                Text("Welcome to FootyLevels")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                Text("Choose how you want to sign in or create an account.")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 40)
-                
-                // --- 1. Google Login Button ---
-                // Uses the dedicated GIDSignInButton
-                GoogleSignInButton {
-                    Task {
-                        do {
-                            if let user = try await authVM.signInWithGoogle(){
-                                appState.currentUser = user
-                                appState.isLoggedIn = .loggedIn
-                                dismiss()
-                            }
-                            
+            // Scrolls so the largest text sizes never push the buttons off screen.
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Welcome to FootyLevels")
+                        .font(SL.display(.largeTitle, .heavy))
+                        .foregroundStyle(SL.ink)
+                        .multilineTextAlignment(.center)
 
-                            // Optional: Add logic to dismiss the view or navigate on success
-                        } catch {
-                            authVM.errorMessage = error.localizedDescription
-                        }
-                    }
-                }
-                .frame(height: 50) // Standard button height
+                    Text("Choose how you want to sign in or create an account.")
+                        .font(.subheadline)
+                        .foregroundStyle(SL.muted)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 40)
 
-                if let message = authVM.errorMessage {
-                    Text(message)
-                        .font(.callout)
-                        .foregroundStyle(.red)
-                        .accessibilityIdentifier("signInError")
-                }
-                
-                // --- Divider ---
-                HStack {
-                    VStack { Divider() }
-                    Text("OR")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    VStack { Divider() }
-                }
-                .padding(.horizontal)
-                
-                // --- 2. Email Sign Up Button ---
-                NavigationLink(destination: EmailSignUpView(appState: $appState)) {
-                    HStack {
-                        Image(systemName: "person.badge.plus.fill")
-                        Text("Sign Up with Email")
+                    // --- 1. Google Login Button ---
+                    // Uses the dedicated GIDSignInButton
+                    GoogleSignInButton(action: signInWithGoogle)
+                        .frame(minHeight: 50) // Standard button height; taller when the text is larger
+
+                    if let message = authVM.errorMessage {
+                        Text(message)
+                            .font(.callout)
+                            .foregroundStyle(SL.errorText)
+                            .accessibilityIdentifier("signInError")
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                }
-                
-                // --- 3. Regular Email Login Button ---
-                NavigationLink(destination: EmailLoginView( appState: $appState)) {
+
+                    // --- Divider ---
                     HStack {
-                        Image(systemName: "envelope.fill")
-                        Text("Log In with Email")
+                        VStack { Divider() }
+                        Text("OR")
+                            .font(.caption)
+                            .foregroundStyle(SL.muted)
+                        VStack { Divider() }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                    .padding(.horizontal)
+
+                    // --- 2. Email Sign Up Button ---
+                    NavigationLink(value: AuthRoute.signUp) {
+                        Label("Sign Up with Email", systemImage: "person.badge.plus.fill")
+                    }
+                    .buttonStyle(.slPrimaryWide)
+
+                    // --- 3. Regular Email Login Button ---
+                    NavigationLink(value: AuthRoute.logIn) {
+                        Label("Log In with Email", systemImage: "envelope.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.slSecondary)
                 }
-                
-                Spacer()
-                Spacer()
+                .padding(.horizontal, 30)
+                .padding(.vertical, 64)
             }
-            .padding(.horizontal, 30)
+            .scrollBounceBehavior(.basedOnSize)
+            .background(SL.page.ignoresSafeArea())
             .toolbar(.hidden, for: .navigationBar) // Hide the default navigation bar for a clean look
+            .navigationDestination(for: AuthRoute.self) { route in
+                switch route {
+                case .signUp: EmailSignUpView(appState: $appState)
+                case .logIn: EmailLoginView(appState: $appState)
+                }
+            }
+        }
+    }
+
+    private func signInWithGoogle() {
+        Task {
+            do {
+                if let user = try await authVM.signInWithGoogle() {
+                    appState.currentUser = user
+                    appState.isLoggedIn = .loggedIn
+                    dismiss()
+                }
+            } catch {
+                authVM.errorMessage = error.localizedDescription
+            }
         }
     }
 }
