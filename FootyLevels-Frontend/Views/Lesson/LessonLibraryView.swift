@@ -5,6 +5,9 @@ import UIKit
 /// to the app. All play from the app bundle, so they work offline and without an account.
 struct LessonLibraryView: View {
     @State private var lessons = LessonLibrary.lessons()
+    /// True once the hero has scrolled away, so the status bar gets a backdrop.
+    @State private var scrolledPastHero = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The lesson the hero image comes from, when it ships.
     private var featured: LessonLibrary.Entry? {
@@ -13,13 +16,34 @@ struct LessonLibraryView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    LearnHero(featured: featured)
-                    lessonList
-                        .padding(.horizontal, 16)
+            GeometryReader { proxy in
+                let statusBar = proxy.safeAreaInsets.top
+                // The scroll view runs under the status bar so the hero image reaches
+                // the top edge; the hero pads its own content below the status bar.
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        LearnHero(featured: featured, topInset: statusBar)
+                        lessonList
+                            .padding(.horizontal, 16)
+                    }
+                    .padding(.bottom, 32)
                 }
-                .padding(.bottom, 32)
+                .onScrollGeometryChange(for: Bool.self) { geometry in
+                    geometry.contentOffset.y > 240
+                } action: { _, scrolled in
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { scrolledPastHero = scrolled }
+                }
+                .ignoresSafeArea(edges: .top)
+                .overlay(alignment: .top) {
+                    // Keeps list text from sitting under the clock once the hero is gone.
+                    Rectangle()
+                        .fill(.bar)
+                        .frame(height: statusBar)
+                        .ignoresSafeArea(edges: .top)
+                        .opacity(scrolledPastHero ? 1 : 0)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
             }
             .background(SL.page)
             .toolbar(.hidden, for: .navigationBar)
@@ -66,6 +90,8 @@ struct LessonLibraryView: View {
 /// brand, the drills to practise next and the way into the featured lesson.
 private struct LearnHero: View {
     let featured: LessonLibrary.Entry?
+    /// The status bar's height: the image runs under it, the content starts below it.
+    let topInset: CGFloat
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -118,9 +144,9 @@ private struct LearnHero: View {
             }
         }
         .padding(.horizontal, 18)
-        .padding(.top, 8)
+        .padding(.top, topInset + 8)
         .padding(.bottom, 24)
-        .frame(maxWidth: .infinity, minHeight: 440, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 440 + topInset, alignment: .topLeading)
         .background {
             ZStack {
                 Image("LearnHero")
@@ -134,7 +160,6 @@ private struct LearnHero: View {
                 LinearGradient(colors: [.clear, .black.opacity(0.6)], startPoint: .center, endPoint: .bottom)
             }
             .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 36, bottomTrailingRadius: 36))
-            .ignoresSafeArea(edges: .top)
         }
     }
 }
