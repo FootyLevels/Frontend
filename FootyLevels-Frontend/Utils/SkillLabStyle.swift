@@ -148,30 +148,37 @@ struct BrandMark: View {
     var size: CGFloat = 24
     /// Draws the mark in white for use over photographs.
     var onImage = false
+    /// Turning this on springs the bars up one after another, then fades the
+    /// wordmark in. The sign-in splash starts it off.
+    var drawn = true
 
     var body: some View {
         HStack(spacing: size * 0.4) {
             HStack(alignment: .center, spacing: size * 0.14) {
-                bar(height: 0.8, color: onImage ? .white : SL.ink)
-                bar(height: 1, color: onImage ? .white : SL.ink)
-                bar(height: 0.57, color: onImage ? SL.lime : SL.data)
+                bar(0, height: 0.8, color: onImage ? .white : SL.ink)
+                bar(1, height: 1, color: onImage ? .white : SL.ink)
+                bar(2, height: 0.57, color: onImage ? SL.lime : SL.data)
             }
             .frame(height: size)
             .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.36, d: 1, tx: size * 0.18, ty: 0))
 
             // The wordmark is a logo, so it keeps its drawn size instead of scaling with text.
-            Text("\(Text("footy").font(.system(size: size, weight: .heavy)))\(Text("levels").font(.system(size: size, weight: .medium)))")
+            Text("\(Text("Footy").font(.system(size: size, weight: .heavy)))\(Text("Levels").font(.system(size: size, weight: .medium)))")
                 .tracking(-size * 0.05)
                 .foregroundStyle(onImage ? .white : SL.ink)
+                .opacity(drawn ? 1 : 0)
+                .animation(.easeOut(duration: 0.3).delay(0.26), value: drawn)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("FootyLevels")
     }
 
-    private func bar(height: CGFloat, color: Color) -> some View {
+    private func bar(_ index: Int, height: CGFloat, color: Color) -> some View {
         Rectangle()
             .fill(color)
             .frame(width: size * 0.2, height: size * height)
+            .scaleEffect(x: 1, y: drawn ? 1 : 0, anchor: .bottom)
+            .animation(.spring(duration: 0.38, bounce: 0.35).delay(Double(index) * 0.09), value: drawn)
     }
 }
 

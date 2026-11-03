@@ -115,6 +115,8 @@ struct EmailSignUpView: View {
         guard canSignUp else { return }
         Task {
             if let user = await signUpVM.signUpWithEmail() {
+                // Drop the keyboard so it doesn't sit over the sign-in splash.
+                focus = nil
                 appState.currentUser = user
                 appState.isLoggedIn = .loggedIn
             }

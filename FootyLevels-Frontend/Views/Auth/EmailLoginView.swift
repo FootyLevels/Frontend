@@ -77,6 +77,8 @@ struct EmailLoginView: View {
         guard !emailVM.isLoading else { return }
         Task {
             if let user = await emailVM.loginWithEmail() {
+                // Drop the keyboard so it doesn't sit over the sign-in splash.
+                focus = nil
                 appState.currentUser = user
                 appState.isLoggedIn = .loggedIn
             }
