@@ -13,6 +13,7 @@ struct ThemeTests {
         ("muted on page", SL.muted, SL.page),
         ("muted on card", SL.muted, SL.card),
         ("muted on raised", SL.muted, SL.raised),
+        ("link on page", SL.link, SL.page),
         ("on-green on green", SL.onGreen, SL.green),
         ("on-green on pressed green", SL.onGreen, SL.greenActive),
         ("mode text on mode track", SL.modeText, SL.modeTrack),

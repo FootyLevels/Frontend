@@ -25,6 +25,8 @@ enum SL {
     static let lime = Color(hex: "C6F24E")
     static let accentLine = data
     static let headlineSoft = muted
+    /// A text link in the brand colour: dark olive in light mode, lime in dark mode.
+    static let link = Color(light: "3F5A1A", dark: "C6F24E")
     /// A raised surface: buttons, fields and chips on top of a card.
     static let raised = Color(light: "FFFFFF", dark: "1C1C1C")
 

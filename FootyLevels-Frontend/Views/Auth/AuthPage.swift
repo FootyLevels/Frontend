@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import GoogleSignInSwift
 import FirebaseAuth
 
 /// The two email screens reachable from the sign-in page.
@@ -44,11 +43,13 @@ struct AuthPage: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.bottom, 24)
-                        choices
+                        choices(bottomInset: proxy.safeAreaInsets.bottom)
                     }
-                    .frame(minHeight: proxy.size.height)
+                    .frame(minHeight: proxy.size.height + proxy.safeAreaInsets.bottom)
                 }
                 .scrollBounceBehavior(.basedOnSize)
+                // The sheet runs to the bottom edge; its buttons pad above the home indicator.
+                .ignoresSafeArea(edges: .bottom)
             }
             .background {
                 ZStack {
@@ -72,17 +73,28 @@ struct AuthPage: View {
         }
     }
 
-    /// The bottom sheet: the three ways in.
-    private var choices: some View {
+    /// The bottom sheet: the three ways in, padded above the home indicator.
+    private func choices(bottomInset: CGFloat) -> some View {
         VStack(spacing: 10) {
             NavigationLink(value: AuthRoute.signUp) {
                 Label("Sign Up with Email", systemImage: "envelope.fill")
             }
             .buttonStyle(.slPrimaryWide)
 
-            // Google's own button: its white style in both appearances, since its dark style is blue.
-            GoogleSignInButton(scheme: .light, style: .wide, action: signInWithGoogle)
-                .frame(minHeight: 50) // Standard button height; taller when the text is larger
+            // A pill in the app's style carrying Google's official four-colour mark.
+            Button(action: signInWithGoogle) {
+                HStack(spacing: 10) {
+                    Image("GoogleG")
+                        .resizable()
+                        .scaledToFit()
+                        .scaledFrame(width: 20, relativeTo: .subheadline)
+                        .accessibilityHidden(true)
+                    Text("Continue with Google")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
+            }
+            .buttonStyle(.slSecondary)
 
             if let message = authVM.errorMessage {
                 Text(message)
@@ -95,7 +107,7 @@ struct AuthPage: View {
             NavigationLink(value: AuthRoute.logIn) {
                 Text("Log In with Email")
                     .font(.system(.callout, weight: .semibold))
-                    .foregroundStyle(SL.ink)
+                    .foregroundStyle(SL.link)
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .contentShape(.rect)
             }
@@ -103,13 +115,9 @@ struct AuthPage: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 22)
-        .padding(.bottom, 12)
+        .padding(.bottom, 12 + bottomInset)
         .frame(maxWidth: .infinity)
-        .background {
-            UnevenRoundedRectangle(topLeadingRadius: 32, topTrailingRadius: 32)
-                .fill(SL.page)
-                .ignoresSafeArea(edges: .bottom)
-        }
+        .background(SL.page, in: UnevenRoundedRectangle(topLeadingRadius: 32, topTrailingRadius: 32))
     }
 
     private func signInWithGoogle() {
