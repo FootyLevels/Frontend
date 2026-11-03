@@ -65,6 +65,20 @@ final class FootyLevels_FrontendUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "START THE SPIN")).firstMatch.waitForExistence(timeout: 5))
     }
 
+    /// The "Practise next" card on Learn opens the featured lesson straight at Practise.
+    @MainActor
+    func testPractiseCardOpensTheLessonAtPractise() {
+        let app = XCUIApplication()
+        app.launchArguments = []
+        app.launch()
+        app.tabBars.buttons["Learn"].tap()
+        let card = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Practise next")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        card.tap()
+        XCTAssertTrue(app.staticTexts["Practise it"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["Stage 3: Practise"].isSelected)
+    }
+
     /// Run after the live SDK probe signs out and deletes its temporary accounts.
     @MainActor
     func testSignedOutEmailLoginRoute() {

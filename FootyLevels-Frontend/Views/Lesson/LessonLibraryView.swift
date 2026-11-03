@@ -4,6 +4,8 @@ import UIKit
 /// The "Learn" tab: the Over Fake lesson and every lesson the lesson pipeline added
 /// to the app. All play from the app bundle, so they work offline and without an account.
 struct LessonLibraryView: View {
+    /// Nil for the Debug local-sample entry, which has no account to show.
+    var appState: AppStateViewModel? = nil
     @State private var lessons = LessonLibrary.lessons()
     /// True once the hero has scrolled away, so the status bar gets a backdrop.
     @State private var scrolledPastHero = false
@@ -22,7 +24,7 @@ struct LessonLibraryView: View {
                 // the top edge; the hero pads its own content below the status bar.
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        LearnHero(featured: featured, topInset: statusBar)
+                        LearnHero(featured: featured, appState: appState, topInset: statusBar)
                         lessonList
                             .padding(.horizontal, 16)
                     }
@@ -87,9 +89,10 @@ struct LessonLibraryView: View {
 }
 
 /// The top of Learn: a colour-graded, motion-blurred still of a real lesson clip with the
-/// brand, the drills to practise next and the way into the featured lesson.
+/// brand, the account, the drills to practise next and the way into the featured lesson.
 private struct LearnHero: View {
     let featured: LessonLibrary.Entry?
+    let appState: AppStateViewModel?
     /// The status bar's height: the image runs under it, the content starts below it.
     let topInset: CGFloat
     @Environment(\.colorScheme) private var colorScheme
@@ -100,9 +103,21 @@ private struct LearnHero: View {
                 BrandMark(size: 20, onImage: true)
                     .padding(.top, 10)
                 Spacer(minLength: 0)
-                if let featured, !featured.practice.isEmpty {
-                    PracticeCard(drills: featured.practice)
+                VStack(alignment: .trailing, spacing: 10) {
+                    if let appState, appState.isLoggedIn == .loggedIn {
+                        AccountMenu(appState: appState, onImage: true)
+                    }
+                    if let featured, !featured.practice.isEmpty {
+                        // Opens the lesson at Practise, where these drills are.
+                        NavigationLink {
+                            PackageLessonView(entry: featured, startStage: .practise)
+                        } label: {
+                            PracticeCard(drills: featured.practice)
+                        }
+                        .buttonStyle(.plain)
                         .frame(maxWidth: 200)
+                        .accessibilityHint("Opens \(featured.title) at Practise")
+                    }
                 }
             }
             Spacer(minLength: 56)
@@ -170,9 +185,14 @@ private struct PracticeCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("Practise next", systemImage: "clock")
-                .font(.system(.caption, weight: .semibold))
-                .padding(.horizontal, 4)
+            HStack(spacing: 6) {
+                Label("Practise next", systemImage: "clock")
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .accessibilityHidden(true)
+            }
+            .font(.system(.caption, weight: .semibold))
+            .padding(.horizontal, 4)
             ForEach(Array(drills.enumerated()), id: \.offset) { index, drill in
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {

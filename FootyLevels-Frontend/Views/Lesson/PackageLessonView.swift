@@ -4,6 +4,8 @@ import SwiftUI
 /// watching it to doing it. Everything shown comes from the lesson bundle.
 struct PackageLessonView: View {
     let entry: LessonLibrary.Entry
+    /// The stage the lesson opens on. Learn's practise card opens straight to Practise.
+    var startStage: LessonStage = .watch
 
     @State private var model: PackageLessonModel?
     @State private var loadError: String?
@@ -29,7 +31,7 @@ struct PackageLessonView: View {
                 let lesson = try PackageLessonModel.load(entry.url)
                 model = lesson
                 await lesson.load()
-                lesson.enter(.watch)
+                lesson.enter(startStage)
             } catch {
                 loadError = error.localizedDescription
             }

@@ -12,7 +12,7 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             Tab("Learn", systemImage: "figure.soccer") {
-                LessonLibraryView()
+                LessonLibraryView(appState: appState)
             }
             Tab("Overlay", systemImage: "square.2.layers.3d") {
                 OverlayDifferenceView(library: library)

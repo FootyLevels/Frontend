@@ -480,11 +480,7 @@ struct ProjectsListView: View {
         }
         if let appState {
             ToolbarItem(placement: .topBarLeading) {
-                Button(role: .destructive) {
-                    try? appState.signOut()
-                } label: {
-                    Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
-                }
+                AccountMenu(appState: appState)
             }
         }
     }
