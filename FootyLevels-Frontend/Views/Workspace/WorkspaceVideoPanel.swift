@@ -17,16 +17,16 @@ struct WorkspaceVideoPanel: View {
             PanelTopline(icon: "film", title: "ORIGINAL VIDEO", dark: true) {
                 HStack(spacing: 8) {
                     Text("\(project.video.width) × \(project.video.height)")
-                    Circle().fill(Color(hex: "D5EC95")).frame(width: 5, height: 5)
+                    Circle().fill(SL.lime).frame(width: 5, height: 5)
                 }
                 .font(.system(.caption2))
-                .foregroundStyle(Color(hex: "A0B29E"))
+                .foregroundStyle(SL.videoMuted)
             }
 
             stage
             controls
         }
-        .slPanel(fill: SL.videoPanel, border: Color(hex: "2B3B32"))
+        .slPanel(fill: SL.videoPanel, border: SL.videoBorder)
     }
 
     // MARK: - Stage
@@ -41,10 +41,10 @@ struct WorkspaceVideoPanel: View {
 
             // Soft vignettes at the sides, as on the web stage.
             HStack {
-                LinearGradient(colors: [Color(hex: "10251F").opacity(0.4), .clear], startPoint: .leading, endPoint: .trailing)
+                LinearGradient(colors: [SL.videoStage.opacity(0.4), .clear], startPoint: .leading, endPoint: .trailing)
                     .frame(width: 60)
                 Spacer()
-                LinearGradient(colors: [.clear, Color(hex: "10251F").opacity(0.4)], startPoint: .leading, endPoint: .trailing)
+                LinearGradient(colors: [.clear, SL.videoStage.opacity(0.4)], startPoint: .leading, endPoint: .trailing)
                     .frame(width: 60)
             }
             .allowsHitTesting(false)
@@ -54,11 +54,11 @@ struct WorkspaceVideoPanel: View {
             Text(BundledSample.isSample(project.id) ? "THE OVER FAKE TUTORIAL" : "SKILL BREAKDOWN")
                 .font(.system(.caption2, weight: .medium))
                 .tracking(1)
-                .foregroundStyle(Color(hex: "F4F6DF"))
+                .foregroundStyle(SL.videoText)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
-                .background(Color(hex: "0E261C").opacity(0.8), in: RoundedRectangle(cornerRadius: 3))
-                .overlay(RoundedRectangle(cornerRadius: 3).stroke(Color(hex: "92A979").opacity(0.2)))
+                .background(SL.videoStage.opacity(0.8), in: RoundedRectangle(cornerRadius: 3))
+                .overlay(RoundedRectangle(cornerRadius: 3).stroke(SL.videoMuted.opacity(0.2)))
                 .padding(14)
         }
         .overlay(alignment: .bottom) {
@@ -71,7 +71,7 @@ struct WorkspaceVideoPanel: View {
                         .foregroundStyle(SL.ink)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 9)
-                        .background(Color(hex: "F7F9EF").opacity(0.93), in: RoundedRectangle(cornerRadius: 5))
+                        .background(SL.toolbar.opacity(0.93), in: RoundedRectangle(cornerRadius: 5))
                         .shadow(color: .black.opacity(0.12), radius: 10, y: 3)
                 }
                 .buttonStyle(.plain)
@@ -90,7 +90,7 @@ struct WorkspaceVideoPanel: View {
                 } label: {
                     Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                         .font(.system(.title3))
-                        .foregroundStyle(Color(hex: "EAF5D9"))
+                        .foregroundStyle(SL.videoText)
                         .frame(width: 28, height: 28)
                 }
                 .accessibilityLabel(playback.isPlaying ? "Pause video" : "Play video")
@@ -111,11 +111,11 @@ struct WorkspaceVideoPanel: View {
                         Image(systemName: "chevron.down").font(.system(.caption2, weight: .bold)).imageScale(.small)
                     }
                     .font(.system(.caption2))
-                    .foregroundStyle(Color(hex: "D5E4C9"))
+                    .foregroundStyle(SL.videoText)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color(hex: "193B2B"), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(hex: "526854")))
+                    .background(SL.videoTopline, in: RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(SL.videoBorder))
                 }
 
                 Button {
@@ -136,12 +136,12 @@ struct WorkspaceVideoPanel: View {
                 Toggle(isOn: Binding(get: { playback.loops }, set: { playback.loops = $0 })) {
                     Text("Loop video")
                 }
-                .toggleStyle(CheckToggleStyle(tint: Color(hex: "CDDD9C"), dark: true))
+                .toggleStyle(CheckToggleStyle(tint: SL.lime, dark: true))
                 Spacer()
                 Text("Take your time. Notice the details.")
             }
             .font(.system(.caption2))
-            .foregroundStyle(Color(hex: "95AA92"))
+            .foregroundStyle(SL.videoMuted)
         }
         .padding(.horizontal, 16)
         .padding(.top, 14)
@@ -266,7 +266,7 @@ struct CheckToggleStyle: ToggleStyle {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(configuration.isOn ? tint : .clear)
                     .overlay(RoundedRectangle(cornerRadius: 3)
-                        .stroke(configuration.isOn ? tint : (dark ? Color(hex: "95AA92") : Color(hex: "A9B39F")), lineWidth: 1))
+                        .stroke(configuration.isOn ? tint : (dark ? SL.videoMuted : SL.controlBorder), lineWidth: 1))
                     .overlay {
                         if configuration.isOn {
                             Image(systemName: "checkmark")

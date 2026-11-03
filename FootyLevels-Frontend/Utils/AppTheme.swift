@@ -19,7 +19,7 @@ struct AppTheme {
         static let secondaryLight = SL.muted // Supporting text
 
         // Accent Colors
-        static let accent = SL.lime         // Lime highlights
+        static let accent = SL.data         // Olive (light) or lime (dark) highlights
         static let accentDark = SL.noticeText     // Amber warnings
 
         // Semantic Colors
@@ -34,15 +34,15 @@ struct AppTheme {
         static let advanced = SL.errorText       // Red
 
         // Background Colors
-        static let background = SL.page     // Warm cream background
+        static let background = SL.page     // Page background, light or dark
         static let surface = SL.panel                  // Card/surface background
-        static let surfaceElevated = Color(hex: "FFFFFF") // Elevated surfaces
+        static let surfaceElevated = SL.raised // Elevated surfaces
 
         // Text Colors
         static let textPrimary = SL.ink    // Main text
         static let textSecondary = SL.muted  // Secondary text
         static let textTertiary = SL.muted   // Disabled/placeholder
-        static let textOnPrimary = Color.white           // Text on primary color
+        static let textOnPrimary = SL.onGreen           // Text on primary color
         static let textOnDark = Color.white              // Text on dark backgrounds
 
         // Border & Divider

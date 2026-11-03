@@ -28,7 +28,7 @@ struct CropEditorView: View {
                     Text("Drag a box around the full body, including hands and feet. Leave a small margin and exclude other players.")
                         .font(.system(.footnote))
                         .lineSpacing(3)
-                        .foregroundStyle(Color(hex: "7B886D"))
+                        .foregroundStyle(SL.muted)
 
                     canvas
                         .frame(maxHeight: 440)
@@ -62,7 +62,7 @@ struct CropEditorView: View {
                 }
                 .padding(20)
             }
-            .background(Color(hex: "F8F9F1"))
+            .background(SL.panel)
             .navigationTitle("Choose the player")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -94,7 +94,7 @@ struct CropEditorView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(label)
                         .font(.system(.caption2))
-                        .foregroundStyle(Color(hex: "79876C"))
+                        .foregroundStyle(SL.muted)
                     TextField(label, value: Binding(
                         get: { Int((box[index] * 100).rounded()) },
                         set: { box[index] = Double(Swift.min(Swift.max($0, 0), 100)) / 100 }

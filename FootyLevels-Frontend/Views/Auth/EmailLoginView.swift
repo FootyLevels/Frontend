@@ -19,7 +19,7 @@ struct EmailLoginView: View {
         ScrollView {
             VStack(spacing: 20) {
                 Text("Welcome Back")
-                    .font(SL.display(.largeTitle, .heavy))
+                    .font(SL.display(.largeTitle))
                     .foregroundStyle(SL.ink)
                     .padding(.bottom, 30)
 

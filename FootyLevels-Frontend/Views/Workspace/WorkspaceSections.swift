@@ -22,7 +22,7 @@ struct InsightCard: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline) {
                     Eyebrow(text: mode == .motion ? "WATCH THE RELATIONSHIP" : String(format: "MOMENT %02d", frameNumber),
-                            color: Color(hex: "81916F"))
+                            color: SL.muted)
                     Spacer()
                     if mode == .frames, canSelectPlayer {
                         Button(action: onSelectPlayer) {
@@ -32,19 +32,19 @@ struct InsightCard: View {
                                 Image(systemName: "arrow.up.right")
                             }
                             .font(.system(.caption2))
-                            .foregroundStyle(Color(hex: "657958"))
+                            .foregroundStyle(SL.muted)
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 Text(title)
-                    .font(SL.display(.subheadline, .bold))
+                    .font(SL.display(.subheadline))
                     .tracking(-0.3)
                     .foregroundStyle(SL.ink)
                 Text(message)
                     .font(.system(.caption))
                     .lineSpacing(3)
-                    .foregroundStyle(Color(hex: "7A8370"))
+                    .foregroundStyle(SL.muted)
             }
         }
         .padding(.horizontal, 14)
@@ -85,19 +85,19 @@ struct KeyFramesSection: View {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         Text("The moments that make the move")
-                            .font(SL.display(.callout, .bold))
+                            .font(SL.display(.callout))
                             .tracking(-0.5)
                             .foregroundStyle(SL.ink)
                         Text(String(format: "%02d", project.frames.count))
                             .font(.system(.caption2, weight: .medium))
-                            .foregroundStyle(Color(hex: "768968"))
+                            .foregroundStyle(SL.muted)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(Color(hex: "EAF0DF"), in: RoundedRectangle(cornerRadius: 4))
+                            .background(SL.iconTile, in: RoundedRectangle(cornerRadius: 4))
                     }
                     Text("Choose a frame to inspect. Add your own moments as you watch.")
                         .font(.system(.caption2))
-                        .foregroundStyle(Color(hex: "8B9480"))
+                        .foregroundStyle(SL.muted)
                 }
                 Spacer()
                 HStack(spacing: 6) {
@@ -168,7 +168,7 @@ private struct FrameCard: View {
                 }
                 .frame(width: 120, height: 150)
                 .overlay(alignment: .bottom) {
-                    LinearGradient(colors: [.clear, Color(hex: "182B28").opacity(0.3)], startPoint: .top, endPoint: .bottom)
+                    LinearGradient(colors: [.clear, SL.videoStage.opacity(0.3)], startPoint: .top, endPoint: .bottom)
                         .frame(height: 35)
                 }
                 .overlay(alignment: .topLeading) {
@@ -176,7 +176,7 @@ private struct FrameCard: View {
                         .font(.system(.caption2))
                         .foregroundStyle(.white)
                         .frame(width: 22, height: 22)
-                        .background(Color(hex: "152B24").opacity(0.56), in: Circle())
+                        .background(SL.videoStage.opacity(0.56), in: Circle())
                         .padding(7)
                 }
                 .overlay(alignment: .topTrailing) {
@@ -207,7 +207,7 @@ private struct FrameCard: View {
                         Text(SL.frameStatusText(frame.status))
                     }
                     .font(.system(.caption2))
-                    .foregroundStyle(Color(hex: "869179"))
+                    .foregroundStyle(SL.muted)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
@@ -243,18 +243,18 @@ struct PipelineBar: View {
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: "cube")
                     .font(.system(.title3))
-                    .foregroundStyle(Color(hex: "67844B"))
+                    .foregroundStyle(SL.muted)
                     .frame(width: 40, height: 40)
                     .background(SL.pipelineIcon, in: RoundedRectangle(cornerRadius: 7))
-                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "D1DFB9")))
+                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(SL.presetActiveBorder))
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(SL.display(.subheadline, .semibold))
+                        .font(SL.display(.subheadline))
                         .tracking(-0.4)
                         .foregroundStyle(SL.ink)
                     Text(subtitle)
                         .font(.system(.caption))
-                        .foregroundStyle(Color(hex: "889477"))
+                        .foregroundStyle(SL.muted)
                 }
             }
 
@@ -320,7 +320,7 @@ struct WorkspaceFootnote: View {
             }
             .font(.system(.caption2))
             .lineSpacing(3)
-            .foregroundStyle(Color(hex: "969D8D"))
+            .foregroundStyle(SL.muted)
 
             if canRemove {
                 HStack {

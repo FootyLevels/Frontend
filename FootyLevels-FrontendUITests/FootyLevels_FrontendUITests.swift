@@ -3,6 +3,8 @@ import XCTest
 final class FootyLevels_FrontendUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
+        // A simulator left in landscape hides rows these portrait checks tap.
+        XCUIDevice.shared.orientation = .portrait
     }
 
     @MainActor
@@ -56,6 +58,7 @@ final class FootyLevels_FrontendUITests: XCTestCase {
         XCTAssertTrue(spin.waitForExistence(timeout: 20))
         XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: spin)], timeout: 30) == .completed,
                       "The lesson's 3D motion must load from the bundle")
+        attachScreenshot(of: app, named: "Light-Lesson")
         spin.tap()
         XCTAssertTrue(app.staticTexts["Watch the Antony spin"].waitForExistence(timeout: 5))
         app.buttons["Stage 2: Break it down"].tap()
@@ -135,6 +138,49 @@ final class FootyLevels_FrontendUITests: XCTestCase {
         }
         stage.tap()
         XCTAssertTrue(stage.isSelected)
+    }
+
+    /// The app follows the phone's appearance: in dark mode Learn, every tab and the
+    /// sign-in page still show their content.
+    @MainActor
+    func testDarkModeShowsLearnTabsAndSignIn() {
+        XCUIDevice.shared.appearance = .dark
+        defer { XCUIDevice.shared.appearance = .light }
+
+        let app = XCUIApplication()
+        app.launchArguments = []
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Lessons"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "Start Chop and Spin")).firstMatch.exists)
+        for tab in ["Learn", "Overlay", "Community", "Videos"] {
+            app.tabBars.buttons[tab].tap()
+            XCTAssertTrue(app.tabBars.buttons[tab].isSelected)
+            attachScreenshot(of: app, named: "Dark-\(tab)")
+        }
+
+        app.tabBars.buttons["Learn"].tap()
+        app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "Start Chop and Spin")).firstMatch.tap()
+        let stage = app.buttons["Stage 2: Break it down"]
+        XCTAssertTrue(stage.waitForExistence(timeout: 20))
+        XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "isEnabled == true"), object: stage)], timeout: 30) == .completed,
+                      "The lesson's 3D motion must load from the bundle")
+        attachScreenshot(of: app, named: "Dark-Lesson")
+
+        app.terminate()
+        app.launchArguments = ["--require-login"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Welcome to FootyLevels"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["Sign Up with Email"].exists)
+        XCTAssertTrue(app.buttons["Log In with Email"].exists)
+        attachScreenshot(of: app, named: "Dark-SignIn")
+    }
+
+    @MainActor
+    private func attachScreenshot(of app: XCUIApplication, named name: String) {
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = name
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
     }
 
     /// The accessibility XXXL content size, the largest a person can choose.

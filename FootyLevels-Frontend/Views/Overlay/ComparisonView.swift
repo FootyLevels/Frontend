@@ -131,7 +131,7 @@ private struct ComparisonLayoutSwitch: View {
                 } label: {
                     Text(layout.rawValue)
                         .font(.system(.footnote, weight: selected ? .semibold : .regular))
-                        .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.modeText)
+                        .foregroundStyle(selected ? SL.onGreen : SL.modeText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 5))
@@ -178,7 +178,7 @@ private struct SideStage: View {
             .font(.system(.caption2))
             .foregroundStyle(SL.ink)
             .padding(7)
-            .background(Color(hex: "F6F8EF").opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
+            .background(SL.toolbar.opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
             .padding(8)
             .allowsHitTesting(false)
         }
@@ -204,7 +204,7 @@ private struct OverlayTransport: View {
                 } label: {
                     Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                         .font(.system(.title3))
-                        .foregroundStyle(Color(hex: "EAF5D9"))
+                        .foregroundStyle(SL.videoText)
                         .scaledFrame(width: 28, relativeTo: .title3)
                         .minimumTapArea()
                 }
@@ -228,11 +228,11 @@ private struct OverlayTransport: View {
                         Image(systemName: "chevron.down").font(.system(.caption2, weight: .bold)).imageScale(.small)
                     }
                     .font(.system(.caption2))
-                    .foregroundStyle(Color(hex: "D5E4C9"))
+                    .foregroundStyle(SL.videoText)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color(hex: "193B2B"), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(hex: "526854")))
+                    .background(SL.videoTopline, in: RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(SL.videoBorder))
                 }
             }
 
@@ -252,7 +252,7 @@ private struct OverlayTransport: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .slPanel(fill: SL.videoPanel, border: Color(hex: "2B3B32"))
+        .slPanel(fill: SL.videoPanel, border: SL.videoBorder)
     }
 }
 
@@ -292,7 +292,7 @@ private struct OverlayStageOverlays: View {
             .font(.system(.caption2))
             .foregroundStyle(SL.ink)
             .padding(9)
-            .background(Color(hex: "F6F8EF").opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
+            .background(SL.toolbar.opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
             .overlay(RoundedRectangle(cornerRadius: 5).stroke(SL.modeBorder))
             .padding(12)
             .allowsHitTesting(false)
@@ -302,7 +302,7 @@ private struct OverlayStageOverlays: View {
                 Text(String(format: "A FRAME %03d", model.currentFrame))
                     .font(.system(.caption2, weight: .medium).monospacedDigit())
                     .tracking(1)
-                    .foregroundStyle(Color(hex: "839574"))
+                    .foregroundStyle(SL.muted)
                     .padding(14)
                     .allowsHitTesting(false)
             }
@@ -368,9 +368,9 @@ private struct ComparisonControls: View {
             }
             .toggleStyle(CheckToggleStyle())
             .font(.system(.caption))
-            .foregroundStyle(Color(hex: "6F7B66"))
+            .foregroundStyle(SL.muted)
         }
-        .tint(SL.green)
+        .tint(SL.tint)
         .disabled(model.state != .ready)
         .padding(16)
         .slPanel()
@@ -407,7 +407,7 @@ private struct ComparisonControls: View {
             Image(systemName: icon)
                 .font(.system(.caption, weight: .semibold))
                 .scaledFrame(width: 32, relativeTo: .caption)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "BFC9B9")))
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(SL.controlBorder))
                 .minimumTapArea()
         }
         .buttonStyle(.plain)

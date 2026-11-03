@@ -151,11 +151,11 @@ struct ProjectDetailView: View {
             if viewModel.isSubmitting {
                 Label("Working on your video…", systemImage: "hourglass")
                     .font(.system(.footnote))
-                    .foregroundStyle(Color(hex: "EEF5E2"))
+                    .foregroundStyle(SL.onGreen)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 13)
-                    .background(Color(hex: "183D2C"), in: RoundedRectangle(cornerRadius: 7))
-                    .shadow(color: Color(hex: "183D2C").opacity(0.27), radius: 12, y: 4)
+                    .background(SL.green, in: RoundedRectangle(cornerRadius: 7))
+                    .shadow(color: SL.green.opacity(0.27), radius: 12, y: 4)
                     .padding(.bottom, 24)
             }
         }
@@ -167,11 +167,11 @@ struct ProjectDetailView: View {
                 .font(.system(.caption, weight: .semibold))
                 .foregroundStyle(SL.ink)
                 .scaledFrame(width: 38, relativeTo: .caption)
-                .background(Color(hex: "EAF0DF"), in: Circle())
-                .overlay(Circle().stroke(Color(hex: "DCE5CD")))
+                .background(SL.iconTile, in: Circle())
+                .overlay(Circle().stroke(SL.cardBorder))
             VStack(alignment: .leading, spacing: 4) {
                 Text(project.title)
-                    .font(SL.display(.title3, .heavy))
+                    .font(SL.display(.title3))
                     .tracking(-0.5)
                     .foregroundStyle(SL.ink)
                     .lineLimit(1)
@@ -179,13 +179,13 @@ struct ProjectDetailView: View {
                             project.video.duration, project.video.fps, project.frames.count))
                     .font(.system(.caption2, weight: .medium))
                     .tracking(1.1)
-                    .foregroundStyle(Color(hex: "7C8578"))
+                    .foregroundStyle(SL.muted)
             }
             Spacer()
             Label(viewModel.isSample ? "Included example" : "Saved on server",
                   systemImage: viewModel.isSample ? "shippingbox" : "checkmark.circle")
                 .font(.system(.caption2))
-                .foregroundStyle(Color(hex: "809073"))
+                .foregroundStyle(SL.muted)
                 .labelStyle(.iconOnly)
                 .accessibilityLabel(viewModel.isSample ? "Included example" : "Saved on server")
         }
@@ -220,12 +220,12 @@ struct ProjectDetailView: View {
                     } label: {
                         Text(mode.rawValue)
                             .font(.system(.footnote, weight: viewModel.mode == mode ? .semibold : .regular))
-                            .foregroundStyle(viewModel.mode == mode ? Color(hex: "F1F6E9") : SL.modeText)
+                            .foregroundStyle(viewModel.mode == mode ? SL.onGreen : SL.modeText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(viewModel.mode == mode ? SL.greenActive : .clear,
                                         in: RoundedRectangle(cornerRadius: 5))
-                            .shadow(color: viewModel.mode == mode ? Color(hex: "173A22").opacity(0.12) : .clear,
+                            .shadow(color: viewModel.mode == mode ? SL.green.opacity(0.12) : .clear,
                                     radius: 3, y: 2)
                     }
                     .buttonStyle(.plain)
@@ -238,7 +238,7 @@ struct ProjectDetailView: View {
             Text(viewModel.mode == .motion ? "Player + football · synchronized playback"
                                            : "Freeze a moment. Explore every angle.")
                 .font(.system(.caption2))
-                .foregroundStyle(Color(hex: "819174"))
+                .foregroundStyle(SL.muted)
         }
     }
 

@@ -105,7 +105,7 @@ struct BreakdownSection: View {
                     NumberBadge(text: number.map(String.init) ?? "–", filled: live, color: stepColor)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(content.name.uppercased())
-                            .font(SL.display(.body, .heavy))
+                            .font(SL.display(.body))
                             .foregroundStyle(number == nil ? SL.muted : SL.ink)
                         Text(String(format: "%.2f–%.2f s", phase.start, phase.end))
                             .font(.system(.caption2).monospacedDigit())
@@ -125,7 +125,7 @@ struct BreakdownSection: View {
             if isOpen {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(content.cue.uppercased())
-                        .font(SL.display(.body, .bold))
+                        .font(SL.display(.body))
                         .foregroundStyle(stepColor)
                     fact("In the 3D", content.shows(model.lesson))
                     fact("In the video", content.watch)
@@ -196,14 +196,14 @@ struct PractiseSection: View {
         let done = progress.isComplete(targetReps: drill.reps, checkCount: drill.checks.count)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 10) {
-                NumberBadge(text: done ? "✓" : "\(number)", filled: done, color: Color(hex: "3F7D4C"))
+                NumberBadge(text: done ? "✓" : "\(number)", filled: done, color: SL.good)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(drill.level.uppercased())
                         .font(.system(.caption2, weight: .semibold))
                         .tracking(0.8)
                         .foregroundStyle(SL.muted)
                     Text(drill.title)
-                        .font(SL.display(.title3, .heavy))
+                        .font(SL.display(.title3))
                         .foregroundStyle(SL.ink)
                 }
                 Spacer(minLength: 0)
@@ -237,8 +237,8 @@ struct PractiseSection: View {
                 HStack(spacing: 3) {
                     ForEach(0..<drill.reps, id: \.self) { rep in
                         Circle()
-                            .fill(rep < progress.reps ? Color(hex: "3F7D4C") : .clear)
-                            .overlay(Circle().stroke(rep < progress.reps ? Color(hex: "3F7D4C") : SL.muted, lineWidth: 1.2))
+                            .fill(rep < progress.reps ? SL.good : .clear)
+                            .overlay(Circle().stroke(rep < progress.reps ? SL.good : SL.muted, lineWidth: 1.2))
                             .frame(width: 8, height: 8)
                     }
                 }
@@ -250,7 +250,7 @@ struct PractiseSection: View {
             }
         }
         .padding(14)
-        .slPanel(fill: SL.card, border: done ? Color(hex: "3F7D4C") : SL.cardBorder, radius: 10)
+        .slPanel(fill: SL.card, border: done ? SL.good : SL.cardBorder, radius: 10)
     }
 }
 
@@ -342,9 +342,9 @@ struct TestSection: View {
                 .foregroundStyle(SL.ink)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(reveal && isRight ? Color(hex: "3F7D4C").opacity(0.12) : (chosen ? Color(hex: "975936").opacity(0.1) : .clear),
+                .background(reveal && isRight ? SL.good.opacity(0.12) : (chosen ? SL.miss.opacity(0.1) : .clear),
                             in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(reveal && isRight ? Color(hex: "3F7D4C") : (chosen ? Color(hex: "975936") : SL.cardBorder)))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(reveal && isRight ? SL.good : (chosen ? SL.miss : SL.cardBorder)))
         }
         .buttonStyle(.plain)
         .disabled(reveal)
@@ -356,7 +356,7 @@ struct TestSection: View {
             .foregroundStyle(SL.ink)
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(good ? Color(hex: "3F7D4C").opacity(0.12) : SL.noticeFill, in: RoundedRectangle(cornerRadius: 8))
+            .background(good ? SL.good.opacity(0.12) : SL.noticeFill, in: RoundedRectangle(cornerRadius: 8))
     }
 
     // 1
@@ -446,10 +446,10 @@ struct TestSection: View {
                     let right = index < correct.count && correct[index] == id
                     Text("\(index + 1). \(OverFakeLessonContent.phase(id).name)")
                         .font(.system(.caption, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(right ? SL.onGreen : .white)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
-                        .background(right ? SL.green : Color(hex: "B23B3B"), in: Capsule())
+                        .background(right ? SL.green : SL.wrong, in: Capsule())
                 }
             }
             .frame(minHeight: 30, alignment: .topLeading)
@@ -483,12 +483,12 @@ struct TestSection: View {
                            text: got == results.count ? "You know the shape of the move. Take it to the pitch with drills 4 and 5."
                                                       : "Revisit the moments you missed in Break it down, then try again.")
             Text("\(got) / \(results.count)")
-                .font(SL.display(.largeTitle, .heavy))
+                .font(SL.display(.largeTitle))
                 .foregroundStyle(SL.ink)
             ForEach(Array(results.enumerated()), id: \.offset) { _, result in
                 Label(result.name, systemImage: result.correct ? "checkmark.circle.fill" : "xmark.circle")
                     .font(.system(.footnote))
-                    .foregroundStyle(result.correct ? Color(hex: "3F7D4C") : Color(hex: "975936"))
+                    .foregroundStyle(result.correct ? SL.good : SL.miss)
             }
             HStack(spacing: 8) {
                 Button("Try again") { results = []; step = .whichFoot }.buttonStyle(.slSecondary)

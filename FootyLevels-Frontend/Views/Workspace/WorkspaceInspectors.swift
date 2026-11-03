@@ -67,14 +67,14 @@ struct MotionInspectorPanel: View {
         VStack(spacing: 10) {
             Image(systemName: "waveform.path.ecg")
                 .font(.system(.largeTitle, weight: .light))
-                .foregroundStyle(Color(hex: "83936A"))
+                .foregroundStyle(SL.muted)
             Text("See the move in motion.")
-                .font(SL.display(.title2, .semibold))
+                .font(SL.display(.title2))
                 .tracking(-0.8)
                 .foregroundStyle(SL.ink)
             Text(emptyMessage)
                 .font(.system(.footnote))
-                .foregroundStyle(Color(hex: "748069"))
+                .foregroundStyle(SL.muted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 290)
             Button(action: onGenerate) {
@@ -94,7 +94,7 @@ struct MotionInspectorPanel: View {
             if !canGenerate, motion?.isActive != true, let blocker {
                 Text(blocker)
                     .font(.system(.caption2))
-                    .foregroundStyle(Color(hex: "88947F"))
+                    .foregroundStyle(SL.muted)
                     .multilineTextAlignment(.center)
             }
         }
@@ -131,10 +131,10 @@ private struct MotionStageOverlays: View {
                 if let contact = model.contactLabel, model.state == .ready {
                     Text(contact)
                         .font(.system(.caption2))
-                        .foregroundStyle(Color(hex: "5B7250"))
+                        .foregroundStyle(SL.muted)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 6)
-                        .background(Color(hex: "F6F8EF").opacity(0.92), in: RoundedRectangle(cornerRadius: 4))
+                        .background(SL.toolbar.opacity(0.92), in: RoundedRectangle(cornerRadius: 4))
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(SL.modeBorder))
                 }
                 if model.missingPose {
@@ -204,7 +204,7 @@ struct PoseInspectorPanel: View {
                         Text("→ X")
                     }
                     .font(.system(.caption2))
-                    .foregroundStyle(Color(hex: "8A9C7B"))
+                    .foregroundStyle(SL.muted)
                     .padding(16)
                     .allowsHitTesting(false)
                 }
@@ -235,24 +235,24 @@ struct PoseInspectorPanel: View {
         VStack(spacing: 10) {
             ZStack {
                 Ellipse()
-                    .stroke(Color(hex: "BDCAAA"))
+                    .stroke(SL.panelBorder)
                     .frame(width: 83, height: 29)
                     .rotationEffect(.degrees(-30))
                 Image(systemName: "cube")
                     .font(.system(.largeTitle, weight: .ultraLight))
-                    .foregroundStyle(Color(hex: "83936A"))
+                    .foregroundStyle(SL.muted)
             }
             .frame(height: 64)
-            Eyebrow(text: "A NEW PERSPECTIVE", color: Color(hex: "829173"))
+            Eyebrow(text: "A NEW PERSPECTIVE", color: SL.muted)
             Text(pending ? "Building this pose…" : "Turn a moment into 3D.")
-                .font(SL.display(.title2, .semibold))
+                .font(SL.display(.title2))
                 .tracking(-0.8)
                 .foregroundStyle(SL.ink)
             Text(pending
                  ? "SAM 3D Body is reconstructing the selected person. This view will update when the mesh is ready."
                  : frame.error ?? "Reconstruct this key frame to explore the player’s body position from every angle.")
                 .font(.system(.footnote))
-                .foregroundStyle(Color(hex: "748069"))
+                .foregroundStyle(SL.muted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 290)
             if pending {
@@ -267,7 +267,7 @@ struct PoseInspectorPanel: View {
                 if !canGenerate, let blocker {
                     Text(blocker)
                         .font(.system(.caption2))
-                        .foregroundStyle(Color(hex: "88947F"))
+                        .foregroundStyle(SL.muted)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -286,13 +286,13 @@ private struct StageFrameLabel: View {
     var body: some View {
         HStack(spacing: 10) {
             Text(String(format: "%03d", frame))
-                .font(SL.display(.title3, .medium).monospacedDigit())
+                .font(SL.display(.title3).monospacedDigit())
                 .tracking(-0.5)
-                .foregroundStyle(Color(hex: "839574"))
+                .foregroundStyle(SL.muted)
             Text("FRAME /\n\(String(format: "%.2f", seconds))s")
                 .font(.system(.caption2, weight: .medium))
                 .tracking(1)
-                .foregroundStyle(Color(hex: "8D9A82"))
+                .foregroundStyle(SL.muted)
         }
         .padding(.leading, 18)
         .padding(.bottom, 14)
@@ -332,7 +332,7 @@ private struct DotGrid: View {
                 var x: CGFloat = spacing / 2
                 while x < size.width {
                     context.fill(Path(ellipseIn: CGRect(x: x - 0.8, y: y - 0.8, width: 1.6, height: 1.6)),
-                                 with: .color(Color(hex: "ACBBA5").opacity(0.25)))
+                                 with: .color(SL.mark.opacity(0.25)))
                     x += spacing
                 }
                 y += spacing
@@ -383,7 +383,7 @@ struct PresetToolbar: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
         .background(SL.toolbar)
-        .overlay(alignment: .top) { Rectangle().fill(Color(hex: "DCE3D3")).frame(height: 1) }
+        .overlay(alignment: .top) { Rectangle().fill(SL.cardBorder).frame(height: 1) }
     }
 }
 
@@ -402,9 +402,9 @@ private struct OptionsRow<Toggles: View>: View {
                 .toggleStyle(CheckToggleStyle())
         }
         .font(.system(.caption2))
-        .foregroundStyle(Color(hex: "8A9481"))
+        .foregroundStyle(SL.muted)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .overlay(alignment: .top) { Rectangle().fill(Color(hex: "E0E7D6")).frame(height: 1) }
+        .overlay(alignment: .top) { Rectangle().fill(SL.line).frame(height: 1) }
     }
 }

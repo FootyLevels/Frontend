@@ -30,7 +30,7 @@ struct EmailSignUpView: View {
         ScrollView {
             VStack(spacing: 20) {
                 Text("Create Your Account")
-                    .font(SL.display(.largeTitle, .heavy))
+                    .font(SL.display(.largeTitle))
                     .foregroundStyle(SL.ink)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 20)

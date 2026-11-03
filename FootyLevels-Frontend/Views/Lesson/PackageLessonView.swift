@@ -81,14 +81,13 @@ private struct PackageLessonScreen: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(text: "LEARN A SKILL", rule: true)
             title
-                .font(SL.display(.largeTitle, .heavy))
-                .tracking(-1.2)
+                .font(.system(.largeTitle))
+                .tracking(-0.6)
                 .foregroundStyle(SL.ink)
             Text(document.subtitle)
                 .font(.system(.subheadline))
-                .foregroundStyle(Color(hex: "77816F"))
+                .foregroundStyle(SL.muted)
         }
         .padding(.top, 8)
     }
@@ -121,16 +120,16 @@ private struct SkillPicker: View {
                             Text(skill.tab.uppercased())
                                 .font(.system(.caption2, weight: .medium))
                                 .tracking(0.6)
-                                .foregroundStyle(selected ? Color(hex: "D6E2D0") : SL.muted)
+                                .foregroundStyle(selected ? SL.onGreen : SL.muted)
                             Text(skill.short)
                                 .font(.system(.footnote, weight: .semibold))
-                                .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.ink)
+                                .foregroundStyle(selected ? SL.onGreen : SL.ink)
                         }
                         .lineLimit(1)
-                        .padding(.horizontal, 10)
+                        .padding(.horizontal, 14)
                         .padding(.vertical, 6)
-                        .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 7))
-                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(selected ? SL.greenActive : SL.cardBorder))
+                        .background(selected ? SL.green : SL.raised, in: Capsule())
+                        .overlay(Capsule().stroke(selected ? SL.green : SL.cardBorder))
                         .minimumTapArea()
                     }
                     .buttonStyle(.plain)

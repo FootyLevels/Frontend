@@ -69,10 +69,10 @@ struct StagePicker<Model: LessonPlayer>: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
-                    .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.modeText)
+                    .foregroundStyle(selected ? SL.onGreen : SL.modeText)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 7)
-                    .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 5))
+                    .background(selected ? SL.green : .clear, in: Capsule())
                     .minimumTapArea()
                 }
                 .buttonStyle(.plain)
@@ -81,7 +81,7 @@ struct StagePicker<Model: LessonPlayer>: View {
             }
         }
         .padding(4)
-        .slPanel(fill: SL.modeTrack, border: SL.modeBorder, radius: 8)
+        .background(SL.modeTrack, in: Capsule())
         .disabled(!model.isReady)
     }
 }
@@ -114,8 +114,8 @@ struct LessonStageView<Model: LessonPlayer>: View {
 
             PresetToolbar(selection: model.angle, enabled: model.isReady) { model.show($0) }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "2B3B32")))
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(SL.videoBorder))
     }
 
     private var videoTile: some View {
@@ -127,17 +127,17 @@ struct LessonStageView<Model: LessonPlayer>: View {
                 .accessibilityAddTraits(.isButton)
                 .accessibilityLabel("Original video. Tap to play or pause.")
         }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(alignment: .topLeading) {
             if !shotLabel.isEmpty {
                 Text(shotLabel.uppercased())
                     .font(.system(.caption2, weight: .medium))
                     .tracking(0.8)
-                    .foregroundStyle(Color(hex: "F4F6DF"))
+                    .foregroundStyle(SL.videoText)
                     .lineLimit(1)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 4)
-                    .background(Color(hex: "0E261C").opacity(0.85), in: RoundedRectangle(cornerRadius: 3))
+                    .background(SL.videoStage.opacity(0.85), in: RoundedRectangle(cornerRadius: 3))
                     .padding(6)
                     .allowsHitTesting(false)
             }
@@ -160,16 +160,16 @@ struct LessonStageView<Model: LessonPlayer>: View {
                 StageMessage(message: message.text, isLoading: message.isLoading)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(alignment: .topLeading) {
             if model.mirror {
                 Text("MIRRORED")
                     .font(.system(.caption2, weight: .semibold))
                     .tracking(0.8)
-                    .foregroundStyle(SL.ink)
-                    .padding(.horizontal, 6)
+                    .foregroundStyle(Color.black)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(SL.lime, in: RoundedRectangle(cornerRadius: 3))
+                    .background(SL.lime, in: Capsule())
                     .padding(6)
             }
         }
@@ -185,16 +185,16 @@ private struct PhaseCue: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(name.uppercased())
-                .font(SL.display(.subheadline, .heavy))
-                .foregroundStyle(Color(hex: "F4F7F2"))
+                .font(SL.display(.subheadline))
+                .foregroundStyle(SL.videoText)
             Text(text)
                 .font(.system(.caption2))
-                .foregroundStyle(Color(hex: "D6E2D0"))
+                .foregroundStyle(SL.videoText)
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(Color(hex: "0E1F17").opacity(0.85), in: RoundedRectangle(cornerRadius: 6))
+        .background(SL.videoStage.opacity(0.85), in: RoundedRectangle(cornerRadius: 6))
         .accessibilityElement(children: .combine)
     }
 }
@@ -220,7 +220,7 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
                     Text("\(model.playback.speed.formatted())×")
                         .font(.system(.caption, weight: .semibold).monospacedDigit())
                         .frame(minWidth: 34, minHeight: 32)
-                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
+                        .overlay(Capsule().stroke(SL.controlBorder))
                         .minimumTapArea()
                 }
                 .accessibilityLabel("Playback speed")
@@ -249,7 +249,7 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
             .scrollIndicators(.hidden)
         }
         .padding(12)
-        .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 10)
+        .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 22)
         .disabled(!model.isReady)
     }
 
@@ -258,7 +258,7 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
             Image(systemName: symbol)
                 .font(.system(.caption, weight: .semibold))
                 .scaledFrame(width: 32, relativeTo: .caption)
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
+                .overlay(Capsule().stroke(SL.controlBorder))
                 .minimumTapArea()
         }
         .buttonStyle(.plain)
@@ -271,9 +271,9 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
                 .font(.system(.caption, weight: .semibold))
                 .padding(.horizontal, 9)
                 .frame(minHeight: 32)
-                .foregroundStyle(on ? Color(hex: "F1F6E9") : SL.ink)
-                .background(on ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 7))
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(on ? SL.greenActive : Color(hex: "BFC9B9")))
+                .foregroundStyle(on ? SL.onGreen : SL.ink)
+                .background(on ? SL.green : .clear, in: Capsule())
+                .overlay(Capsule().stroke(on ? SL.green : SL.controlBorder))
                 .minimumTapArea()
         }
         .buttonStyle(.plain)
@@ -290,9 +290,9 @@ struct PlayButton: View {
         Button(action: action) {
             Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                 .font(.system(.footnote, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(SL.onGreen)
                 .scaledFrame(width: 40, height: 32, relativeTo: .footnote)
-                .background(SL.green, in: RoundedRectangle(cornerRadius: 7))
+                .background(SL.green, in: Capsule())
                 .minimumTapArea()
         }
         .buttonStyle(.plain)
@@ -350,12 +350,12 @@ struct SectionHeading: View {
         VStack(alignment: .leading, spacing: 6) {
             Eyebrow(text: eyebrow, color: SL.muted)
             Text(title)
-                .font(SL.display(.title2, .heavy))
+                .font(SL.display(.title2))
                 .tracking(-0.6)
                 .foregroundStyle(SL.ink)
             Text(text)
                 .font(.system(.subheadline))
-                .foregroundStyle(Color(hex: "5E6B58"))
+                .foregroundStyle(SL.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -379,9 +379,9 @@ struct NumberBadge: View {
 extension LessonConfidence {
     var color: Color {
         switch self {
-        case .high: return Color(hex: "3F7D4C")
-        case .medium: return Color(hex: "96713E")
-        case .low: return Color(hex: "975936")
+        case .high: return SL.good
+        case .medium: return SL.fair
+        case .low: return SL.miss
         }
     }
 }

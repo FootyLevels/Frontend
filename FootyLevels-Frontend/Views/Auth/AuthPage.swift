@@ -20,70 +20,95 @@ struct AuthPage: View {
     @State private var authVM = UserLoginViewModel()
     @Binding var appState:AppStateViewModel
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         NavigationStack {
-            // Scrolls so the largest text sizes never push the buttons off screen.
-            ScrollView {
-                VStack(spacing: 20) {
-                    Text("Welcome to FootyLevels")
-                        .font(SL.display(.largeTitle, .heavy))
-                        .foregroundStyle(SL.ink)
-                        .multilineTextAlignment(.center)
-
-                    Text("Choose how you want to sign in or create an account.")
-                        .font(.subheadline)
-                        .foregroundStyle(SL.muted)
-                        .multilineTextAlignment(.center)
-                        .padding(.bottom, 40)
-
-                    // --- 1. Google Login Button ---
-                    // Uses the dedicated GIDSignInButton
-                    GoogleSignInButton(action: signInWithGoogle)
-                        .frame(minHeight: 50) // Standard button height; taller when the text is larger
-
-                    if let message = authVM.errorMessage {
-                        Text(message)
-                            .font(.callout)
-                            .foregroundStyle(SL.errorText)
-                            .accessibilityIdentifier("signInError")
+            GeometryReader { proxy in
+                // Scrolls so the largest text sizes never push the buttons off screen.
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        BrandMark(size: 20, onImage: true)
+                            .padding(.horizontal, 18)
+                            .padding(.top, 10)
+                        Spacer(minLength: 160)
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Welcome to FootyLevels")
+                                .font(.system(.largeTitle))
+                                .tracking(-0.6)
+                                .foregroundStyle(.white)
+                                .accessibilityAddTraits(.isHeader)
+                            Text("Choose how you want to sign in or create an account.")
+                                .font(.system(.subheadline))
+                                .foregroundStyle(.white.opacity(0.92))
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.bottom, 24)
+                        choices
                     }
-
-                    // --- Divider ---
-                    HStack {
-                        VStack { Divider() }
-                        Text("OR")
-                            .font(.caption)
-                            .foregroundStyle(SL.muted)
-                        VStack { Divider() }
-                    }
-                    .padding(.horizontal)
-
-                    // --- 2. Email Sign Up Button ---
-                    NavigationLink(value: AuthRoute.signUp) {
-                        Label("Sign Up with Email", systemImage: "person.badge.plus.fill")
-                    }
-                    .buttonStyle(.slPrimaryWide)
-
-                    // --- 3. Regular Email Login Button ---
-                    NavigationLink(value: AuthRoute.logIn) {
-                        Label("Log In with Email", systemImage: "envelope.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.slSecondary)
+                    .frame(minHeight: proxy.size.height)
                 }
-                .padding(.horizontal, 30)
-                .padding(.vertical, 64)
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .scrollBounceBehavior(.basedOnSize)
-            .background(SL.page.ignoresSafeArea())
-            .toolbar(.hidden, for: .navigationBar) // Hide the default navigation bar for a clean look
+            .background {
+                ZStack {
+                    Image("LearnHero")
+                        .resizable()
+                        .scaledToFill()
+                    LinearGradient(colors: [.black.opacity(colorScheme == .dark ? 0.45 : 0), .clear],
+                                   startPoint: .top, endPoint: .center)
+                    LinearGradient(colors: [.clear, .black.opacity(0.6)], startPoint: .center, endPoint: .bottom)
+                }
+                .ignoresSafeArea()
+                .accessibilityHidden(true)
+            }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: AuthRoute.self) { route in
                 switch route {
                 case .signUp: EmailSignUpView(appState: $appState)
                 case .logIn: EmailLoginView(appState: $appState)
                 }
             }
+        }
+    }
+
+    /// The bottom sheet: the three ways in.
+    private var choices: some View {
+        VStack(spacing: 10) {
+            NavigationLink(value: AuthRoute.signUp) {
+                Label("Sign Up with Email", systemImage: "envelope.fill")
+            }
+            .buttonStyle(.slPrimaryWide)
+
+            // Google's own button: its white style in both appearances, since its dark style is blue.
+            GoogleSignInButton(scheme: .light, style: .wide, action: signInWithGoogle)
+                .frame(minHeight: 50) // Standard button height; taller when the text is larger
+
+            if let message = authVM.errorMessage {
+                Text(message)
+                    .font(.callout)
+                    .foregroundStyle(SL.errorText)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("signInError")
+            }
+
+            NavigationLink(value: AuthRoute.logIn) {
+                Text("Log In with Email")
+                    .font(.system(.callout, weight: .semibold))
+                    .foregroundStyle(SL.ink)
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 22)
+        .padding(.bottom, 12)
+        .frame(maxWidth: .infinity)
+        .background {
+            UnevenRoundedRectangle(topLeadingRadius: 32, topTrailingRadius: 32)
+                .fill(SL.page)
+                .ignoresSafeArea(edges: .bottom)
         }
     }
 

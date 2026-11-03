@@ -168,7 +168,7 @@ struct ProjectsListView: View {
                 }
             }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
     }
 
     private func watchPreparingProjects() async {
@@ -320,11 +320,11 @@ struct ProjectsListView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 8) {
                 Eyebrow(text: "THE SKILL BREAKDOWN", rule: true)
-                Text("/").font(.system(.caption2)).foregroundStyle(Color(hex: "B6BEB0"))
+                Text("/").font(.system(.caption2)).foregroundStyle(SL.muted)
                 Eyebrow(text: "FOOTBALL")
             }
             Text("See the move.\n\(Text("Understand the motion.").foregroundStyle(SL.headlineSoft))")
-                .font(SL.display(.largeTitle, .semibold))
+                .font(SL.display(.largeTitle))
                 .tracking(-1.6)
                 .lineSpacing(2)
                 .foregroundStyle(SL.ink)
@@ -348,8 +348,8 @@ struct ProjectsListView: View {
             Image(systemName: "film")
                 .font(.system(.largeTitle, weight: .light))
             Text("Every skill starts with a moment.")
-                .font(SL.display(.title3, .bold))
-                .foregroundStyle(Color(hex: "35502D"))
+                .font(SL.display(.title3))
+                .foregroundStyle(SL.presetActiveText)
             Text("Import a short skill video — up to 60 seconds — to select frames and build your breakdown.")
                 .font(.system(.footnote))
                 .foregroundStyle(SL.muted)
@@ -367,7 +367,7 @@ struct ProjectsListView: View {
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity)
         .overlay(RoundedRectangle(cornerRadius: 12)
-            .stroke(Color(hex: "CAD6BB"), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+            .stroke(SL.panelBorder, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
     }
 
     /// Shown under existing projects. `welcome` disappears after the first
@@ -384,7 +384,7 @@ struct ProjectsListView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
             .overlay(RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(hex: "CAD6BB"), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+                .stroke(SL.panelBorder, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
@@ -496,7 +496,7 @@ struct ProjectsListView: View {
                 SLActivityIndicator(size: 28)
                 Text(phase).font(.headline).multilineTextAlignment(.center)
                 if let progress = cloud.progress {
-                    ProgressView(value: progress).tint(SL.green)
+                    ProgressView(value: progress).tint(SL.tint)
                     Text("\(Int(progress * 100))%").font(.subheadline.monospacedDigit())
                 }
                 if cloud.progress != nil {
@@ -533,7 +533,7 @@ private struct ProjectCard: View {
                         .font(.system(.caption2, weight: .semibold))
                         .foregroundStyle(SL.ink)
                         .scaledFrame(width: 24, relativeTo: .caption2)
-                        .background(Color(hex: "EAF0DF"), in: Circle())
+                        .background(SL.iconTile, in: Circle())
                     if isSample {
                         Text("OFFLINE")
                             .font(.system(.caption2, weight: .bold))
@@ -541,11 +541,11 @@ private struct ProjectCard: View {
                             .foregroundStyle(SL.green)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(Color(hex: "E0EDCD"), in: RoundedRectangle(cornerRadius: 3))
+                            .background(SL.tick, in: RoundedRectangle(cornerRadius: 3))
                     }
                 }
                 Text(project.title)
-                    .font(SL.display(.body, .heavy))
+                    .font(SL.display(.body))
                     .tracking(-0.5)
                     .foregroundStyle(SL.ink)
                     .lineLimit(2)

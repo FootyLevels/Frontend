@@ -24,7 +24,7 @@ struct MainTabView: View {
                 ProjectsListView(appState: appState, viewModel: library)
             }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
         .toolbarBackground(SL.header, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
     }

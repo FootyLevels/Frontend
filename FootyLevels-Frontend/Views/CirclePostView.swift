@@ -61,7 +61,7 @@ struct CirclePostView: View {
     private var postHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label("SHARED WITH \(circle.name.uppercased())", systemImage: "lock.shield").font(.caption.weight(.semibold)).foregroundStyle(SL.green)
-            Text(model.post.projectTitle).font(SL.display(.title2, .bold))
+            Text(model.post.projectTitle).font(SL.display(.title2))
             Text("By \(model.post.authorName.isEmpty ? "a circle member" : model.post.authorName)").font(.callout).foregroundStyle(SL.muted)
             if !model.post.note.isEmpty { Text(model.post.note).font(.callout) }
         }

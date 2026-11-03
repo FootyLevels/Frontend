@@ -87,14 +87,14 @@ struct OverlayDifferenceView: View {
             }
             .task(id: viewModel.pollKey) { await viewModel.pollWhileBuilding() }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
     }
 
     private var intro: some View {
         VStack(alignment: .leading, spacing: 14) {
             Eyebrow(text: "COMPARE YOUR MOVEMENT", rule: true)
             Text("Two attempts.\n\(Text("See what changes.").foregroundStyle(SL.headlineSoft))")
-                .font(SL.display(.largeTitle, .semibold))
+                .font(SL.display(.largeTitle))
                 .tracking(-1.4)
                 .foregroundStyle(SL.ink)
             Text("Choose your attempt and a reference. See their 3D movements together, then explore where they differ.")
@@ -177,7 +177,7 @@ private struct OverlaySlotCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Eyebrow(text: "\(slot.rawValue) · \(slot.role.uppercased())", color: SL.panelToplineText)
                     Text(project?.title ?? (slot == .first ? "Your attempt" : "Reference video"))
-                        .font(SL.display(.body, .heavy))
+                        .font(SL.display(.body))
                         .tracking(-0.5)
                         .foregroundStyle(SL.ink)
                         .lineLimit(2)
@@ -325,7 +325,7 @@ private struct OverlayVideoPicker: View {
                 }
             }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
     }
 }
 

@@ -78,14 +78,13 @@ private struct LessonScreen: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(text: "LEARN A SKILL", rule: true)
             Text("The over \(Text("fake").foregroundStyle(Color(uiColor: SL.overlaySecond)))")
-                .font(SL.display(.largeTitle, .heavy))
-                .tracking(-1.2)
+                .font(.system(.largeTitle))
+                .tracking(-0.6)
                 .foregroundStyle(SL.ink)
             Text("Shape one way, step across the ball, then take it the other way.")
                 .font(.system(.subheadline))
-                .foregroundStyle(Color(hex: "77816F"))
+                .foregroundStyle(SL.muted)
         }
         .padding(.top, 8)
     }

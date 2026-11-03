@@ -195,8 +195,8 @@ final class AnimatedBodyMesh {
 /// y = 0 — so the grid, body and ball agree without any rescaling. The camera
 /// rig does the framing instead.
 enum StageBuilder {
-    /// The sage floor lines from the web viewer's `GridHelper`.
-    static let gridTint = UIColor(red: 0x8F / 255, green: 0xA3 / 255, blue: 0x85 / 255, alpha: 1)
+    /// Neutral floor lines that read on the light and the dark stage.
+    static let gridTint = UIColor(light: "ABABAB", dark: "3C3C3C")
 
     @MainActor
     static func makeStage(content: [Entity], floorCenter: SIMD3<Float>, floorSize: Float,

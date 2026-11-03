@@ -1,8 +1,8 @@
 import SwiftUI
 
 private let ballColor = Color(uiColor: SL.overlaySecond)
-private let goodColor = Color(hex: "3F7D4C")
-private let missColor = Color(hex: "975936")
+private let goodColor = SL.good
+private let missColor = SL.miss
 
 // MARK: - 1. Watch
 
@@ -104,7 +104,7 @@ struct PackageBreakdownSection: View {
                     NumberBadge(text: "\(number)", filled: live, color: ballColor)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(phase.name.uppercased())
-                            .font(SL.display(.body, .heavy))
+                            .font(SL.display(.body))
                             .foregroundStyle(SL.ink)
                         Text(String(format: "%.2f–%.2f s", phase.start, phase.end))
                             .font(.system(.caption2).monospacedDigit())
@@ -124,7 +124,7 @@ struct PackageBreakdownSection: View {
             if isOpen {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(phase.cue.uppercased())
-                        .font(SL.display(.body, .bold))
+                        .font(SL.display(.body))
                         .foregroundStyle(ballColor)
                     if let shows = phase.shows { fact("In the 3D", shows) }
                     if let video = phase.video { fact("In the video", video) }
@@ -212,7 +212,7 @@ struct PackagePractiseSection: View {
                         .tracking(0.8)
                         .foregroundStyle(SL.muted)
                     Text(drill.title)
-                        .font(SL.display(.title3, .heavy))
+                        .font(SL.display(.title3))
                         .foregroundStyle(SL.ink)
                 }
                 Spacer(minLength: 0)
@@ -440,10 +440,10 @@ struct PackageTestSection: View {
                     let right = index < correct.count && correct[index] == id
                     Text("\(index + 1). \(name(id))")
                         .font(.system(.caption, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(right ? SL.onGreen : .white)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 5)
-                        .background(right ? SL.green : Color(hex: "B23B3B"), in: Capsule())
+                        .background(right ? SL.green : SL.wrong, in: Capsule())
                 }
             }
             .frame(minHeight: 30, alignment: .topLeading)
@@ -483,7 +483,7 @@ struct PackageTestSection: View {
                            text: got == results.count ? "You know the shape of the move. Take it to the pitch with the later drills."
                                                       : "Revisit the moments you missed in Break it down, then try again.")
             Text("\(got) / \(results.count)")
-                .font(SL.display(.largeTitle, .heavy))
+                .font(SL.display(.largeTitle))
                 .foregroundStyle(SL.ink)
             ForEach(Array(results.enumerated()), id: \.offset) { _, result in
                 Label(result.name, systemImage: result.correct ? "checkmark.circle.fill" : "xmark.circle")
