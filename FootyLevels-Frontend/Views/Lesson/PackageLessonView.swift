@@ -25,6 +25,8 @@ struct PackageLessonView: View {
         .background(SL.page)
         .navigationTitle(entry.title)
         .navigationBarTitleDisplayMode(.inline)
+        // A lesson has the whole screen; the tab bar would cover its sheet.
+        .toolbar(.hidden, for: .tabBar)
         .task {
             guard model == nil, loadError == nil else { return }
             do {
@@ -40,276 +42,123 @@ struct PackageLessonView: View {
     }
 }
 
+/// The video (or the 3D body) fills the screen, and the lesson sits in a sheet over it.
+/// Slid away, the sheet leaves the key point in an island and a pill to bring it back.
+/// The skill and the View options are in the navigation bar.
 private struct PackageLessonScreen: View {
     let model: PackageLessonModel
 
-    private var document: LessonDocument { model.package.document }
+    @State private var main: LessonMainView = .video
+    @State private var detent: LessonSheetDetent = .peek
+    /// The sheet's chosen row per stage, which the island also shows.
+    @State private var picked: [LessonStage: String] = [:]
+    @State private var headerHeight: CGFloat = 240
+    @State private var showingView = false
+    @State private var viewHeight: CGFloat = 520
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                header
-                if document.skills.count > 1 {
-                    SkillPicker(model: model)
-                }
-                StagePicker(model: model)
-                LessonStageView(model: model, shotLabel: shotLabel, cue: model.phase.map { ($0.name, $0.cue) })
-                PackageInfoBar(model: model)
-                LessonTransport(model: model) { PackageTimeline(model: model) }
-                Group {
-                    switch model.stage {
-                    case .watch: PackageWatchSection(model: model)
-                    case .breakdown: PackageBreakdownSection(model: model)
-                    case .practise: PackagePractiseSection(model: model)
-                    case .test: PackageTestSection(model: model)
+        GeometryReader { geo in
+            let insets = geo.safeAreaInsets
+            let screen = geo.size.height + insets.top + insets.bottom
+            let layout = LessonSheetLayout(screenHeight: screen, headerHeight: headerHeight,
+                                           bottomInset: insets.bottom, topReserve: insets.top + 12)
+            ZStack(alignment: .bottom) {
+                LessonMediaStage(model: model, main: $main,
+                                 covered: showingView ? Swift.min(viewHeight, screen * 0.9) : layout.height(detent),
+                                 top: insets.top)
+                if detent == .hidden {
+                    LessonWatchOverlay(model: model, selected: picked[model.stage], bottomInset: insets.bottom) {
+                        detent = .peek
                     }
+                    .transition(.opacity.combined(with: .offset(y: 20)))
                 }
-                // A new skill starts its sections afresh.
-                .id(model.skill.id)
-                Text("Built from \(document.sourceNote) Measurements are estimates from a single camera; nothing here rates the player.")
-                    .font(.system(.caption2))
-                    .foregroundStyle(SL.muted)
+                PackageLessonSheet(model: model, detent: $detent, picked: $picked, layout: layout,
+                                   onHeaderHeight: { headerHeight = $0 },
+                                   openView: { showingView = true })
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 32)
+            .ignoresSafeArea(edges: .bottom)
+            .animation(reduceMotion ? nil : .smooth(duration: 0.4), value: detent == .hidden)
         }
-        .scrollDismissesKeyboard(.immediately)
-    }
-
-    private var shotLabel: String {
-        model.package.shotLabel(at: model.phase?.start ?? model.skill.range.lowerBound)?.label ?? ""
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            title
-                .font(.system(.largeTitle))
-                .tracking(-0.6)
-                .foregroundStyle(SL.ink)
-            Text(document.subtitle)
-                .font(.system(.subheadline))
-                .foregroundStyle(SL.muted)
+        .toolbar {
+            // The skill pill names what's playing, so the bar shows no title.
+            ToolbarItem(placement: .principal) {
+                Color.clear.frame(width: 1, height: 1).accessibilityHidden(true)
+            }
+            if model.package.document.skills.count > 1 {
+                ToolbarItem(placement: .topBarLeading) { SkillMenu(model: model) }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                ViewButton(lit: main == .body || model.mirror) { showingView = true }
+            }
         }
-        .padding(.top, 8)
-    }
-
-    /// The title with its accent word drawn in the ball-foot colour.
-    private var title: Text {
-        guard let accent = document.accent, let range = document.title.range(of: accent) else {
-            return Text(document.title)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        // Light bar content over the video; dark over the light 3D stage.
+        .toolbarColorScheme(main == .body && colorScheme == .light ? .light : .dark, for: .navigationBar)
+        .sheet(isPresented: $showingView) {
+            LessonViewOptions(model: model, main: $main) { viewHeight = $0 }
+                .presentationDetents(viewHeight > 620 ? [.large] : [.height(viewHeight)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(SL.card)
+                .presentationCornerRadius(28)
+                // The 3D stays live above the sheet, so each change shows as it's made.
+                .presentationBackgroundInteraction(.enabled)
         }
-        let accented = Text(document.title[range]).foregroundStyle(Color(uiColor: SL.overlaySecond))
-        return Text("\(String(document.title[..<range.lowerBound]))\(accented)\(String(document.title[range.upperBound...]))")
     }
 }
 
-// MARK: - Skill picker
-
-/// One chip per move in the video.
-private struct SkillPicker: View {
+/// Picks which of the video's skills the lesson teaches.
+private struct SkillMenu: View {
     let model: PackageLessonModel
 
     var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 6) {
+        Menu {
+            Picker("Skill", selection: Binding(get: { model.skill.id }, set: { model.select($0) })) {
                 ForEach(model.package.document.skills) { skill in
-                    let selected = model.skill.id == skill.id
-                    Button {
-                        model.select(skill.id)
-                    } label: {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(skill.tab.uppercased())
-                                .font(.system(.caption2, weight: .medium))
-                                .tracking(0.6)
-                                .foregroundStyle(selected ? SL.onGreen : SL.muted)
-                            Text(skill.short)
-                                .font(.system(.footnote, weight: .semibold))
-                                .foregroundStyle(selected ? SL.onGreen : SL.ink)
-                        }
-                        .lineLimit(1)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 6)
-                        .background(selected ? SL.green : SL.raised, in: Capsule())
-                        .overlay(Capsule().stroke(selected ? SL.green : SL.cardBorder))
-                        .minimumTapArea()
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("\(skill.name), \(skill.tab)")
-                    .accessibilityAddTraits(selected ? .isSelected : [])
+                    Text(skill.short).tag(skill.id)
                 }
             }
-            .padding(.vertical, 1)
+        } label: {
+            HStack(spacing: 6) {
+                Text(model.skill.short)
+                    .font(.system(.body, weight: .semibold))
+                    .lineLimit(1)
+                Image(systemName: "chevron.down")
+                    .font(.system(.caption, weight: .semibold))
+            }
+            // White over the video, black over the light 3D stage: the bar's own colour.
+            .foregroundStyle(.primary)
         }
-        .scrollIndicators(.hidden)
+        .tint(.primary)
+        .accessibilityLabel("Skill: \(model.skill.short)")
+        .accessibilityHint("Changes the skill")
         .disabled(!model.isReady)
     }
 }
 
-// MARK: - Info bar
-
-/// Which feet are down, where the weight sits between them, and the readings.
-/// In Break it down, the reading the phase is about gets a ring. All estimated from the 3D.
-private struct PackageInfoBar: View {
-    let model: PackageLessonModel
-
-    private var stand: Color { Color(uiColor: SL.overlayFirst) }
-    private var ball: Color { Color(uiColor: SL.overlaySecond) }
+/// Opens View. Filled white while the 3D body or Mirror is on, so a changed view shows.
+private struct ViewButton: View {
+    let lit: Bool
+    let action: () -> Void
 
     var body: some View {
-        let focus = model.stage == .breakdown ? model.phase?.focus : nil
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
-                pill("Ball foot", on: model.ballPlanted, color: ball)
-                    .overlay(focusRing(focus == "ball"))
-                pill("Standing foot", on: model.standPlanted, color: stand)
-                    .overlay(focusRing(focus == "stand"))
-                Spacer(minLength: 0)
-            }
-            meter.overlay(focusRing(focus == "weight").padding(-4))
-            HStack(spacing: 14) {
-                reading("Body", model.dropCm > 2 ? "≈\(Int(model.dropCm.rounded())) cm lower" : "upright")
-                    .overlay(focusRing(focus == "drop").padding(-4))
-                reading("Turn", model.turnDegrees.map { "≈\(Int($0.rounded()))°" } ?? "–")
-                    .overlay(focusRing(focus == "turn").padding(-4))
-                reading("Ball", model.ballText)
-                    .overlay(focusRing(focus == "balls").padding(-4))
-                Spacer(minLength: 0)
-            }
-            if !model.hasBody {
-                Text("No 3D body in this frame: the tracker lost the player.")
-                    .font(.system(.caption2))
-                    .foregroundStyle(SL.muted)
-            }
+        if #available(iOS 26.0, *), lit {
+            button.buttonStyle(.glassProminent).tint(.white)
+        } else if lit {
+            button.background(Color.white, in: Circle())
+        } else {
+            button
         }
-        .padding(12)
-        .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 10)
     }
 
-    private var meter: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text("◀ Standing foot")
-                Spacer()
-                Text("WEIGHT · EST.").tracking(0.8)
-                Spacer()
-                Text("Ball foot ▶")
-            }
-            .font(.system(.caption2, weight: .medium))
-            .foregroundStyle(SL.muted)
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(LinearGradient(colors: [stand.opacity(0.35), SL.line, ball.opacity(0.35)],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(height: 8)
-                    Circle()
-                        .fill(SL.ink)
-                        .overlay(Circle().stroke(SL.panel, lineWidth: 3))
-                        .frame(width: 16, height: 16)
-                        .offset(x: geo.size.width * model.weight - 8)
-                        .animation(.easeOut(duration: 0.12), value: model.weight)
-                }
-                .frame(maxHeight: .infinity)
-            }
-            .frame(height: 16)
+    private var button: some View {
+        Button(action: action) {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(.body, weight: .semibold))
+                .foregroundStyle(lit ? Color.black : Color.white)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Weight, estimated")
-        .accessibilityValue("\(Int((model.weight * 100).rounded())) percent toward the ball foot")
-    }
-
-    private func pill(_ text: String, on: Bool, color: Color) -> some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(on ? color : .clear)
-                .overlay(Circle().stroke(on ? color : SL.muted, lineWidth: 1.5))
-                .frame(width: 9, height: 9)
-            Text(text)
-        }
-        .font(.system(.caption, weight: .medium))
-        .foregroundStyle(on ? color : SL.muted)
-        .padding(.horizontal, 9)
-        .padding(.vertical, 5)
-        .overlay(Capsule().stroke(on ? color : SL.line, lineWidth: 1.5))
-        .accessibilityLabel("\(text) \(on ? "on the ground" : "off the ground")")
-    }
-
-    private func reading(_ label: String, _ value: String) -> some View {
-        Text("\(Text("\(label) ").foregroundStyle(SL.muted))\(Text(value).foregroundStyle(SL.ink).fontWeight(.semibold))")
-            .font(.system(.caption).monospacedDigit())
-    }
-
-    private func focusRing(_ on: Bool) -> some View {
-        RoundedRectangle(cornerRadius: 8)
-            .stroke(on ? Color(uiColor: SL.overlaySecond).opacity(0.7) : .clear, lineWidth: 2)
-    }
-}
-
-// MARK: - Timeline
-
-/// The selected skill's part of the video: its shots, phases and key moments, with a
-/// playhead. Drag or tap to scrub.
-private struct PackageTimeline: View {
-    let model: PackageLessonModel
-
-    private var range: ClosedRange<Double> { model.skill.range }
-
-    var body: some View {
-        GeometryReader { geo in
-            let width = geo.size.width
-            let span = Swift.max(range.upperBound - range.lowerBound, 0.001)
-            let x = { (t: Double) in width * CGFloat((Swift.min(Swift.max(t, range.lowerBound), range.upperBound) - range.lowerBound) / span) }
-            ZStack(alignment: .topLeading) {
-                ForEach(Array(shots.enumerated()), id: \.offset) { _, shot in
-                    Text(shot.label.uppercased())
-                        .font(.system(.caption2, weight: .medium))
-                        .tracking(0.8)
-                        .foregroundStyle(SL.muted)
-                        .lineLimit(1)
-                        .frame(width: Swift.max(x(shot.end) - x(shot.start) - 3, 0), alignment: .leading)
-                        .offset(x: x(shot.start) + 3)
-                }
-                ForEach(model.skill.phases) { phase in
-                    let active = phase == model.phase
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(active ? Color(uiColor: SL.overlaySecond) : SL.modeTrack)
-                        .overlay(RoundedRectangle(cornerRadius: 3).stroke(SL.panel, lineWidth: 1))
-                        .frame(width: Swift.max(x(phase.end) - x(phase.start), 2), height: 16)
-                        .offset(x: x(phase.start), y: 15)
-                    Rectangle()
-                        .fill(SL.ink.opacity(0.5))
-                        .frame(width: 1.5, height: 6)
-                        .offset(x: x(phase.key) - 0.75, y: 33)
-                }
-                if let loop = model.loop {
-                    RoundedRectangle(cornerRadius: 4)
-                        .stroke(Color(uiColor: SL.overlaySecond), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
-                        .frame(width: Swift.max(x(loop.upperBound) - x(loop.lowerBound), 4), height: 22)
-                        .offset(x: x(loop.lowerBound), y: 12)
-                }
-                Playhead(playback: model.playback, range: range, width: width)
-            }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        let share = Double(Swift.min(Swift.max(value.location.x / Swift.max(width, 1), 0), 1))
-                        model.freeze(at: Swift.min(range.lowerBound + share * span, range.upperBound - 0.01))
-                    }
-            )
-        }
-        .frame(height: 44)
-        // Shot labels sit at fixed offsets above the phase bars, so they keep their drawn size.
-        .dynamicTypeSize(...DynamicTypeSize.large)
-        .accessibilityElement()
-        .accessibilityLabel("Skill timeline")
-        .accessibilityValue("\(model.phase?.name ?? model.skill.short), \(String(format: "%.1f", model.playback.currentTime)) seconds")
-        .accessibilityAdjustableAction { direction in model.step(frames: direction == .increment ? 5 : -5) }
-    }
-
-    /// The labelled shots that overlap this skill.
-    private var shots: [LessonDocument.Shot] {
-        model.package.document.shots.filter { $0.end > range.lowerBound + 0.05 && $0.start < range.upperBound - 0.05 }
+        .accessibilityLabel("View options")
+        .accessibilityValue(lit ? "Changed" : "")
     }
 }

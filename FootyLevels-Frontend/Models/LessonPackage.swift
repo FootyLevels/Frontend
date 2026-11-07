@@ -329,6 +329,14 @@ struct LessonDocument: Decodable {
             }
         }
 
+        var prompt: String {
+            switch self {
+            case .choice(let c): return c.prompt
+            case .tap(let c): return c.prompt
+            case .order(let c): return c.prompt ?? "Tap the moments in the order they happen."
+            }
+        }
+
         private enum Kind: String, Decodable { case choice, tap, order }
         private enum TypeKey: String, CodingKey { case type }
 

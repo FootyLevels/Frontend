@@ -232,11 +232,13 @@ private struct VideoTimeline: View {
 /// A bare `AVPlayerLayer`, so the workspace can draw its own controls.
 struct VideoSurface: UIViewRepresentable {
     let player: AVPlayer
+    /// `.resizeAspectFill` fills the view and crops; the default shows the whole frame.
+    var gravity: AVLayerVideoGravity = .resizeAspect
 
     func makeUIView(context: Context) -> PlayerView {
         let view = PlayerView()
         view.playerLayer?.player = player
-        view.playerLayer?.videoGravity = .resizeAspect
+        view.playerLayer?.videoGravity = gravity
         view.backgroundColor = .clear
         return view
     }
