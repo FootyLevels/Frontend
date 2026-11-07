@@ -47,8 +47,8 @@ struct CheckUser: View {
 
                         AuthPage(appState: $appState)
                     }
-                    // Fade + slide up when the app opens, or just a fade when Reduce Motion is on
-                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                    // Just a fade: the sign-in screen plays its own launch as it appears.
+                    .transition(.opacity)
                 }
             }
 

@@ -151,15 +151,22 @@ struct BrandMark: View {
     /// Draws the mark in white for use over photographs.
     var onImage = false
     /// Turning this on springs the bars up one after another, then fades the
-    /// wordmark in. The sign-in splash starts it off.
+    /// wordmark in. The sign-in splash and the sign-in screen start it off.
     var drawn = true
+    /// Keeps the bars rising and falling like a level meter, as on the sign-in screen.
+    var levels = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: size * 0.4) {
-            HStack(alignment: .center, spacing: size * 0.14) {
-                bar(0, height: 0.8, color: onImage ? .white : SL.ink)
-                bar(1, height: 1, color: onImage ? .white : SL.ink)
-                bar(2, height: 0.57, color: onImage ? SL.lime : SL.data)
+            TimelineView(.animation(paused: !levels || reduceMotion)) { context in
+                let time = context.date.timeIntervalSinceReferenceDate
+                HStack(alignment: .center, spacing: size * 0.14) {
+                    bar(0, height: 0.8, color: onImage ? .white : SL.ink, time: time)
+                    bar(1, height: 1, color: onImage ? .white : SL.ink, time: time)
+                    bar(2, height: 0.57, color: onImage ? SL.lime : SL.data, time: time)
+                        .shadow(color: SL.lime.opacity(levels && onImage && !reduceMotion ? 0.8 : 0), radius: size * 0.25)
+                }
             }
             .frame(height: size)
             .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.36, d: 1, tx: size * 0.18, ty: 0))
@@ -169,18 +176,31 @@ struct BrandMark: View {
                 .tracking(-size * 0.05)
                 .foregroundStyle(onImage ? .white : SL.ink)
                 .opacity(drawn ? 1 : 0)
-                .animation(.easeOut(duration: 0.3).delay(0.26), value: drawn)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.3).delay(0.26), value: drawn)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("FootyLevels")
     }
 
-    private func bar(_ index: Int, height: CGFloat, color: Color) -> some View {
-        Rectangle()
+    private func bar(_ index: Int, height: CGFloat, color: Color, time: TimeInterval) -> some View {
+        let level = levels && !reduceMotion ? Self.levelScale(bar: index, at: time) : 1
+        return Rectangle()
             .fill(color)
             .frame(width: size * 0.2, height: size * height)
-            .scaleEffect(x: 1, y: drawn ? 1 : 0, anchor: .bottom)
-            .animation(.spring(duration: 0.38, bounce: 0.35).delay(Double(index) * 0.09), value: drawn)
+            .scaleEffect(x: 1, y: (drawn ? 1 : 0) * level, anchor: .bottom)
+            .animation(reduceMotion ? nil : .spring(duration: 0.38, bounce: 0.35).delay(Double(index) * 0.09), value: drawn)
+    }
+
+    /// Each bar's height as a share of its resting height, at a moment in time. The three move
+    /// at different speeds, like a level meter: the first dips to half, the second rests at
+    /// 70% and rises to full, and the lime one rises to 145%.
+    static func levelScale(bar: Int, at seconds: TimeInterval) -> CGFloat {
+        let wave = { (period: Double) in (1 - cos(2 * .pi * seconds / period)) / 2 }
+        switch bar {
+        case 0: return 1 - 0.5 * wave(1.7)
+        case 1: return 0.7 + 0.3 * wave(2.3)
+        default: return 1 + 0.45 * wave(1.3)
+        }
     }
 }
 
