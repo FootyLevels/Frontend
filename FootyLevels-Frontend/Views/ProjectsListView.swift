@@ -480,7 +480,7 @@ struct ProjectsListView: View {
         }
         if let appState {
             ToolbarItem(placement: .topBarLeading) {
-                AccountMenu(appState: appState)
+                ProfileButton(user: appState.currentUser, size: 32, style: .plain)
             }
         }
     }

@@ -89,7 +89,7 @@ struct LessonLibraryView: View {
 }
 
 /// The top of Learn: a colour-graded, motion-blurred still of a real lesson clip with the
-/// brand, the account, the drills to practise next and the way into the featured lesson.
+/// brand, the profile photo, the drills to practise next and the way into the featured lesson.
 private struct LearnHero: View {
     let featured: LessonLibrary.Entry?
     let appState: AppStateViewModel?
@@ -105,7 +105,7 @@ private struct LearnHero: View {
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 10) {
                     if let appState, appState.isLoggedIn == .loggedIn {
-                        AccountMenu(appState: appState, onImage: true)
+                        ProfileButton(user: appState.currentUser)
                     }
                     if let featured, !featured.practice.isEmpty {
                         // Opens the lesson at Practise, where these drills are.

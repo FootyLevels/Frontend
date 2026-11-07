@@ -84,6 +84,8 @@ enum SL {
     static let miss = Color(light: "9E4A22", dark: "FF9A6A")
     /// A wrong answer's fill; white text on it in both modes (5.9:1).
     static let wrong = Color(hex: "B23B3B")
+    /// Behind the person symbol when an account has no photo; the symbol is white (8:1).
+    static let avatarFill = Color(hex: "3F5A1A")
 
     // Status dots on key frames
     static func frameDot(_ status: String) -> Color {
