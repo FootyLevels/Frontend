@@ -1,0 +1,22 @@
+{
+  "images" : [
+    {
+      "filename" : "thumb-Lesson-hocus-pocus-olive.jpg",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "thumb-Lesson-hocus-pocus-lime.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

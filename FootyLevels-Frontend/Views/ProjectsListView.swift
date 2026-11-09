@@ -65,7 +65,7 @@ struct ProjectsListView: View {
                     // says so; repeating it as an error adds nothing.
                     if !hasAccount, let error = viewModel.errorMessage, viewModel.health != nil {
                         Text(error)
-                            .font(.system(size: 13))
+                            .font(.system(.footnote))
                             .foregroundStyle(SL.errorText)
                             .padding(14)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -168,7 +168,7 @@ struct ProjectsListView: View {
                 }
             }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
     }
 
     private func watchPreparingProjects() async {
@@ -284,7 +284,7 @@ struct ProjectsListView: View {
                         if project.state == "preparing" { SLActivityIndicator(size: 22) }
                         else { Image(systemName: "lock.fill").foregroundStyle(SL.green) }
                     }
-                    .frame(width: 42, height: 48)
+                    .scaledFrame(width: 42, height: 48)
                     .background(SL.iconTile, in: RoundedRectangle(cornerRadius: 10))
                     VStack(alignment: .leading, spacing: 6) {
                         Text(project.title).font(.headline).foregroundStyle(SL.ink)
@@ -320,16 +320,16 @@ struct ProjectsListView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 8) {
                 Eyebrow(text: "THE SKILL BREAKDOWN", rule: true)
-                Text("/").font(.system(size: 10)).foregroundStyle(Color(hex: "B6BEB0"))
+                Text("/").font(.system(.caption2)).foregroundStyle(SL.muted)
                 Eyebrow(text: "FOOTBALL")
             }
-            (Text("See the move.\n") + Text("Understand the motion.").foregroundColor(SL.headlineSoft))
-                .font(SL.display(34, .semibold))
+            Text("See the move.\n\(Text("Understand the motion.").foregroundStyle(SL.headlineSoft))")
+                .font(SL.display(.largeTitle))
                 .tracking(-1.6)
                 .lineSpacing(2)
                 .foregroundStyle(SL.ink)
             Text("Slow it down. Find the key moments.\nExplore the body position from every angle.")
-                .font(.system(size: 14))
+                .font(.system(.subheadline))
                 .lineSpacing(5)
                 .foregroundStyle(SL.muted)
         }
@@ -346,12 +346,12 @@ struct ProjectsListView: View {
     private var welcome: some View {
         VStack(spacing: 14) {
             Image(systemName: "film")
-                .font(.system(size: 38, weight: .light))
+                .font(.system(.largeTitle, weight: .light))
             Text("Every skill starts with a moment.")
-                .font(SL.display(18, .bold))
-                .foregroundStyle(Color(hex: "35502D"))
+                .font(SL.display(.title3))
+                .foregroundStyle(SL.presetActiveText)
             Text("Import a short skill video — up to 60 seconds — to select frames and build your breakdown.")
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(SL.muted)
                 .multilineTextAlignment(.center)
             importPicker {
@@ -367,7 +367,7 @@ struct ProjectsListView: View {
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity)
         .overlay(RoundedRectangle(cornerRadius: 12)
-            .stroke(Color(hex: "CAD6BB"), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+            .stroke(SL.panelBorder, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
     }
 
     /// Shown under existing projects. `welcome` disappears after the first
@@ -379,12 +379,12 @@ struct ProjectsListView: View {
                 Image(systemName: "plus")
                 Text("Import another video")
             }
-            .font(.system(size: 14, weight: .semibold))
+            .font(.system(.subheadline, weight: .semibold))
             .foregroundStyle(SL.green)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
             .overlay(RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(hex: "CAD6BB"), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+                .stroke(SL.panelBorder, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
@@ -415,7 +415,7 @@ struct ProjectsListView: View {
                     SLActivityIndicator()
                 } else {
                     Image(systemName: "ellipsis")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(.subheadline, weight: .semibold))
                         .foregroundStyle(SL.muted)
                 }
             }
@@ -443,13 +443,13 @@ struct ProjectsListView: View {
     private var footer: some View {
         VStack(spacing: 6) {
             Text("FOOTYLEVELS")
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(.caption2, weight: .bold))
                 .tracking(2)
                 .foregroundStyle(SL.muted)
             Text("Watch closely. Move with intention.")
-                .font(.system(size: 11))
+                .font(.system(.caption2))
             Text("POWERED BY META SAM 3D BODY")
-                .font(.system(size: 9))
+                .font(.system(.caption2))
                 .tracking(0.8)
         }
         .foregroundStyle(SL.muted)
@@ -480,11 +480,7 @@ struct ProjectsListView: View {
         }
         if let appState {
             ToolbarItem(placement: .topBarLeading) {
-                Button(role: .destructive) {
-                    try? appState.signOut()
-                } label: {
-                    Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
-                }
+                ProfileButton(user: appState.currentUser, size: 32, style: .plain)
             }
         }
     }
@@ -496,7 +492,7 @@ struct ProjectsListView: View {
                 SLActivityIndicator(size: 28)
                 Text(phase).font(.headline).multilineTextAlignment(.center)
                 if let progress = cloud.progress {
-                    ProgressView(value: progress).tint(SL.green)
+                    ProgressView(value: progress).tint(SL.tint)
                     Text("\(Int(progress * 100))%").font(.subheadline.monospacedDigit())
                 }
                 if cloud.progress != nil {
@@ -530,34 +526,34 @@ private struct ProjectCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
                     Text(String(format: "%02d", number))
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(.caption2, weight: .semibold))
                         .foregroundStyle(SL.ink)
-                        .frame(width: 24, height: 24)
-                        .background(Color(hex: "EAF0DF"), in: Circle())
+                        .scaledFrame(width: 24, relativeTo: .caption2)
+                        .background(SL.iconTile, in: Circle())
                     if isSample {
                         Text("OFFLINE")
-                            .font(.system(size: 8, weight: .bold))
+                            .font(.system(.caption2, weight: .bold))
                             .tracking(1)
                             .foregroundStyle(SL.green)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(Color(hex: "E0EDCD"), in: RoundedRectangle(cornerRadius: 3))
+                            .background(SL.tick, in: RoundedRectangle(cornerRadius: 3))
                     }
                 }
                 Text(project.title)
-                    .font(SL.display(17, .heavy))
+                    .font(SL.display(.body))
                     .tracking(-0.5)
                     .foregroundStyle(SL.ink)
                     .lineLimit(2)
                 Text(String(format: "%.1f SEC  ·  %d KEY FRAMES", project.video.duration, project.frames.count))
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(.caption2, weight: .medium))
                     .tracking(1)
                     .foregroundStyle(SL.muted)
                 StatusDot(text: motionText, ready: project.motion?.isPlayable == true)
             }
             Spacer(minLength: 0)
             Image(systemName: "arrow.right")
-                .font(.system(size: 13))
+                .font(.system(.footnote))
                 .foregroundStyle(SL.muted)
         }
         .padding(12)
@@ -608,9 +604,9 @@ private struct ServerStatusCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 16))
+                .font(.system(.callout))
                 .foregroundStyle(health != nil ? SL.iconTileText : SL.noticeText)
-                .frame(width: 34, height: 34)
+                .scaledFrame(width: 34, relativeTo: .callout)
                 .background(health != nil ? SL.iconTile : SL.noticeFill, in: RoundedRectangle(cornerRadius: 6))
 
             VStack(alignment: .leading, spacing: 5) {
@@ -619,18 +615,18 @@ private struct ServerStatusCard: View {
                     Spacer()
                     if let mode = health?.network?.mode {
                         Text(mode.uppercased())
-                            .font(.system(size: 9, weight: .semibold))
+                            .font(.system(.caption2, weight: .semibold))
                             .tracking(1)
                             .foregroundStyle(SL.muted)
                     }
                 }
                 if isLoading {
                     Text("Connecting to \(address)…")
-                        .font(.system(size: 12))
+                        .font(.system(.caption))
                         .foregroundStyle(SL.muted)
                 } else if let health {
                     Text(address)
-                        .font(.system(size: 12))
+                        .font(.system(.caption))
                         .foregroundStyle(SL.muted)
                     HStack(spacing: 12) {
                         StatusDot(text: "Motion", ready: health.motion.ready)
@@ -642,11 +638,11 @@ private struct ServerStatusCard: View {
                     Text(offlineReason ?? (ServerSettings.baseURL == nil
                                            ? "Connect a FootyLevels server to import videos. The included example works offline."
                                            : "Can't reach \(address)."))
-                        .font(.system(size: 12))
+                        .font(.system(.caption))
                         .lineSpacing(2)
                         .foregroundStyle(SL.muted)
                     Text("Tap to set the server address.")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(.caption2, weight: .medium))
                         .foregroundStyle(SL.green)
                 }
             }

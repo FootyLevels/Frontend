@@ -16,9 +16,9 @@ struct PipelineSettingsView: View {
                     steps
 
                     Text("Choose where to reconstruct the selected player. The app loads saved meshes; it does not run the model.")
-                        .font(.system(size: 13))
+                        .font(.system(.footnote))
                         .lineSpacing(3)
-                        .foregroundStyle(Color(hex: "7B886D"))
+                        .foregroundStyle(SL.muted)
 
                     if let health = viewModel.health {
                         ForEach(health.providers) { provider in
@@ -26,7 +26,7 @@ struct PipelineSettingsView: View {
                         }
                     } else {
                         Label("Not connected to a FootyLevels server.", systemImage: "network.slash")
-                            .font(.system(size: 13))
+                            .font(.system(.footnote))
                             .foregroundStyle(SL.errorText)
                             .padding(14)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -38,7 +38,7 @@ struct PipelineSettingsView: View {
                 }
                 .padding(20)
             }
-            .background(Color(hex: "F8F9F1"))
+            .background(SL.panel)
             .navigationTitle("Reconstruction pipeline")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -70,13 +70,13 @@ struct PipelineSettingsView: View {
         HStack(spacing: 6) {
             ForEach(Array(["Video", "Key frames", "SAM 3D Body", "3D inspection"].enumerated()), id: \.offset) { index, step in
                 if index > 0 {
-                    Image(systemName: "arrow.right").font(.system(size: 9))
+                    Image(systemName: "arrow.right").font(.system(.caption2))
                 }
                 Text(step)
             }
         }
-        .font(.system(size: 11))
-        .foregroundStyle(Color(hex: "6E835A"))
+        .font(.system(.caption2))
+        .foregroundStyle(SL.muted)
     }
 
     private func providerOption(_ provider: ProviderCapability) -> some View {
@@ -90,30 +90,30 @@ struct PipelineSettingsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text(provider.label)
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(.subheadline, weight: .semibold))
                             .foregroundStyle(SL.ink)
                         Spacer()
                         Text(provider.ready ? "Configured" : "Setup needed")
-                            .font(.system(size: 10))
-                            .foregroundStyle(provider.ready ? Color(hex: "63814A") : Color(hex: "9B8550"))
+                            .font(.system(.caption2))
+                            .foregroundStyle(provider.ready ? SL.good : SL.noticeText)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
-                            .background(provider.ready ? Color(hex: "E0EDCD") : Color(hex: "EEE9D6"),
+                            .background(provider.ready ? SL.tick : SL.noticeFill,
                                         in: RoundedRectangle(cornerRadius: 4))
                     }
                     Text(provider.reason ?? (provider.remote
                         ? "Selected frame crops are sent to fal. Usage is billed to your configured account."
                         : "Frames and models stay on the machine running the API."))
-                        .font(.system(size: 12))
+                        .font(.system(.caption))
                         .lineSpacing(2)
-                        .foregroundStyle(Color(hex: "7F8A74"))
+                        .foregroundStyle(SL.muted)
                         .multilineTextAlignment(.leading)
                 }
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .slPanel(fill: selected ? Color(hex: "F0F4E7") : .clear,
-                     border: selected ? Color(hex: "789460") : Color(hex: "D7DFCC"), radius: 7)
+            .slPanel(fill: selected ? SL.presetActive : .clear,
+                     border: selected ? SL.green : SL.cardBorder, radius: 7)
         }
         .buttonStyle(.plain)
         .disabled(!provider.ready)
@@ -129,24 +129,24 @@ struct PipelineSettingsView: View {
                     .foregroundStyle(SL.iconTileText)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Server")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(.footnote, weight: .semibold))
                         .foregroundStyle(SL.ink)
                     Text(ServerSettings.baseURL?.absoluteString ?? "No server address set")
-                        .font(.system(size: 12))
+                        .font(.system(.caption))
                         .foregroundStyle(SL.muted)
                 }
                 Spacer()
                 if let mode = viewModel.health?.network?.mode {
                     Text(mode.uppercased())
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(.caption2, weight: .semibold))
                         .foregroundStyle(SL.muted)
                 }
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
+                    .font(.system(.caption))
                     .foregroundStyle(SL.muted)
             }
             .padding(14)
-            .slPanel(fill: .clear, border: Color(hex: "D7DFCC"), radius: 7)
+            .slPanel(fill: .clear, border: SL.cardBorder, radius: 7)
         }
         .buttonStyle(.plain)
     }
@@ -157,23 +157,23 @@ struct PipelineSettingsView: View {
                 .foregroundStyle(SL.ink)
             VStack(alignment: .leading, spacing: 8) {
                 Text("Using your GPU server")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(.footnote, weight: .semibold))
                     .foregroundStyle(SL.ink)
                 Text("Run the API in the SAM 3D Body environment on the server with scripts/serve_lan.sh, then enter the address it prints. Check the models with:")
-                    .font(.system(size: 12))
+                    .font(.system(.caption))
                     .lineSpacing(2)
-                    .foregroundStyle(Color(hex: "7B876F"))
+                    .foregroundStyle(SL.muted)
                 Text("python -m backend.cli doctor")
-                    .font(.system(size: 11, design: .monospaced))
+                    .font(.system(.caption2, design: .monospaced))
                     .foregroundStyle(SL.ink)
                     .padding(.horizontal, 9)
                     .padding(.vertical, 7)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(hex: "F4F7EE"), in: RoundedRectangle(cornerRadius: 4))
+                    .background(SL.insight, in: RoundedRectangle(cornerRadius: 4))
                     .textSelection(.enabled)
             }
         }
         .padding(17)
-        .background(Color(hex: "EAF0DF"), in: RoundedRectangle(cornerRadius: 6))
+        .background(SL.iconTile, in: RoundedRectangle(cornerRadius: 6))
     }
 }

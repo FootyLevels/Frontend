@@ -14,15 +14,15 @@ struct InsightCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "viewfinder")
-                .font(.system(size: 18))
+                .font(.system(.title3))
                 .foregroundStyle(SL.iconTileText)
-                .frame(width: 34, height: 34)
+                .scaledFrame(width: 34, relativeTo: .title3)
                 .background(SL.iconTile, in: RoundedRectangle(cornerRadius: 6))
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline) {
                     Eyebrow(text: mode == .motion ? "WATCH THE RELATIONSHIP" : String(format: "MOMENT %02d", frameNumber),
-                            color: Color(hex: "81916F"))
+                            color: SL.muted)
                     Spacer()
                     if mode == .frames, canSelectPlayer {
                         Button(action: onSelectPlayer) {
@@ -31,20 +31,20 @@ struct InsightCard: View {
                                 Text("Select player")
                                 Image(systemName: "arrow.up.right")
                             }
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color(hex: "657958"))
+                            .font(.system(.caption2))
+                            .foregroundStyle(SL.muted)
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 Text(title)
-                    .font(SL.display(15, .bold))
+                    .font(SL.display(.subheadline))
                     .tracking(-0.3)
                     .foregroundStyle(SL.ink)
                 Text(message)
-                    .font(.system(size: 12))
+                    .font(.system(.caption))
                     .lineSpacing(3)
-                    .foregroundStyle(Color(hex: "7A8370"))
+                    .foregroundStyle(SL.muted)
             }
         }
         .padding(.horizontal, 14)
@@ -85,19 +85,19 @@ struct KeyFramesSection: View {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         Text("The moments that make the move")
-                            .font(SL.display(16, .bold))
+                            .font(SL.display(.callout))
                             .tracking(-0.5)
                             .foregroundStyle(SL.ink)
                         Text(String(format: "%02d", project.frames.count))
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(Color(hex: "768968"))
+                            .font(.system(.caption2, weight: .medium))
+                            .foregroundStyle(SL.muted)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(Color(hex: "EAF0DF"), in: RoundedRectangle(cornerRadius: 4))
+                            .background(SL.iconTile, in: RoundedRectangle(cornerRadius: 4))
                     }
                     Text("Choose a frame to inspect. Add your own moments as you watch.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color(hex: "8B9480"))
+                        .font(.system(.caption2))
+                        .foregroundStyle(SL.muted)
                 }
                 Spacer()
                 HStack(spacing: 6) {
@@ -112,7 +112,7 @@ struct KeyFramesSection: View {
             }
 
             ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.horizontal) {
                     LazyHStack(spacing: 12) {
                         ForEach(Array(project.frames.enumerated()), id: \.element.id) { index, frame in
                             FrameCard(frame: frame, order: index + 1, isSelected: frame.id == selectedFrameId) {
@@ -123,6 +123,7 @@ struct KeyFramesSection: View {
                     }
                     .padding(2)
                 }
+                .scrollIndicators(.hidden)
                 .onChange(of: selectedFrameId) { _, id in
                     guard let id else { return }
                     withAnimation { proxy.scrollTo(id, anchor: .center) }
@@ -135,10 +136,11 @@ struct KeyFramesSection: View {
                                   action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(.footnote, weight: .medium))
                 .foregroundStyle(SL.ink)
-                .frame(width: 30, height: 30)
+                .scaledFrame(width: 30, relativeTo: .footnote)
                 .overlay(Circle().stroke(SL.line))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .disabled(disabled)
@@ -166,21 +168,21 @@ private struct FrameCard: View {
                 }
                 .frame(width: 120, height: 150)
                 .overlay(alignment: .bottom) {
-                    LinearGradient(colors: [.clear, Color(hex: "182B28").opacity(0.3)], startPoint: .top, endPoint: .bottom)
+                    LinearGradient(colors: [.clear, SL.videoStage.opacity(0.3)], startPoint: .top, endPoint: .bottom)
                         .frame(height: 35)
                 }
                 .overlay(alignment: .topLeading) {
                     Text(String(format: "%02d", order))
-                        .font(.system(size: 9))
+                        .font(.system(.caption2))
                         .foregroundStyle(.white)
                         .frame(width: 22, height: 22)
-                        .background(Color(hex: "152B24").opacity(0.56), in: Circle())
+                        .background(SL.videoStage.opacity(0.56), in: Circle())
                         .padding(7)
                 }
                 .overlay(alignment: .topTrailing) {
                     if isSelected {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 9, weight: .bold))
+                            .font(.system(.caption2, weight: .bold))
                             .foregroundStyle(SL.tickText)
                             .frame(width: 20, height: 20)
                             .background(SL.tick, in: Circle())
@@ -189,7 +191,7 @@ private struct FrameCard: View {
                 }
                 .overlay(alignment: .bottomTrailing) {
                     Text(String(format: "%.2fs", frame.timestamp))
-                        .font(.system(size: 9).monospacedDigit())
+                        .font(.system(.caption2).monospacedDigit())
                         .foregroundStyle(.white)
                         .padding(8)
                 }
@@ -197,15 +199,15 @@ private struct FrameCard: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(frame.label)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(.caption, weight: .semibold))
                         .foregroundStyle(SL.ink)
                         .lineLimit(1)
                     HStack(spacing: 5) {
                         Circle().fill(SL.frameDot(frame.status)).frame(width: 5, height: 5)
                         Text(SL.frameStatusText(frame.status))
                     }
-                    .font(.system(size: 10))
-                    .foregroundStyle(Color(hex: "869179"))
+                    .font(.system(.caption2))
+                    .foregroundStyle(SL.muted)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 10)
@@ -240,19 +242,19 @@ struct PipelineBar: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: "cube")
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color(hex: "67844B"))
+                    .font(.system(.title3))
+                    .foregroundStyle(SL.muted)
                     .frame(width: 40, height: 40)
                     .background(SL.pipelineIcon, in: RoundedRectangle(cornerRadius: 7))
-                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "D1DFB9")))
+                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(SL.presetActiveBorder))
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(SL.display(15, .semibold))
+                        .font(SL.display(.subheadline))
                         .tracking(-0.4)
                         .foregroundStyle(SL.ink)
                     Text(subtitle)
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color(hex: "889477"))
+                        .font(.system(.caption))
+                        .foregroundStyle(SL.muted)
                 }
             }
 
@@ -313,19 +315,19 @@ struct WorkspaceFootnote: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 7) {
                 Image(systemName: "info.circle")
-                    .font(.system(size: 12))
+                    .font(.system(.caption))
                 Text("3D poses are estimates from a single image. Hidden limbs and foot contact may be inaccurate. Motion uses SAM 3 tracking, SAM 3D Body poses, and a SAM 3D Objects football. Ball depth assumes a 22 cm diameter; spin is not reconstructed. Camera movement is not separated from player movement.")
             }
-            .font(.system(size: 10))
+            .font(.system(.caption2))
             .lineSpacing(3)
-            .foregroundStyle(Color(hex: "969D8D"))
+            .foregroundStyle(SL.muted)
 
             if canRemove {
                 HStack {
                     Spacer()
                     Button(role: .destructive, action: onRemove) {
                         Label("Remove selected frame", systemImage: "trash")
-                            .font(.system(size: 11))
+                            .font(.system(.caption2))
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(SL.errorText)

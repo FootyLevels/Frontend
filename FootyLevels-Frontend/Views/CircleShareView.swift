@@ -65,7 +65,7 @@ struct CircleShareView: View {
             } message: {
                 Text("Current and future members of this circle can watch the prepared video\(model.includeMotion ? " and explore the selected 3D motion" : ""), read your note, and leave feedback. Members may save a copy\(model.includeMotion ? " of the video and motion files" : ""). You can remove the shared attempt later; your private originals are kept.")
             }
-        }.tint(SL.green)
+        }.tint(SL.tint)
     }
 
     private var motionChoice: some View {

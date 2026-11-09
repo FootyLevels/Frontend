@@ -8,11 +8,27 @@ enum LessonLibrary {
         let title: String
         let subtitle: String
         let skills: [String]
+        /// The first skill's opening drills, for a "practise next" preview.
+        var practice: [Drill] = []
         let url: URL
     }
 
+    struct Drill: Hashable {
+        let title: String
+        let level: String
+        let reps: Int
+    }
+
     private struct Summary: Decodable {
-        struct Skill: Decodable { let short: String }
+        struct Skill: Decodable {
+            let short: String
+            let drills: [SummaryDrill]?
+        }
+        struct SummaryDrill: Decodable {
+            let title: String
+            let lvl: String
+            let reps: Int
+        }
         let id: String
         let title: String
         let subtitle: String
@@ -30,8 +46,10 @@ enum LessonLibrary {
                 let url = root.appendingPathComponent(name, isDirectory: true)
                 guard let data = try? Data(contentsOf: url.appendingPathComponent("lesson.json")),
                       let summary = try? JSONDecoder().decode(Summary.self, from: data) else { return nil }
+                let drills = (summary.skills.first?.drills ?? []).prefix(2)
+                    .map { Drill(title: $0.title, level: $0.lvl, reps: $0.reps) }
                 return Entry(id: summary.id, title: summary.title, subtitle: summary.subtitle,
-                             skills: summary.skills.map(\.short), url: url)
+                             skills: summary.skills.map(\.short), practice: drills, url: url)
             }
             .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
     }

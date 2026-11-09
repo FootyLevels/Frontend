@@ -1,0 +1,22 @@
+{
+  "images" : [
+    {
+      "filename" : "thumb-Lesson-three-1v1-moves-olive.jpg",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "thumb-Lesson-three-1v1-moves-lime.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -26,13 +26,13 @@ struct CommunityView: View {
             .onChange(of: scenePhase) { _, phase in if phase != .active { model.stop() } }
             .onDisappear { model.stop() }
             .sheet(item: $form) { kind in CircleEntryForm(kind: kind, model: model) }
-        }.tint(SL.green)
+        }.tint(SL.tint)
     }
 
     private var introduction: some View {
         VStack(alignment: .leading, spacing: 10) {
             Eyebrow(text: "TRAIN TOGETHER", rule: true)
-            Text("Your people.\nYour next attempt.").font(SL.display(30, .bold)).tracking(-0.6)
+            Text("Your people.\nYour next attempt.").font(SL.display(.title)).tracking(-0.6)
             Text("Create a private training circle, share an attempt, and help each other improve with feedback at the right moment.")
                 .font(.callout).foregroundStyle(SL.muted)
         }.accessibilityIdentifier("community-introduction")
@@ -169,6 +169,6 @@ private struct CircleEntryForm: View {
             .navigationTitle(kind == .create ? "Create circle" : "Join circle").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(model.isWorking) } }
             .interactiveDismissDisabled(model.isWorking)
-        }.tint(SL.green)
+        }.tint(SL.tint)
     }
 }

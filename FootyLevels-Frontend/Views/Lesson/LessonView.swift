@@ -56,7 +56,7 @@ private struct LessonScreen: View {
                 case .test: TestSection(model: model)
                 }
                 Text("Built from one tutorial clip and its 3D reconstruction. Measurements are estimates from a single camera; nothing here rates the player.")
-                    .font(.system(size: 11))
+                    .font(.system(.caption2))
                     .foregroundStyle(SL.muted)
             }
             .padding(.horizontal, 16)
@@ -78,14 +78,13 @@ private struct LessonScreen: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(text: "LEARN A SKILL", rule: true)
-            (Text("The over ") + Text("fake").foregroundColor(Color(uiColor: SL.overlaySecond)))
-                .font(SL.display(32, .heavy))
-                .tracking(-1.2)
+            Text("The over \(Text("fake").foregroundStyle(Color(uiColor: SL.overlaySecond)))")
+                .font(.system(.largeTitle))
+                .tracking(-0.6)
                 .foregroundStyle(SL.ink)
             Text("Shape one way, step across the ball, then take it the other way.")
-                .font(.system(size: 14))
-                .foregroundStyle(Color(hex: "77816F"))
+                .font(.system(.subheadline))
+                .foregroundStyle(SL.muted)
         }
         .padding(.top, 8)
     }
@@ -140,7 +139,7 @@ private struct LessonInfoBar: View {
                 Spacer()
                 Text(model.mirror ? "Front foot ▶" : "Step foot ▶")
             }
-            .font(.system(size: 10, weight: .medium))
+            .font(.system(.caption2, weight: .medium))
             .foregroundStyle(SL.muted)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -172,7 +171,7 @@ private struct LessonInfoBar: View {
                 .frame(width: 9, height: 9)
             Text(text)
         }
-        .font(.system(size: 12, weight: .medium))
+        .font(.system(.caption, weight: .medium))
         .foregroundStyle(on ? color : SL.muted)
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
@@ -181,8 +180,8 @@ private struct LessonInfoBar: View {
     }
 
     private func reading(_ label: String, _ value: String) -> some View {
-        (Text(label + " ").foregroundColor(SL.muted) + Text(value).foregroundColor(SL.ink).fontWeight(.semibold))
-            .font(.system(size: 12).monospacedDigit())
+        Text("\(Text("\(label) ").foregroundStyle(SL.muted))\(Text(value).foregroundStyle(SL.ink).fontWeight(.semibold))")
+            .font(.system(.caption).monospacedDigit())
     }
 
     private func focusRing(_ on: Bool) -> some View {
@@ -205,7 +204,7 @@ private struct LessonTimeline: View {
             ZStack(alignment: .topLeading) {
                 ForEach(model.lesson.shots, id: \.id) { shot in
                     Text(shot.id == 0 ? "FULL-SPEED DEMO" : "SLOW TUTORIAL")
-                        .font(.system(size: 9, weight: .medium))
+                        .font(.system(.caption2, weight: .medium))
                         .tracking(0.8)
                         .foregroundStyle(SL.muted)
                         .lineLimit(1)
@@ -243,7 +242,9 @@ private struct LessonTimeline: View {
                     }
             )
         }
-        .frame(height: 42)
+        .frame(height: 44)
+        // Shot labels sit at fixed offsets above the phase bars, so they keep their drawn size.
+        .dynamicTypeSize(...DynamicTypeSize.large)
         .accessibilityElement()
         .accessibilityLabel("Lesson timeline")
         .accessibilityValue("\(model.phase.id == "pause" ? "Tutorial pause" : OverFakeLessonContent.phase(model.phase.id).name), \(String(format: "%.1f", model.playback.currentTime)) seconds")

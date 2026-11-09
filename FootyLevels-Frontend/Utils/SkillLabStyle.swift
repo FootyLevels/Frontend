@@ -1,66 +1,91 @@
 import SwiftUI
 import UIKit
 
-/// The Skill Lab look, taken from `3d-model-frontend/web/src/styles.css` so the
-/// app and the browser viewer read as one product: deep pitch green, lime
-/// accents, and pale sage panels.
+/// The FootyLevels look. Every colour has a light and a dark value and follows the
+/// phone's appearance: light mode is olive green on light grey with off-white cards;
+/// dark mode is black with white controls and lime on the data. Video and 3D video
+/// surfaces stay dark in both modes.
 enum SL {
     // Page
-    static let page = Color(hex: "F8F8F2")
-    static let header = Color(hex: "FAFAF5")
-    static let ink = Color(hex: "233C30")
-    static let muted = Color(hex: "58665B")
-    static let line = Color(hex: "DFE3D9")
-    static let green = Color(hex: "173F31")
-    static let greenActive = Color(hex: "244C36")
-    static let lime = Color(hex: "D9EF8B")
-    static let accentLine = Color(hex: "719554")
-    static let headlineSoft = Color(hex: "526B53")
+    static let page = Color(light: "EBEBEB", dark: "000000")
+    static let header = Color(light: "EBEBEB", dark: "000000")
+    static let ink = Color(light: "0B0B0B", dark: "FFFFFF")
+    static let muted = Color(light: "5E5E5E", dark: "B4B4B4")
+    static let line = Color(light: "DCDCDC", dark: "222222")
+    /// The main action colour: olive in light mode, white in dark mode. Text on it is `onGreen`.
+    static let green = Color(light: "58752A", dark: "FFFFFF")
+    static let greenActive = Color(light: "4A6323", dark: "E0E0E0")
+    static let onGreen = Color(light: "FFFFFF", dark: "000000")
+    /// System controls (toggles, progress, links): olive in light mode, lime in dark mode.
+    static let tint = Color(light: "58752A", dark: "C6F24E")
+    /// Data on the page (the 3D body, timelines, progress, key numbers). Graphics only in
+    /// light mode, where it is under 4.5:1 against cards.
+    static let data = Color(light: "6B8E2E", dark: "C6F24E")
+    /// Lime for data on the dark video surfaces, in both modes.
+    static let lime = Color(hex: "C6F24E")
+    static let accentLine = data
+    static let headlineSoft = muted
+    /// A text link in the brand colour: dark olive in light mode, lime in dark mode.
+    static let link = Color(light: "3F5A1A", dark: "C6F24E")
+    /// A raised surface: buttons, fields and chips on top of a card.
+    static let raised = Color(light: "FFFFFF", dark: "1C1C1C")
 
-    // Video panel
-    static let videoPanel = Color(hex: "142C22")
-    static let videoTopline = Color(hex: "17352A")
-    static let videoStage = Color(hex: "11271E")
-    static let videoText = Color(hex: "DCE8D4")
-    static let videoMuted = Color(hex: "8EAA94")
-    static let track = Color(hex: "50604A")
-    static let knob = Color(hex: "E7F6B0")
-    static let mark = Color(hex: "78936B")
+    // Video panel: dark in both modes
+    static let videoPanel = Color(light: "141414", dark: "0A0A0A")
+    static let videoTopline = Color(light: "1A1A1A", dark: "111111")
+    static let videoStage = Color(light: "0E0E0E", dark: "050505")
+    static let videoText = Color(hex: "F2F2F2")
+    static let videoMuted = Color(hex: "A3A3A3")
+    static let videoBorder = Color(hex: "2A2A2A")
+    static let track = Color(hex: "4A4A4A")
+    static let knob = Color(hex: "FFFFFF")
+    /// Field outlines and frame marks: at least 3:1 against the surface they sit on.
+    static let mark = Color(light: "858585", dark: "6E6E6E")
+    static let controlBorder = Color(light: "8A8A8A", dark: "6E6E6E")
 
     // 3D inspector
-    static let panel = Color(hex: "F9FAF3")
-    static let panelBorder = Color(hex: "D7DECF")
-    static let panelTopline = Color(hex: "F2F5EB")
-    static let panelToplineText = Color(hex: "5A6C52")
-    static let stage = Color(hex: "EDF0E8")
-    static let toolbar = Color(hex: "F6F8EF")
-    static let presetActive = Color(hex: "E4ECD6")
-    static let presetActiveBorder = Color(hex: "D1DFBE")
-    static let presetActiveText = Color(hex: "355338")
-    static let presetText = Color(hex: "586C4E")
-    static let readyDot = Color(hex: "558552")
-    static let idleDot = Color(hex: "B4BF98")
+    static let panel = Color(light: "F7F7F7", dark: "111111")
+    static let panelBorder = Color(light: "E0E0E0", dark: "262626")
+    static let panelTopline = Color(light: "F0F0F0", dark: "161616")
+    static let panelToplineText = Color(light: "575757", dark: "B4B4B4")
+    static let stage = Color(light: "F2F2F2", dark: "0A0A0A")
+    static let toolbar = Color(light: "F7F7F7", dark: "111111")
+    static let presetActive = Color(light: "E3EBD3", dark: "222A10")
+    static let presetActiveBorder = Color(light: "C9D7AE", dark: "3A4A1A")
+    static let presetActiveText = Color(light: "3F5A1A", dark: "C6F24E")
+    static let presetText = Color(light: "575757", dark: "B4B4B4")
+    static let readyDot = data
+    static let idleDot = Color(light: "B0B0B0", dark: "4A4A4A")
 
     // Cards
-    static let insight = Color(hex: "F5F6EF")
-    static let iconTile = Color(hex: "E9EFDE")
-    static let iconTileText = Color(hex: "4E663C")
-    static let card = Color(hex: "F4F5ED")
-    static let cardBorder = Color(hex: "DCE3D3")
-    static let cardSelected = Color(hex: "486539")
-    static let frameImage = Color(hex: "C9D3BD")
-    static let tick = Color(hex: "DCEFAF")
-    static let tickText = Color(hex: "31572D")
-    static let pipeline = Color(hex: "EDF2E3")
-    static let pipelineBorder = Color(hex: "DCE5CB")
-    static let pipelineIcon = Color(hex: "E0EBCE")
-    static let modeTrack = Color(hex: "E9EFDF")
-    static let modeBorder = Color(hex: "D5DFC8")
-    static let modeText = Color(hex: "526546")
-    static let errorFill = Color(hex: "F8E9E3")
-    static let errorText = Color(hex: "923E28")
-    static let noticeFill = Color(hex: "F5E9D8")
-    static let noticeText = Color(hex: "79551F")
+    static let insight = Color(light: "F2F2F2", dark: "111111")
+    static let iconTile = Color(light: "E3EBD3", dark: "1C1C1C")
+    static let iconTileText = Color(light: "3F5A1A", dark: "C6F24E")
+    static let card = Color(light: "F7F7F7", dark: "111111")
+    static let cardBorder = Color(light: "E2E2E2", dark: "222222")
+    static let cardSelected = green
+    static let frameImage = Color(light: "D6D6D6", dark: "2A2A2A")
+    static let tick = Color(light: "E3EBD3", dark: "222A10")
+    static let tickText = Color(light: "3F5A1A", dark: "C6F24E")
+    static let pipeline = Color(light: "F2F2F2", dark: "111111")
+    static let pipelineBorder = Color(light: "E2E2E2", dark: "222222")
+    static let pipelineIcon = Color(light: "E3EBD3", dark: "1C1C1C")
+    static let modeTrack = Color(light: "E2E2E2", dark: "1C1C1C")
+    static let modeBorder = Color(light: "D6D6D6", dark: "262626")
+    static let modeText = Color(light: "474747", dark: "B4B4B4")
+    static let errorFill = Color(light: "FBE9E7", dark: "2C1616")
+    static let errorText = Color(light: "9E2B1E", dark: "FF8A7A")
+    static let noticeFill = Color(light: "FBF1DD", dark: "2A2212")
+    static let noticeText = Color(light: "7A4F12", dark: "F0C46A")
+
+    // Outcomes and confidence, as text or marks on cards
+    static let good = Color(light: "4A6A1F", dark: "C6F24E")
+    static let fair = Color(light: "8A6418", dark: "F0C46A")
+    static let miss = Color(light: "9E4A22", dark: "FF9A6A")
+    /// A wrong answer's fill; white text on it in both modes (5.9:1).
+    static let wrong = Color(hex: "B23B3B")
+    /// Behind the person symbol when an account has no photo; the symbol is white (8:1).
+    static let avatarFill = Color(hex: "3F5A1A")
 
     // Status dots on key frames
     static func frameDot(_ status: String) -> Color {
@@ -82,49 +107,100 @@ enum SL {
         }
     }
 
-    // 3D scene, as UIColor for RealityKit materials
-    static let bodyTint = UIColor(red: 0xA1 / 255, green: 0xBD / 255, blue: 0x9B / 255, alpha: 1)
+    // 3D scene, as UIColor for RealityKit materials. RealityKit reads the colour when
+    // a material is made, so a scene built in one appearance keeps it until rebuilt.
+    static let bodyTint = UIColor(light: "6B8E2E", dark: "C6F24E")
     // The two bodies in the overlay. Blue and orange stay apart with red-green
     // color blindness, where green and orange would not.
     static let overlayFirst = UIColor(red: 0x3E / 255, green: 0x7C / 255, blue: 0xB1 / 255, alpha: 1)
     static let overlaySecond = UIColor(red: 0xE0 / 255, green: 0x7B / 255, blue: 0x39 / 255, alpha: 1)
 
-    // Type — Manrope for display, DM Sans for text in the web app. The system
-    // face with tightened tracking gets close without bundling fonts.
-    static func display(_ size: CGFloat, _ weight: Font.Weight = .bold) -> Font {
-        .system(size: size, weight: weight)
+    // Type — the system face. A text style rather than a point size, so headings follow
+    // the person's text size. Large titles are regular weight, as in the brand screens;
+    // smaller headings are semibold, never heavier.
+    static func display(_ style: Font.TextStyle) -> Font {
+        switch style {
+        case .largeTitle, .title: .system(style)
+        default: .system(style, weight: .semibold)
+        }
+    }
+}
+
+extension Color {
+    /// A colour that follows the system appearance, from two hex values.
+    init(light: String, dark: String) {
+        self.init(uiColor: UIColor(light: light, dark: dark))
+    }
+}
+
+extension UIColor {
+    /// A colour that follows the system appearance, from two hex values.
+    convenience init(light: String, dark: String) {
+        let light = UIColor(Color(hex: light))
+        let dark = UIColor(Color(hex: dark))
+        self.init { $0.userInterfaceStyle == .dark ? dark : light }
     }
 }
 
 // MARK: - Shared pieces
 
-/// The skewed three-bar logo followed by "footy**levels**".
+/// The skewed three-bar logo followed by "footy**levels**". The last bar carries the
+/// data colour: olive in light mode, lime in dark mode.
 struct BrandMark: View {
     var size: CGFloat = 24
+    /// Draws the mark in white for use over photographs.
+    var onImage = false
+    /// Turning this on springs the bars up one after another, then fades the
+    /// wordmark in. The sign-in splash and the sign-in screen start it off.
+    var drawn = true
+    /// Keeps the bars rising and falling like a level meter, as on the sign-in screen.
+    var levels = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: size * 0.4) {
-            HStack(alignment: .center, spacing: size * 0.14) {
-                bar(height: 0.8)
-                bar(height: 1)
-                bar(height: 0.57)
+            TimelineView(.animation(paused: !levels || reduceMotion)) { context in
+                let time = context.date.timeIntervalSinceReferenceDate
+                HStack(alignment: .center, spacing: size * 0.14) {
+                    bar(0, height: 0.8, color: onImage ? .white : SL.ink, time: time)
+                    bar(1, height: 1, color: onImage ? .white : SL.ink, time: time)
+                    bar(2, height: 0.57, color: onImage ? SL.lime : SL.data, time: time)
+                        .shadow(color: SL.lime.opacity(levels && onImage && !reduceMotion ? 0.8 : 0), radius: size * 0.25)
+                }
             }
             .frame(height: size)
             .transformEffect(CGAffineTransform(a: 1, b: 0, c: -0.36, d: 1, tx: size * 0.18, ty: 0))
 
-            (Text("footy").font(SL.display(size, .heavy))
-                + Text("levels").font(SL.display(size, .medium)))
+            // The wordmark is a logo, so it keeps its drawn size instead of scaling with text.
+            Text("\(Text("Footy").font(.system(size: size, weight: .heavy)))\(Text("Levels").font(.system(size: size, weight: .medium)))")
                 .tracking(-size * 0.05)
-                .foregroundStyle(SL.ink)
+                .foregroundStyle(onImage ? .white : SL.ink)
+                .opacity(drawn ? 1 : 0)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.3).delay(0.26), value: drawn)
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("FootyLevels")
     }
 
-    private func bar(height: CGFloat) -> some View {
-        Rectangle()
-            .fill(SL.green)
+    private func bar(_ index: Int, height: CGFloat, color: Color, time: TimeInterval) -> some View {
+        let level = levels && !reduceMotion ? Self.levelScale(bar: index, at: time) : 1
+        return Rectangle()
+            .fill(color)
             .frame(width: size * 0.2, height: size * height)
+            .scaleEffect(x: 1, y: (drawn ? 1 : 0) * level, anchor: .bottom)
+            .animation(reduceMotion ? nil : .spring(duration: 0.38, bounce: 0.35).delay(Double(index) * 0.09), value: drawn)
+    }
+
+    /// Each bar's height as a share of its resting height, at a moment in time. The three move
+    /// at different speeds, like a level meter: the first dips to half, the second rests at
+    /// 70% and rises to full, and the lime one rises to 145%.
+    static func levelScale(bar: Int, at seconds: TimeInterval) -> CGFloat {
+        let wave = { (period: Double) in (1 - cos(2 * .pi * seconds / period)) / 2 }
+        switch bar {
+        case 0: return 1 - 0.5 * wave(1.7)
+        case 1: return 0.7 + 0.3 * wave(2.3)
+        default: return 1 + 0.45 * wave(1.3)
+        }
     }
 }
 
@@ -140,7 +216,7 @@ struct Eyebrow: View {
                 Rectangle().fill(SL.accentLine).frame(width: 21, height: 2)
             }
             Text(text)
-                .font(.system(size: 10, weight: .bold))
+                .font(.system(.caption2, weight: .bold))
                 .tracking(1.6)
                 .foregroundStyle(color)
         }
@@ -157,15 +233,15 @@ struct PanelTopline<Trailing: View>: View {
     var body: some View {
         HStack {
             Label(title, systemImage: icon)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(.caption2, weight: .semibold))
                 .tracking(1.3)
             Spacer()
             trailing
         }
         .labelStyle(.titleAndIcon)
         .padding(.horizontal, 14)
-        .frame(height: 40)
-        .foregroundStyle(dark ? Color(hex: "D5DFCF") : SL.panelToplineText)
+        .frame(minHeight: 40)
+        .foregroundStyle(dark ? SL.videoText : SL.panelToplineText)
         .background(dark ? SL.videoTopline : SL.panelTopline)
     }
 }
@@ -178,12 +254,14 @@ struct StatusDot: View {
     var body: some View {
         HStack(spacing: 6) {
             Circle().fill(ready ? SL.readyDot : SL.idleDot).frame(width: 6, height: 6)
-            Text(text).font(.system(size: 10))
+            Text(text).font(.system(.caption2))
         }
         .foregroundStyle(SL.muted)
     }
 }
 
+/// The main action: a filled pill, olive with white text in light mode and white with
+/// black text in dark mode.
 struct SLPrimaryButtonStyle: ButtonStyle {
     var fullWidth = false
     @Environment(\.isEnabled) private var isEnabled
@@ -192,30 +270,30 @@ struct SLPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 18)
             .padding(.vertical, 12)
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .frame(minHeight: 44)
-            .background(isEnabled ? (configuration.isPressed ? SL.greenActive : SL.green) : SL.line,
-                        in: RoundedRectangle(cornerRadius: 12))
-            .foregroundStyle(isEnabled ? Color.white : SL.muted)
+            .background(isEnabled ? (configuration.isPressed ? SL.greenActive : SL.green) : SL.modeTrack,
+                        in: Capsule())
+            .foregroundStyle(isEnabled ? SL.onGreen : SL.muted)
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
             .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
+/// A secondary action: a raised pill with a hairline border.
 struct SLSecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline.weight(.semibold))
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .frame(minHeight: 44)
-            .background(configuration.isPressed ? SL.iconTile : SL.panel,
-                        in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(SL.panelBorder))
+            .background(configuration.isPressed ? SL.modeTrack : SL.raised, in: Capsule())
+            .overlay(Capsule().stroke(SL.cardBorder))
             .foregroundStyle(isEnabled ? SL.ink : SL.muted)
     }
 }
@@ -230,18 +308,59 @@ extension ButtonStyle where Self == SLSecondaryButtonStyle {
 }
 
 extension View {
-    /// The workspace uses a light canvas, including its navigation chrome.
+    /// The page canvas, including its navigation chrome, in either appearance.
     func slScreen() -> some View {
         self.foregroundStyle(SL.ink)
             .toolbarBackground(SL.header, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.light, for: .navigationBar)
     }
 
-    /// Rounded panel with the hairline border used across the workspace.
-    func slPanel(fill: Color = SL.panel, border: Color = SL.panelBorder, radius: CGFloat = 10) -> some View {
+    /// Rounded panel with the hairline border used across the app.
+    func slPanel(fill: Color = SL.panel, border: Color = SL.panelBorder, radius: CGFloat = 16) -> some View {
         background(fill, in: RoundedRectangle(cornerRadius: radius))
             .clipShape(RoundedRectangle(cornerRadius: radius))
             .overlay(RoundedRectangle(cornerRadius: radius).stroke(border))
+    }
+
+    /// A form field: a raised well with a border that stays visible against the page
+    /// (at least 3:1 in both appearances).
+    func slField() -> some View {
+        padding(14)
+            .frame(minHeight: 44)
+            .background(SL.raised, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(SL.mark))
+    }
+
+    /// A fixed-size box, such as a number badge or icon tile, that grows with
+    /// the person's text size so the text inside it never clips.
+    func scaledFrame(width: CGFloat, height: CGFloat? = nil, relativeTo style: Font.TextStyle = .body) -> some View {
+        modifier(ScaledFrame(width: width, height: height ?? width, style: style))
+    }
+
+    /// Keeps a small control's look but gives it Apple's 44-point minimum tap area.
+    func minimumTapArea() -> some View {
+        frame(minWidth: 44, minHeight: 44).contentShape(.rect)
+    }
+
+    /// Frosted glass over a photograph or video: a light translucent fill with a hairline.
+    func slGlass(radius: CGFloat = 22) -> some View {
+        background(.ultraThinMaterial.opacity(0.9), in: RoundedRectangle(cornerRadius: radius))
+            .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: radius))
+            .overlay(RoundedRectangle(cornerRadius: radius).stroke(Color.white.opacity(0.35)))
+            .environment(\.colorScheme, .dark)
+    }
+}
+
+private struct ScaledFrame: ViewModifier {
+    @ScaledMetric private var width: CGFloat
+    @ScaledMetric private var height: CGFloat
+
+    init(width: CGFloat, height: CGFloat, style: Font.TextStyle) {
+        _width = ScaledMetric(wrappedValue: width, relativeTo: style)
+        _height = ScaledMetric(wrappedValue: height, relativeTo: style)
+    }
+
+    func body(content: Content) -> some View {
+        content.frame(width: width, height: height)
     }
 }

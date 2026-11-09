@@ -22,7 +22,7 @@ struct ComparisonView: View {
                 }
                 ComparisonControls(model: model)
                 Text("The comparison shows where two movements differ. It doesn't score or rank either one.")
-                    .font(.system(size: 11))
+                    .font(.system(.caption2))
                     .foregroundStyle(SL.muted)
             }
             .padding(.horizontal, 16)
@@ -51,7 +51,7 @@ struct ComparisonView: View {
             HStack(spacing: 6) {
                 OverlaySlotBadge(slot: slot, size: 18)
                 Text(project.title)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(.caption2, weight: .semibold))
                     .foregroundStyle(SL.videoText)
                     .lineLimit(1)
             }
@@ -130,8 +130,8 @@ private struct ComparisonLayoutSwitch: View {
                     Task { await model.setLayout(layout) }
                 } label: {
                     Text(layout.rawValue)
-                        .font(.system(size: 13, weight: selected ? .semibold : .regular))
-                        .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.modeText)
+                        .font(.system(.footnote, weight: selected ? .semibold : .regular))
+                        .foregroundStyle(selected ? SL.onGreen : SL.modeText)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 5))
@@ -175,10 +175,10 @@ private struct SideStage: View {
                     Text("No pose in this frame").foregroundStyle(SL.noticeText)
                 }
             }
-            .font(.system(size: 11))
+            .font(.system(.caption2))
             .foregroundStyle(SL.ink)
             .padding(7)
-            .background(Color(hex: "F6F8EF").opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
+            .background(SL.toolbar.opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
             .padding(8)
             .allowsHitTesting(false)
         }
@@ -203,15 +203,15 @@ private struct OverlayTransport: View {
                     playback.togglePlayback()
                 } label: {
                     Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
-                        .font(.system(size: 18))
-                        .foregroundStyle(Color(hex: "EAF5D9"))
-                        .frame(width: 28, height: 28)
+                        .font(.system(.title3))
+                        .foregroundStyle(SL.videoText)
+                        .scaledFrame(width: 28, relativeTo: .title3)
+                        .minimumTapArea()
                 }
                 .accessibilityLabel(playback.isPlaying ? "Pause both videos" : "Play both videos")
 
-                (Text(String(format: "%.2f", playback.currentTime))
-                    + Text(String(format: "  / %.2f", playback.duration)).foregroundColor(SL.videoMuted))
-                    .font(.system(size: 12).monospacedDigit())
+                Text("\(String(format: "%.2f", playback.currentTime))\(Text(String(format: "  / %.2f", playback.duration)).foregroundStyle(SL.videoMuted))")
+                    .font(.system(.caption).monospacedDigit())
                     .foregroundStyle(SL.videoText)
 
                 Spacer()
@@ -225,14 +225,14 @@ private struct OverlayTransport: View {
                 } label: {
                     HStack(spacing: 4) {
                         Text("\(playback.speed.formatted())× speed")
-                        Image(systemName: "chevron.down").font(.system(size: 8, weight: .bold))
+                        Image(systemName: "chevron.down").font(.system(.caption2, weight: .bold)).imageScale(.small)
                     }
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color(hex: "D5E4C9"))
+                    .font(.system(.caption2))
+                    .foregroundStyle(SL.videoText)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
-                    .background(Color(hex: "193B2B"), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(hex: "526854")))
+                    .background(SL.videoTopline, in: RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(SL.videoBorder))
                 }
             }
 
@@ -252,7 +252,7 @@ private struct OverlayTransport: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .slPanel(fill: SL.videoPanel, border: Color(hex: "2B3B32"))
+        .slPanel(fill: SL.videoPanel, border: SL.videoBorder)
     }
 }
 
@@ -289,10 +289,10 @@ private struct OverlayStageOverlays: View {
                     }
                 }
             }
-            .font(.system(size: 11))
+            .font(.system(.caption2))
             .foregroundStyle(SL.ink)
             .padding(9)
-            .background(Color(hex: "F6F8EF").opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
+            .background(SL.toolbar.opacity(0.92), in: RoundedRectangle(cornerRadius: 5))
             .overlay(RoundedRectangle(cornerRadius: 5).stroke(SL.modeBorder))
             .padding(12)
             .allowsHitTesting(false)
@@ -300,9 +300,9 @@ private struct OverlayStageOverlays: View {
         .overlay(alignment: .bottomLeading) {
             if model.state == .ready {
                 Text(String(format: "A FRAME %03d", model.currentFrame))
-                    .font(.system(size: 10, weight: .medium).monospacedDigit())
+                    .font(.system(.caption2, weight: .medium).monospacedDigit())
                     .tracking(1)
-                    .foregroundStyle(Color(hex: "839574"))
+                    .foregroundStyle(SL.muted)
                     .padding(14)
                     .allowsHitTesting(false)
             }
@@ -367,10 +367,10 @@ private struct ComparisonControls: View {
                 Spacer(minLength: 0)
             }
             .toggleStyle(CheckToggleStyle())
-            .font(.system(size: 12))
-            .foregroundStyle(Color(hex: "6F7B66"))
+            .font(.system(.caption))
+            .foregroundStyle(SL.muted)
         }
-        .tint(SL.green)
+        .tint(SL.tint)
         .disabled(model.state != .ready)
         .padding(16)
         .slPanel()
@@ -393,11 +393,11 @@ private struct ComparisonControls: View {
     private func row(title: String, value: String) -> some View {
         HStack {
             Text(title)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(.footnote, weight: .semibold))
                 .foregroundStyle(SL.ink)
             Spacer()
             Text(value)
-                .font(.system(size: 12).monospacedDigit())
+                .font(.system(.caption).monospacedDigit())
                 .foregroundStyle(SL.muted)
         }
     }
@@ -405,9 +405,10 @@ private struct ComparisonControls: View {
     private func nudge(_ icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
-                .frame(width: 32, height: 32)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "BFC9B9")))
+                .font(.system(.caption, weight: .semibold))
+                .scaledFrame(width: 32, relativeTo: .caption)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(SL.controlBorder))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .foregroundStyle(SL.ink)

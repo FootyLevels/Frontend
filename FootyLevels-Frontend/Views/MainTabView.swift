@@ -8,11 +8,13 @@ struct MainTabView: View {
 
     /// Shared by both tabs, so a video imported on one shows up on the other.
     @State private var library = ProjectsListViewModel()
+    /// The profile card, which opens from the photo button on Learn or Videos.
+    @State private var profile = ProfilePresenter()
 
     var body: some View {
         TabView {
             Tab("Learn", systemImage: "figure.soccer") {
-                LessonLibraryView()
+                LessonLibraryView(appState: appState)
             }
             Tab("Overlay", systemImage: "square.2.layers.3d") {
                 OverlayDifferenceView(library: library)
@@ -24,8 +26,20 @@ struct MainTabView: View {
                 ProjectsListView(appState: appState, viewModel: library)
             }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
         .toolbarBackground(SL.header, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
+        .environment(profile)
+        // Over the tab bar too, so the whole app blurs behind the card.
+        .overlay {
+            if profile.isOpen, let appState {
+                ProfileCardOverlay(user: appState.currentUser, origin: profile.origin) {
+                    profile.dismiss()
+                } onLogOut: {
+                    profile.dismiss()
+                    try? appState.signOut()
+                }
+            }
+        }
     }
 }

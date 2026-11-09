@@ -1,5 +1,6 @@
 import Foundation
 import RealityKit
+import UIKit
 import Testing
 @testable import FootyLevels_Frontend
 
@@ -23,6 +24,17 @@ struct LessonPackageTests {
         for lesson in lessons {
             #expect(!lesson.skills.isEmpty, "\(lesson.id) lists no skills")
         }
+    }
+
+    /// Learn previews each lesson's opening drills and shows its colour-graded thumbnail.
+    @Test func everyLessonHasADrillPreviewAndAThumbnail() {
+        for lesson in LessonLibrary.lessons() {
+            #expect(lesson.practice.count == 2, "\(lesson.id) shows \(lesson.practice.count) drills")
+            #expect(lesson.practice.allSatisfy { $0.reps > 0 && !$0.title.isEmpty }, "\(lesson.id) drill preview")
+            #expect(UIImage(named: "LessonThumb-\(lesson.id)") != nil, "\(lesson.id) has no thumbnail")
+        }
+        #expect(UIImage(named: "LessonThumb-over-fake") != nil)
+        #expect(UIImage(named: "LearnHero") != nil)
     }
 
     /// Every bundle in the app, including ones added after these five.

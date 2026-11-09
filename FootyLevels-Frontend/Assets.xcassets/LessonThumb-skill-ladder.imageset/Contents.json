@@ -1,0 +1,22 @@
+{
+  "images" : [
+    {
+      "filename" : "thumb-Lesson-skill-ladder-olive.jpg",
+      "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "thumb-Lesson-skill-ladder-lime.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

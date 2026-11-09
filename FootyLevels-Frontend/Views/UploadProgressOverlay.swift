@@ -16,7 +16,7 @@ struct UploadProgressOverlay: View {
                         .font(.footnote).foregroundStyle(SL.muted)
                 case .uploading(let fraction):
                     Text("Uploading your video").font(.headline)
-                    ProgressView(value: fraction).tint(SL.green)
+                    ProgressView(value: fraction).tint(SL.tint)
                     Text("\(Int(fraction * 100))%")
                         .font(.subheadline.monospacedDigit())
                 case .processing:

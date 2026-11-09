@@ -19,7 +19,7 @@ struct AppTheme {
         static let secondaryLight = SL.muted // Supporting text
 
         // Accent Colors
-        static let accent = SL.lime         // Lime highlights
+        static let accent = SL.data         // Olive (light) or lime (dark) highlights
         static let accentDark = SL.noticeText     // Amber warnings
 
         // Semantic Colors
@@ -34,15 +34,15 @@ struct AppTheme {
         static let advanced = SL.errorText       // Red
 
         // Background Colors
-        static let background = SL.page     // Warm cream background
+        static let background = SL.page     // Page background, light or dark
         static let surface = SL.panel                  // Card/surface background
-        static let surfaceElevated = Color(hex: "FFFFFF") // Elevated surfaces
+        static let surfaceElevated = SL.raised // Elevated surfaces
 
         // Text Colors
         static let textPrimary = SL.ink    // Main text
         static let textSecondary = SL.muted  // Secondary text
         static let textTertiary = SL.muted   // Disabled/placeholder
-        static let textOnPrimary = Color.white           // Text on primary color
+        static let textOnPrimary = SL.onGreen           // Text on primary color
         static let textOnDark = Color.white              // Text on dark backgrounds
 
         // Border & Divider
@@ -192,7 +192,7 @@ extension View {
         self
             .padding(padding)
             .background(AppTheme.Colors.surface)
-            .cornerRadius(AppTheme.Metrics.cornerRadius)
+            .clipShape(.rect(cornerRadius: AppTheme.Metrics.cornerRadius))
             .shadow(
                 color: AppTheme.Shadows.medium.color,
                 radius: AppTheme.Shadows.medium.radius,
@@ -205,22 +205,22 @@ extension View {
     func primaryButtonStyle() -> some View {
         self
             .font(AppTheme.Typography.headline)
-            .foregroundColor(AppTheme.Colors.textOnPrimary)
+            .foregroundStyle(AppTheme.Colors.textOnPrimary)
             .frame(maxWidth: .infinity)
             .frame(height: AppTheme.Metrics.buttonHeight)
             .background(AppTheme.Colors.primary)
-            .cornerRadius(AppTheme.Metrics.cornerRadius)
+            .clipShape(.rect(cornerRadius: AppTheme.Metrics.cornerRadius))
     }
 
     /// Apply secondary button styling
     func secondaryButtonStyle() -> some View {
         self
             .font(AppTheme.Typography.headline)
-            .foregroundColor(AppTheme.Colors.secondary)
+            .foregroundStyle(AppTheme.Colors.secondary)
             .frame(maxWidth: .infinity)
             .frame(height: AppTheme.Metrics.buttonHeight)
             .background(AppTheme.Colors.surface)
-            .cornerRadius(AppTheme.Metrics.cornerRadius)
+            .clipShape(.rect(cornerRadius: AppTheme.Metrics.cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: AppTheme.Metrics.cornerRadius)
                     .stroke(AppTheme.Colors.border, lineWidth: 1)
@@ -232,11 +232,11 @@ extension View {
         self
             .font(AppTheme.Typography.caption)
             .fontWeight(.semibold)
-            .foregroundColor(color)
+            .foregroundStyle(color)
             .padding(.horizontal, AppTheme.Metrics.paddingM)
             .padding(.vertical, AppTheme.Metrics.paddingXS)
             .background(color.opacity(0.1))
-            .cornerRadius(AppTheme.Metrics.cornerRadiusPill)
+            .clipShape(.rect(cornerRadius: AppTheme.Metrics.cornerRadiusPill))
     }
 }
 

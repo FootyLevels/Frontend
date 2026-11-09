@@ -154,7 +154,7 @@ private struct CircleMembersView: View {
             .confirmationDialog("Remove this member?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }), titleVisibility: .visible) {
                 if let member = removing { Button("Remove member", role: .destructive) { Task { await model.removeMember(member); removing = nil } } }
             } message: { Text("They will lose circle access, and their shared attempts and feedback will be removed. The existing invite code will stop working. Their private videos are kept.") }
-        }.tint(SL.green)
+        }.tint(SL.tint)
     }
 }
 
@@ -192,6 +192,6 @@ private struct CircleInviteView: View {
                 .confirmationDialog("Replace the current invite code?", isPresented: $rotate, titleVisibility: .visible) {
                     Button("Replace code") { Task { await model.generateInvite() } }
                 } message: { Text("The previous code will stop working. Existing members keep their access.") }
-        }.tint(SL.green)
+        }.tint(SL.tint)
     }
 }

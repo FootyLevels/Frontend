@@ -27,7 +27,7 @@ struct Pose3DView: View {
         .navigationTitle("3D Pose")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 PhotosPicker(selection: $pickedItem, matching: .images) {
                     Image(systemName: "photo.badge.plus")
                 }
@@ -37,7 +37,7 @@ struct Pose3DView: View {
             // Only present behind the auth gate — Pose3DView is also used
             // standalone, where there's no session to end.
             if let appState {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button(role: .destructive) {
                         try? appState.signOut()
                     } label: {
@@ -97,16 +97,17 @@ struct Pose3DView: View {
     private var emptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "figure.stand")
-                .font(.system(size: 60))
-                .foregroundColor(.secondary)
+                .font(.system(.largeTitle))
+                .imageScale(.large)
+                .foregroundStyle(.secondary)
 
             Text("No Reconstruction Yet")
                 .font(.headline)
-                .foregroundColor(AppTheme.secondaryColor)
+                .foregroundStyle(AppTheme.secondaryColor)
 
             Text("Pick a photo of a player to build a 3D body from a single frame.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
@@ -116,8 +117,8 @@ struct Pose3DView: View {
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
                     .background(AppTheme.primaryColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(AppTheme.Metrics.cornerRadius)
+                    .foregroundStyle(.white)
+                    .clipShape(.rect(cornerRadius: AppTheme.Metrics.cornerRadius))
             }
         }
     }
@@ -130,26 +131,27 @@ struct Pose3DView: View {
 
             Text(viewModel.stage == .uploading ? "Reconstructing..." : "Loading mesh...")
                 .font(.headline)
-                .foregroundColor(AppTheme.secondaryColor)
+                .foregroundStyle(AppTheme.secondaryColor)
         }
         .padding(32)
         .background(AppTheme.surfaceColor.opacity(0.9))
-        .cornerRadius(AppTheme.Metrics.cornerRadius)
+        .clipShape(.rect(cornerRadius: AppTheme.Metrics.cornerRadius))
     }
 
     private func failureState(_ message: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 44))
-                .foregroundColor(AppTheme.errorColor)
+                .font(.system(.largeTitle))
+                .imageScale(.large)
+                .foregroundStyle(AppTheme.errorColor)
 
             Text("Reconstruction Failed")
                 .font(.headline)
-                .foregroundColor(AppTheme.secondaryColor)
+                .foregroundStyle(AppTheme.secondaryColor)
 
             Text(message)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
@@ -174,7 +176,7 @@ struct Pose3DView: View {
                     }
                 }
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             }
 
             HStack(spacing: 16) {
@@ -192,7 +194,7 @@ struct Pose3DView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 12) {
                     Text("Body")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .frame(width: 48, alignment: .leading)
                     Toggle("Flip Y", isOn: $viewModel.bodyOrientation.flipY)
                     Toggle("Flip Z", isOn: $viewModel.bodyOrientation.flipZ)
@@ -200,7 +202,7 @@ struct Pose3DView: View {
 
                 HStack(spacing: 12) {
                     Text("Joints")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .frame(width: 48, alignment: .leading)
                     Toggle("Flip Y", isOn: $viewModel.skeletonOrientation.flipY)
                     Toggle("Flip Z", isOn: $viewModel.skeletonOrientation.flipZ)
@@ -212,7 +214,7 @@ struct Pose3DView: View {
             if viewModel.keypoints?.parents == nil, viewModel.keypoints != nil {
                 Text("Joints only — the keypoints endpoint sends no parent hierarchy, so bones can't be connected yet.")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
     }

@@ -54,6 +54,6 @@ struct ClipImportEditor: View {
             .task { end = min(60, clip.duration); player = AVPlayer(url: clip.url) }
             .onDisappear { player?.pause() }
         }
-        .tint(SL.green)
+        .tint(SL.tint)
     }
 }

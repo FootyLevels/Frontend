@@ -63,16 +63,17 @@ struct StagePicker<Model: LessonPlayer>: View {
                 } label: {
                     VStack(spacing: 2) {
                         Text("\(stage.number)")
-                            .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                            .font(.system(.caption2, weight: .semibold).monospacedDigit())
                         Text(stage.rawValue)
-                            .font(.system(size: 12, weight: selected ? .semibold : .regular))
+                            .font(.system(.caption, weight: selected ? .semibold : .regular))
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
-                    .foregroundStyle(selected ? Color(hex: "F1F6E9") : SL.modeText)
+                    .foregroundStyle(selected ? SL.onGreen : SL.modeText)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 7)
-                    .background(selected ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 5))
+                    .background(selected ? SL.green : .clear, in: Capsule())
+                    .minimumTapArea()
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Stage \(stage.number): \(stage.rawValue)")
@@ -80,7 +81,7 @@ struct StagePicker<Model: LessonPlayer>: View {
             }
         }
         .padding(4)
-        .slPanel(fill: SL.modeTrack, border: SL.modeBorder, radius: 8)
+        .background(SL.modeTrack, in: Capsule())
         .disabled(!model.isReady)
     }
 }
@@ -113,8 +114,8 @@ struct LessonStageView<Model: LessonPlayer>: View {
 
             PresetToolbar(selection: model.angle, enabled: model.isReady) { model.show($0) }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "2B3B32")))
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .overlay(RoundedRectangle(cornerRadius: 22).stroke(SL.videoBorder))
     }
 
     private var videoTile: some View {
@@ -126,17 +127,17 @@ struct LessonStageView<Model: LessonPlayer>: View {
                 .accessibilityAddTraits(.isButton)
                 .accessibilityLabel("Original video. Tap to play or pause.")
         }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(alignment: .topLeading) {
             if !shotLabel.isEmpty {
                 Text(shotLabel.uppercased())
-                    .font(.system(size: 9, weight: .medium))
+                    .font(.system(.caption2, weight: .medium))
                     .tracking(0.8)
-                    .foregroundStyle(Color(hex: "F4F6DF"))
+                    .foregroundStyle(SL.videoText)
                     .lineLimit(1)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 4)
-                    .background(Color(hex: "0E261C").opacity(0.85), in: RoundedRectangle(cornerRadius: 3))
+                    .background(SL.videoStage.opacity(0.85), in: RoundedRectangle(cornerRadius: 3))
                     .padding(6)
                     .allowsHitTesting(false)
             }
@@ -148,6 +149,8 @@ struct LessonStageView<Model: LessonPlayer>: View {
                     .allowsHitTesting(false)
             }
         }
+        // Labels over the picture stop growing at the largest standard size, so they never hide it.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private var stageTile: some View {
@@ -157,19 +160,20 @@ struct LessonStageView<Model: LessonPlayer>: View {
                 StageMessage(message: message.text, isLoading: message.isLoading)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(alignment: .topLeading) {
             if model.mirror {
                 Text("MIRRORED")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.system(.caption2, weight: .semibold))
                     .tracking(0.8)
-                    .foregroundStyle(SL.ink)
-                    .padding(.horizontal, 6)
+                    .foregroundStyle(Color.black)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(SL.lime, in: RoundedRectangle(cornerRadius: 3))
+                    .background(SL.lime, in: Capsule())
                     .padding(6)
             }
         }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 }
 
@@ -181,16 +185,16 @@ private struct PhaseCue: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(name.uppercased())
-                .font(SL.display(15, .heavy))
-                .foregroundStyle(Color(hex: "F4F7F2"))
+                .font(SL.display(.subheadline))
+                .foregroundStyle(SL.videoText)
             Text(text)
-                .font(.system(size: 11))
-                .foregroundStyle(Color(hex: "D6E2D0"))
+                .font(.system(.caption2))
+                .foregroundStyle(SL.videoText)
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(Color(hex: "0E1F17").opacity(0.85), in: RoundedRectangle(cornerRadius: 6))
+        .background(SL.videoStage.opacity(0.85), in: RoundedRectangle(cornerRadius: 6))
         .accessibilityElement(children: .combine)
     }
 }
@@ -204,7 +208,7 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
+            FlowRow(spacing: 6) {
                 PlayButton(playback: model.playback) { model.togglePlayback() }
                 iconButton("chevron.left", label: "Back one frame") { model.step(frames: -1) }
                 iconButton("chevron.right", label: "Forward one frame") { model.step(frames: 1) }
@@ -214,21 +218,22 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
                     }
                 } label: {
                     Text("\(model.playback.speed.formatted())×")
-                        .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                        .font(.system(.caption, weight: .semibold).monospacedDigit())
                         .frame(minWidth: 34, minHeight: 32)
-                        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
+                        .overlay(Capsule().stroke(SL.controlBorder))
+                        .minimumTapArea()
                 }
                 .accessibilityLabel("Playback speed")
                 toggle("Loop", on: model.loop != nil) { model.toggleLoop() }
                 toggle("Mirror", on: model.mirror) { model.mirror.toggle() }
-                Spacer(minLength: 0)
                 TimeLabel(playback: model.playback)
+                    .frame(minHeight: 44)
             }
             .foregroundStyle(SL.ink)
 
             timeline
 
-            ScrollView(.horizontal, showsIndicators: false) {
+            ScrollView(.horizontal) {
                 HStack(spacing: 14) {
                     Toggle("Footprints", isOn: $model.overlays.footprints)
                     Toggle("Paths", isOn: $model.overlays.paths)
@@ -237,22 +242,24 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
                     Toggle("Follow", isOn: $model.overlays.follow)
                 }
                 .toggleStyle(CheckToggleStyle())
-                .font(.system(size: 12))
-                .foregroundStyle(Color(hex: "6F7B66"))
+                .font(.system(.caption))
+                .foregroundStyle(SL.muted)
                 .padding(.vertical, 2)
             }
+            .scrollIndicators(.hidden)
         }
         .padding(12)
-        .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 10)
+        .slPanel(fill: SL.panel, border: SL.panelBorder, radius: 22)
         .disabled(!model.isReady)
     }
 
     private func iconButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .frame(width: 32, height: 32)
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(hex: "BFC9B9")))
+                .font(.system(.caption, weight: .semibold))
+                .scaledFrame(width: 32, relativeTo: .caption)
+                .overlay(Capsule().stroke(SL.controlBorder))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
@@ -261,12 +268,13 @@ struct LessonTransport<Model: LessonPlayer, Timeline: View>: View {
     private func toggle(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(.caption, weight: .semibold))
                 .padding(.horizontal, 9)
                 .frame(minHeight: 32)
-                .foregroundStyle(on ? Color(hex: "F1F6E9") : SL.ink)
-                .background(on ? SL.greenActive : .clear, in: RoundedRectangle(cornerRadius: 7))
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(on ? SL.greenActive : Color(hex: "BFC9B9")))
+                .foregroundStyle(on ? SL.onGreen : SL.ink)
+                .background(on ? SL.green : .clear, in: Capsule())
+                .overlay(Capsule().stroke(on ? SL.green : SL.controlBorder))
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(on ? .isSelected : [])
@@ -281,10 +289,11 @@ struct PlayButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 32)
-                .background(SL.green, in: RoundedRectangle(cornerRadius: 7))
+                .font(.system(.footnote, weight: .semibold))
+                .foregroundStyle(SL.onGreen)
+                .scaledFrame(width: 40, height: 32, relativeTo: .footnote)
+                .background(SL.green, in: Capsule())
+                .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel(playback.isPlaying ? "Pause" : "Play")
@@ -297,7 +306,7 @@ struct TimeLabel: View {
 
     var body: some View {
         Text(String(format: "%.2f s", playback.currentTime))
-            .font(.system(size: 12).monospacedDigit())
+            .font(.system(.caption).monospacedDigit())
             .foregroundStyle(SL.muted)
     }
 }
@@ -341,12 +350,12 @@ struct SectionHeading: View {
         VStack(alignment: .leading, spacing: 6) {
             Eyebrow(text: eyebrow, color: SL.muted)
             Text(title)
-                .font(SL.display(24, .heavy))
+                .font(SL.display(.title2))
                 .tracking(-0.6)
                 .foregroundStyle(SL.ink)
             Text(text)
-                .font(.system(size: 14))
-                .foregroundStyle(Color(hex: "5E6B58"))
+                .font(.system(.subheadline))
+                .foregroundStyle(SL.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -359,9 +368,9 @@ struct NumberBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 12, weight: .semibold).monospacedDigit())
+            .font(.system(.caption, weight: .semibold).monospacedDigit())
             .foregroundStyle(filled ? .white : SL.ink)
-            .frame(width: 26, height: 26)
+            .scaledFrame(width: 26, relativeTo: .caption)
             .background(filled ? color : .clear, in: Circle())
             .overlay(Circle().stroke(filled ? color : SL.cardBorder, lineWidth: 1.5))
     }
@@ -370,9 +379,9 @@ struct NumberBadge: View {
 extension LessonConfidence {
     var color: Color {
         switch self {
-        case .high: return Color(hex: "3F7D4C")
-        case .medium: return Color(hex: "96713E")
-        case .low: return Color(hex: "975936")
+        case .high: return SL.good
+        case .medium: return SL.fair
+        case .low: return SL.miss
         }
     }
 }
