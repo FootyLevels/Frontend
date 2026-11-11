@@ -25,6 +25,9 @@ struct LessonLibraryView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         LearnHero(featured: featured, appState: appState, topInset: statusBar)
+                        if appState?.isLoggedIn == .loggedIn {
+                            UserLessonsSection().padding(.horizontal, 16)
+                        }
                         lessonList
                             .padding(.horizontal, 16)
                     }

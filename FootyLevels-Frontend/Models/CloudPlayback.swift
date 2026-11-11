@@ -44,11 +44,32 @@ struct CloudJob: Decodable, Hashable {
     let motionSegment: Segment?
     let keyframes: [CloudKeyframeSelection]?
     let reconstructionId: String?
+    let lessonId: String?
     let errorCode: String?
     struct Segment: Decodable, Hashable { let startFrame: Int; let endFrame: Int }
 
     var isActive: Bool { ["queued", "running", "retrying"].contains(status) }
     var statusText: String {
+        if kind == "buildLesson" {
+            switch status {
+            case "queued": return "Waiting for the lesson builder"
+            case "retrying": return "Waiting to retry your lesson"
+            case "running":
+                switch stage {
+                case "screeningVideo": return "Checking your video"
+                case "generatingBodies": return "Building your 3D motion"
+                case "writingLesson": return "Writing your lesson"
+                case "checkingLesson": return "Checking your lesson"
+                case "publishingAssets": return "Saving your lesson"
+                default: return "Starting your lesson"
+                }
+            case "succeeded": return "Lesson ready"
+            case "cancelled": return "Lesson cancelled"
+            case "failed" where errorCode == "lesson_rejected":
+                return "No football skill to teach was found in this video"
+            default: return "The lesson couldn't be created. Please try again later."
+            }
+        }
         if kind == "prepareMedia" {
             switch status {
             case "queued", "retrying": return "Waiting for video preparation"

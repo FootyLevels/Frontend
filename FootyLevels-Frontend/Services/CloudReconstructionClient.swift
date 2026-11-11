@@ -84,7 +84,7 @@ final class CloudReconstructionClient {
         try checkSession(); try validID(result.id)
         guard result.ownerId == account.uid, result.projectId == project.id, result.inputRevision == project.inputRevision,
               expectedID == nil || result.id == expectedID,
-              ["prepareMedia", "reconstructKeyframes", "reconstructMotion"].contains(result.kind),
+              ["prepareMedia", "reconstructKeyframes", "reconstructMotion", "buildLesson"].contains(result.kind),
               ["queued", "running", "retrying", "succeeded", "partial", "failed", "cancelled"].contains(result.status)
         else { throw CloudPlaybackError.invalidResult }
         return result
