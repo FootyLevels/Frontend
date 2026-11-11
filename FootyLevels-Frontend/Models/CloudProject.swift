@@ -10,6 +10,7 @@ struct CloudProject: Decodable, Identifiable, Hashable {
     let inputRevision: Int
     let activeJobId: String?
     let latestReconstructionId: String?
+    let latestLessonId: String?
     let preparedMedia: CloudPreparedMedia?
 
     var statusText: String {

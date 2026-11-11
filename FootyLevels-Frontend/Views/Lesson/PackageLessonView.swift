@@ -6,6 +6,9 @@ struct PackageLessonView: View {
     let entry: LessonLibrary.Entry
     /// The stage the lesson opens on. Learn's practise card opens straight to Practise.
     var startStage: LessonStage = .watch
+    /// Shown in the navigation bar: lessons from the user's own videos put their
+    /// AI-generated notice here.
+    var accessory: AnyView? = nil
 
     @State private var model: PackageLessonModel?
     @State private var loadError: String?
@@ -27,6 +30,9 @@ struct PackageLessonView: View {
         .navigationBarTitleDisplayMode(.inline)
         // A lesson has the whole screen; the tab bar would cover its sheet.
         .toolbar(.hidden, for: .tabBar)
+        .toolbar {
+            if let accessory { ToolbarItem(placement: .topBarTrailing) { accessory } }
+        }
         .task {
             guard model == nil, loadError == nil else { return }
             do {

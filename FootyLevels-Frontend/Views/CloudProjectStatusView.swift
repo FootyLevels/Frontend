@@ -4,12 +4,16 @@ import SwiftUI
 /// Owned preparation, durable motion jobs and the existing RealityKit player.
 struct CloudProjectStatusView: View {
     @State private var model: CloudProjectViewModel
+    @State private var lesson: CloudLessonViewModel
     @State private var startFrame = 0.0
     @State private var length = 30.0
     @State private var selectedMode = "motion"
     @Environment(\.scenePhase) private var scenePhase
 
-    init(project: CloudProject) { _model = State(initialValue: CloudProjectViewModel(project: project)) }
+    init(project: CloudProject) {
+        _model = State(initialValue: CloudProjectViewModel(project: project))
+        _lesson = State(initialValue: CloudLessonViewModel(project: project))
+    }
 
     var body: some View {
         ScrollView {
@@ -33,6 +37,7 @@ struct CloudProjectStatusView: View {
                         VideoPlayer(player: prepared.player).frame(height: 220).clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                 }
+                if model.project.state == "ready", model.project.preparedMedia != nil { lessonPanel }
                 if let media = model.project.preparedMedia, model.project.state == "ready" {
                     Picker("Generation type",selection: $selectedMode) {
                         Text("Motion clip").tag("motion"); Text("Selected pose").tag("pose")
@@ -45,7 +50,7 @@ struct CloudProjectStatusView: View {
                             .disabled(model.isMutating || model.job?.isActive == true)
                     }
                 }
-                if let job = model.job {
+                if let job = model.job, job.kind != "buildLesson" {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(spacing: 10) {
                             if job.isActive { SLActivityIndicator() }
@@ -72,10 +77,47 @@ struct CloudProjectStatusView: View {
         }
         .background(SL.page).slScreen().navigationTitle("Private project").navigationBarTitleDisplayMode(.inline)
         .task { await model.watch() }
-        .onDisappear { model.stop() }
+        .task { await lesson.watch() }
+        .onChange(of: model.project) { _, project in lesson.update(project: project) }
+        .sheet(isPresented: $lesson.showingConsent) { LessonConsentSheet { lesson.answerConsent($0) } }
+        .onDisappear { model.stop(); lesson.stop() }
         .onChange(of: scenePhase) { _, phase in
             model.isForeground = phase == .active
             if phase != .active { model.playback?.pause(); model.preparedPlayback?.pause() }
+        }
+    }
+
+    @ViewBuilder private var lessonPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("LEARN FROM YOUR VIDEO").font(.caption).foregroundStyle(SL.muted)
+            switch lesson.phase {
+            case .ready:
+                if let entry = lesson.entry {
+                    NavigationLink {
+                        if let record = lesson.lesson, let client = lesson.client, let store = lesson.store {
+                            PackageLessonView(entry: entry, accessory: AnyView(AILessonNotice(lesson: record, client: client, store: store)))
+                        } else {
+                            PackageLessonView(entry: entry)
+                        }
+                    } label: { Label("Open lesson", systemImage: "play.rectangle") }
+                        .buttonStyle(.slPrimary)
+                    Text("\(entry.title) · AI-generated, private to you.").font(.footnote).foregroundStyle(SL.muted)
+                }
+            case .building(let status):
+                SLLoadingState(title: status, detail: "A lesson takes a few minutes. You can leave this screen and come back.")
+            case .downloading:
+                SLLoadingState(title: "Downloading your lesson…")
+            case .submitting:
+                SLLoadingState(title: "Requesting your lesson…")
+            case .idle, .needsConsent, .failed:
+                if case .failed(let message) = lesson.phase {
+                    Text(message).font(.callout).foregroundStyle(SL.errorText)
+                }
+                Button { lesson.createLesson() } label: { Label("Create lesson", systemImage: "sparkles") }
+                    .buttonStyle(.slPrimary).disabled(!lesson.canCreate)
+                Text("AI watches your clip and writes a Watch, Break it down, Practise and Test lesson with your own 3D motion.")
+                    .font(.footnote).foregroundStyle(SL.muted)
+            }
         }
     }
 
