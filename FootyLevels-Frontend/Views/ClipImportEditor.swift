@@ -13,7 +13,7 @@ struct ClipImportEditor: View {
 
     private var valid: Bool {
         let count = title.trimmingCharacters(in: .whitespacesAndNewlines).count
-        return (1...120).contains(count) && label.count <= 80 && end - start >= 1 && end - start <= 60
+        return (1...120).contains(count) && label.count <= 80 && end - start >= ClipTrim.shortest && end - start <= ClipTrim.longest
     }
 
     var body: some View {
@@ -27,13 +27,17 @@ struct ClipImportEditor: View {
                 }
                 Section("Choose up to 60 seconds") {
                     Text("Start: \(start, specifier: "%.1f") seconds")
-                    Slider(value: $start, in: 0...max(0.01, clip.duration - 1), step: 0.1)
-                        .onChange(of: start) { _, value in
-                            end = min(clip.duration, max(value + 1, min(end, value + 60)))
-                            player?.seek(to: CMTime(seconds: value, preferredTimescale: 600))
-                        }
+                    if let range = ClipTrim.startRange(duration: clip.duration) {
+                        Slider(value: $start, in: range, step: ClipTrim.step)
+                            .onChange(of: start) { _, value in
+                                end = ClipTrim.end(end, start: value, duration: clip.duration)
+                                player?.seek(to: CMTime(seconds: value, preferredTimescale: 600))
+                            }
+                    }
                     Text("End: \(end, specifier: "%.1f") seconds")
-                    Slider(value: $end, in: min(start + 1, clip.duration)...max(start + 1, min(clip.duration, start + 60)), step: 0.1)
+                    if let range = ClipTrim.endRange(start: start, duration: clip.duration) {
+                        Slider(value: $end, in: range, step: ClipTrim.step)
+                    }
                     Text("\(end - start, specifier: "%.1f") seconds · prepared as a private MP4, maximum 50 MB")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
@@ -51,7 +55,7 @@ struct ClipImportEditor: View {
                     Button("Cancel") { player?.pause(); onCancel() }
                 }
             }
-            .task { end = min(60, clip.duration); player = AVPlayer(url: clip.url) }
+            .task { end = min(ClipTrim.longest, clip.duration); player = AVPlayer(url: clip.url) }
             .onDisappear { player?.pause() }
         }
         .tint(SL.tint)
