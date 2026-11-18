@@ -181,4 +181,27 @@ final class CloudUploadsViewModelTests: XCTestCase {
         XCTAssertEqual(model.projects, [original])
         XCTAssertNil(model.errorMessage)
     }
+
+    /// The Videos tab shows "Account server connected" only while the last refresh succeeded.
+    @MainActor
+    func testRefreshRecordsWhetherTheAccountServerAnswered() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let model = CloudUploadsViewModel(coordinator: try coordinator(PreparingProjectCredentials(), root: root))
+        XCTAssertNil(model.connectedAt)
+        PreparingProjectURLProtocol.handler = { request in
+            switch request.url!.path {
+            case "/api/deletions": return (200, try Self.json(["items": []]))
+            case "/api/projects": return (200, try Self.json(["items": [], "nextCursor": NSNull()]))
+            default: XCTFail("Unexpected refresh request"); return (500, Data())
+            }
+        }
+        let before = Date.now
+        await model.refresh()
+        XCTAssertGreaterThanOrEqual(try XCTUnwrap(model.connectedAt), before)
+        PreparingProjectURLProtocol.handler = { _ in throw URLError(.cannotConnectToHost) }
+        await model.refresh()
+        XCTAssertNil(model.connectedAt)
+        XCTAssertNotNil(model.errorMessage)
+    }
 }
