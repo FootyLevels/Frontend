@@ -19,6 +19,8 @@ final class CloudUploadsViewModel {
     var pending: PendingClip?
     var errorMessage: String?
     var isLoading = false
+    /// When the account server last answered a full refresh; nil before that and after one fails.
+    private(set) var connectedAt: Date?
     var phase: String?
     var progress: Double?
     var isConfigured: Bool { coordinator != nil }
@@ -36,6 +38,7 @@ final class CloudUploadsViewModel {
 
     func configure() {
         projectRefreshGeneration &+= 1
+        connectedAt = nil
         do {
             guard let url = ApplicationEnvironment.apiBaseURL else { throw AccountAPIError.notConfigured }
             coordinator = try CloudUploadCoordinator(apiURL: url, environment: .current, credentials: FirebaseAPICredentials.shared)
@@ -61,10 +64,12 @@ final class CloudUploadsViewModel {
             drafts = loadedDrafts
             deletions = loadedDeletions
             errorMessage = nil
+            connectedAt = .now
         } catch {
             guard !isCancelledRefresh(error), generation == projectRefreshGeneration,
                   coordinator === self.coordinator else { return }
             errorMessage = error.localizedDescription
+            connectedAt = nil
         }
     }
 

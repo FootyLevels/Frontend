@@ -218,6 +218,12 @@ struct ProjectsListView: View {
                 Text("Private uploads need the account API connection. The included example is available on this page.")
                     .font(.callout).foregroundStyle(SL.muted)
             }
+            if let connectedAt = cloud.connectedAt, cloud.errorMessage == nil {
+                Label("Account server connected · checked \(connectedAt, format: .dateTime.hour().minute())",
+                      systemImage: "checkmark.circle.fill")
+                    .font(.footnote).foregroundStyle(SL.green)
+                    .accessibilityIdentifier("accountServerStatus")
+            }
             if cloud.isLoading && cloud.projects.isEmpty && cloud.drafts.isEmpty {
                 SLLoadingState(title: "Loading your videos…", detail: "Finding the clips saved to your account.")
             }
